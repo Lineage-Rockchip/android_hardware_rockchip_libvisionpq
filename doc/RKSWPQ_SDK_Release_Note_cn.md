@@ -2,12 +2,23 @@
 
 ## coming next version
 
+## v0.11.2.3856  Release Note | 2024.09.29
+  - [MSSR] 4kMEMC通路部分RGA处理改成GPU处理，优化带宽分布
+  - [MSSR] 修正SR解析结果写出到输出虚宽大于实宽时出现的花图问题
+  - [MSSR] 修正调用`rkpq_deinit`报错问题
+
+## v0.11.1.3843  Release Note | 2024.09.25
+  - [MSSR] 重新调整输出SD数据：只有场景发生切换时输出场景类型及相关数据才能变化
+  - [MSSR] 修改异步线程wait机制，避免wait启动失败的线程
+  - [MSSR] 更新`watermark_type=4`的定制水印
+  - [MSSR] 修正`v0.10.3.3828`引入的720p打开logD会闪退的问题
 
 ## v0.11.0.3836  Release Note | 2024.09.24
   - [ALL] 恢复并修改`RKPQ_FLAG_CALC_MEAN_LUMA`的值使其重新生效，结合新增的`RKPQ_QUERY_MEAN_LUMA_OUTPUT`可以获取输出图像的平均亮度值
+  - [MSSR] 优化AIPQ处理效果：只有在场景发生切换时场景类型才能发生变化，保持同一场景的AIPQ处理效果时域一致，避免在同一场景时出现效果跳变
 
 ## v0.10.3.3828  Release Note | 2024.09.23
-  - [MSSR] 重新支持接口'nSchemeIdx=2'的配置，优化MC性能
+  - [MSSR] 重新支持接口'nSchemeIdx=2'的配置降低NPU-ME耗时，优化GPU-MC性能
 
 ## v0.10.2.3824  Release Note | 2024.09.20
   - [BLR] 修正`nBlurChannel`和`nBlurMode`从api传参失败的问题

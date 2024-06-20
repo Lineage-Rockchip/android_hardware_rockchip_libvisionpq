@@ -142,6 +142,7 @@ ifeq ($(BOARD_ENABLE_AIPQ_PROJECTOR_PRODUCT), true)
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_mssr_model*_sd*.bin $(TARGET_RKNN_MODEL_PATH))
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_mssr_model*_std*.bin $(TARGET_RKNN_MODEL_PATH))
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_mssr_model*_f*.bin $(TARGET_RKNN_MODEL_PATH))
+    $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_mssr_model*_DC*.bin $(TARGET_RKNN_MODEL_PATH))
 endif
 
 # endif

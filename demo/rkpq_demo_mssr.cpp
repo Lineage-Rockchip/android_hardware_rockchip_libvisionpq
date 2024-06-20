@@ -80,8 +80,12 @@ int main(int argc, const char *argv[])
     initParams.nInitFlag = RKPQ_FLAG_DEFAULT;
     initParams.nInitFlag |= RKPQ_FLAG_ASYNC_MODE;       // 某些模块支持异步模式，请指明这个flag
     initParams.nInitFlag |= RKPQ_FLAG_CIRCULAR_BUF_IN | RKPQ_FLAG_CIRCULAR_BUF_OUT; /* 如果输入/输出是环形缓冲区，请显示指定此flag，可节省buffer映射时间 */
-    initParams.aModPipeOrder[0] = RKPQ_MIXTURE_MSSR;    // 这里pipeline中只包含`MSSR`这一个模块
-    initParams.nModNumInPipe = 1;                       // 这里pipeline中模块数量为1
+    
+    initParams.nModNumInPipe     = 1;                       // 这里pipeline中模块数量为1
+    initParams.bLazyInit         = 0;
+    initParams.aModPipeOrder[0]  = RKPQ_MIXTURE_MSSR;       // 这里pipeline中只包含`MSSR`这一个模块
+    initParams.aModSetupFlags[0] = RKPQ_MSSR_INIT_FLAGS_OUT1080P; // 参考 rkpq_mssr_initflag
+    initParams.nMaxIoBufCacheNum = 64; // 
     ret = rkpq_init(&context, &initParams);             // 注意这里参数是两个指针!
     if (ret)
     {
@@ -103,7 +107,7 @@ int main(int argc, const char *argv[])
     stSrcImgInfos[0].nColorSpace    = RKPQ_CLR_SPC_YUV_601_FULL;// see rkpq_clr_spc
     stSrcImgInfos[0].nPixFmt        = RKPQ_IMG_FMT_NV24;        // see rkpq_img_fmt
     stSrcImgInfos[0].nPixWid        = 960;                      // set the input image width
-    stSrcImgInfos[0].nPixHgt        = 544;                      // set the input image height
+    stSrcImgInfos[0].nPixHgt        = 540;                      // set the input image height
     stSrcImgInfos[0].nEleDepth      = 8;                        // set the first component(Y or R) depth [bit]
     stSrcImgInfos[0].nAlignment     = 128;                      // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
     stSrcImgInfos[0].aWidStrides[0] = 1024;                     // in this case, no padding in the width dimension
@@ -246,6 +250,8 @@ int main(int argc, const char *argv[])
         memcpy(&pConfig->pSRConfig->stPipeResInfo, &pConfig->stPipeResInfo, sizeof(rkpq_pipe_res_info));
         pConfig->bEnableMEMC = 1;           // 这里关闭了 MEMC 子模块
         pConfig->pSDConfig->bEnableSD = 0;  // 这里开启了 SD 子模块
+        // 
+        pConfig->nProcFlag = RKPQ_MSSR_PROC_FLAGS_SD_DC_SR_MEMC; // 参考 rkpq_mssr_procflag
 
         int inputFPS = 20;
         int outputFPS = 30;

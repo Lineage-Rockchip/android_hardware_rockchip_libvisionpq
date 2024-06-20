@@ -174,7 +174,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 <br>
 
 - **AI视频插帧混合模块(Mix-MSSR)**
-  - 支持MEMC,SD,SR,RD等，24/25/30 fps => 60fps
+  - 支持MEMC,SD,SR,DC等，24/25/30/50/60 fps => 60fps
   - 支持**RK3588**(RKNN版本需大于等于2.0)，支持**RK3576**(RKNN版本需大于等于2.0)
 <br>
 
@@ -208,12 +208,12 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | AISR | 16G | TBD | 27+28=55 | 180 | 205 | 1080P NV12 => 4K NV12 |
 | AISD | 0.1G | TBD | 3+0=3 | 2      |  5  | 1080P NV12 input |
 | AIDM | 22.5G | TBD | 4+2=6 | 15     | 21  | 1080P NV12 => 1080P NV12, 仅计算Y通道 |
-| AIDFC| TBD | TBD | TBD | TBD | TBD | TBD |
+| AIDFC| TBD | TBD | 3+6=9 | 24 | 33 | 1080P NV12 => 1080P NV24或RGBA |
 | AIDE | TBD | TBD | TBD | TBD | TBD | TBD |
 | AIDD | TBD | TBD | TBD | TBD | TBD | TBD |
 | AIDHW | TBD | TBD | TBD | TBD | TBD | TBD |
 | MixFE | TBD | TBD |   TBD   | ~430 |   TBD    | 540P  NV12 => 4K NV12; 异步模式，延迟1帧 |
-| MixMSSR | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| MixMSSR | TBD | TBD | 5+6=11 <br> 6+6=12 <br> 9+6=15 <br> 9+12=21 | 21 <br> 21 <br> 23 <br> 35 | 32 <br> 43 <br> 38 <br> 56 | 3x540P NV24 => 2x1080P NV12;异步延迟2帧 <br> 3x720P Y+C => 2x1080P NV12;异步延迟2帧 <br> 3x1080P NV12 => 2x1080P NV12;异步延迟2帧 <br> 3x1080P NV12 => 1x4K NV12;异步延迟2帧 |
 
 注：
 1. 算力（以60pfs计）和带宽数据根据右侧备注中输入输出图像和格式计算得到
@@ -237,7 +237,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | AIDHW| 否 | 输入: YUV4xxSP_8bit, RGB[A8]888, Y8 <br> 输出: YUV4xxSP_8bit, RGB[A8]888, Y8 | 输出格式和输入相同 |
 | MixSHPACM | 否 | 输入: YUV420SP_NV12, RGBA8888 <br> 输出: YUV420SP_NV12 | \ |
 | MixFE | 否 | 输入: TBD <br> 输出: TBD | TBD |
-| MixMSSR | 否 | 输入: YUV4xxSP_8bit, Y8, UV88 <br> 输出: TBD | TBD |
+| MixMSSR | 否 | 输入: YUV4xxSP_8bit, Y8, UV88 <br> 输出: YUV420SP_NV12 | TBD |
 
 注：
 1. `YUV4xxSP_8bit`表示`YUV420SP_NV12, YUV422SP_NV16, YUV444SP_NV24`均支持。
@@ -1064,9 +1064,9 @@ TODO
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
-    <td>TBD</td>
-    <td>TBD</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
+    <td>960x540,NV24</td>
+    <td>30->60</td>
     <td>TBD</td>
     <td>TBD</td>
     <td>TBD</td>
