@@ -1,6 +1,112 @@
 # RKSWPQ SDK Release Note
 
-<!-- ## coming next version -->
+## coming next version
+
+
+## v0.11.0.3836  Release Note | 2024.09.24
+  - [ALL] 恢复并修改`RKPQ_FLAG_CALC_MEAN_LUMA`的值使其重新生效，结合新增的`RKPQ_QUERY_MEAN_LUMA_OUTPUT`可以获取输出图像的平均亮度值
+
+## v0.10.3.3828  Release Note | 2024.09.23
+  - [MSSR] 重新支持接口'nSchemeIdx=2'的配置，优化MC性能
+
+## v0.10.2.3824  Release Note | 2024.09.20
+  - [BLR] 修正`nBlurChannel`和`nBlurMode`从api传参失败的问题
+
+## v0.10.1.3819  Release Note | 2024.09.19
+  - [MSSR] 修改MSSR通路：支持4k输入、4k输出的MEMC处理通路
+  - [MSSR] 修正输出虚宽大于实宽时出现的花图问题
+  - [BLR] BLR模块配置参数`rkpq_blr_cfg`新加参数：`nBlurChannel`用于配置指定模糊的通道，`nBlurMode`用于配置模糊处理是在指定区域内还是指定区域外，详见`rkpq_blr_cfg`
+
+## v0.10.0.3812  Release Note | 2024.09.18
+  - [IO] 增加了`rkpq_init_params::nMaxIoBufCacheNum`用于设置 IO buffer cache 的上限数量(对应Android属性为`persist.vendor.rkpq.io.cache.limit`)，并将默认上限数还原为32个
+  - [DCI_ACM] 新增`RKPQ_MIXTURE_DCI_ACM`混合模块，支持DCI+ACM合并处理减少耗时，新增对应的集成示例(rkpq_demo_dci_acm.cpp)
+  - [ALL] 取消`SHP_ACM`和`DCI_ACM`两个模块的授权要求
+  - [ALL] 优化了pipeline最后一级是单通道处理模块（如`SHP`/`DCI`）时的copy操作，该情况下性能和带宽略有优化
+  - [ALL] 部分Android属性名称变更，由`test.vendor.rkpq`开头的属性名称去掉`test.`前缀，避免因SELinux权限问题导致属性读取失败而频繁报错 (最新的属性名称见开发文档 Rockchip_Developer_Guide_SWPQ_cn.md)
+  - [DHW] 模型文件更新，解决出图结果有多块大面积团状黑斑的问题
+  - [MSSR] 增加针对文字区域的ME优化：新加支持X5模型，支持帧率x2、x2.4、x2.5、x4等倍数
+  - [MSSR] 调整算法处理步骤时序优化SR通路性能
+
+## v0.9.1.3784 Release Note | 2024.09.10
+  - [MSSR] 修改CMCC定制水印`AI-SR`与`AI_DC`关联一个水印`AI-SR`
+  - [IO] 修改FD映射表上限64改成256
+
+## v0.9.0.3782 Release Note | 2024.09.10
+  - [ALL] 初始化参数`rkpq_init_params`增加参数`aModSetupFlags[]`用于配置配置对应算法模块的初始化处理，当前支持`CSC`与`MSSR`模块，`MSSR`模块的配置详见`rkpq_mssr_initflag`
+  - [ALL] 性能优化：当pipeline中最后几级的模块只处理Y通道或UV通道时，在一定条件下可以省去未处理通道的拷贝过程
+  - [ALL] `rkpq_set_cache_path()`接口加入`pPath`参数的空指针检验，防止传入空指针导致程序崩溃
+  - [RKNN] RKNN自定义模型路径的访问权限由读写改为只读
+  - [CGC] 支持纹理不重复的 full resolution 的类纸纹理叠加的算法实现
+  - [DHW] 上传正式的模型文件；支持开关文档外观增强功能；取消输出格式必须和输入一致的限制
+  - [MSSR] 修正SD数据与输出帧序不一致问题
+  - [MSSR] 配置参数`rkpq_mssr_cfg`增加参数`nProcFlag`，用于`rkpq_proc()`调用时配置算法模块各步骤的开关，具体配置详见`rkpq_mssr_procflag`，各算法步骤开关属性配置仍沿用旧版
+  - [MSSR] 增加CMCC定制水印`persist.vendor.rkpq.watermark_type 4`
+  - [MSSR] 修正切换到FE通路出现人脸跳闪问题
+
+## v0.8.0.3756 Release Note | 2024.09.03
+  - [MSSR] 修正场景切换结果数据冲突问题
+  - [MSSR] 增加针对文字区域的ME优化：暂只支持X4模型，支持帧率x2或x4倍数。
+  - [MSSR] 增加一个API参数`aDstHistIdx[16]`用于输出对应帧的直方图序号，`aDstHistIdx[k]=x`表示输出的第`k`帧使用输入的`n-x`帧对应的直方图数据
+
+## v0.7.4.3732 Release Note | 2024.08.23
+  - [DHW] 修正对 YUV4xxSP 和 Y8 格式的输入输出支持运行错误
+  - [RKNN] RKNN符号动态加载的预设路径扩充，增加对`/system`路径下的`librknnrt.so`文件符号加载尝试
+
+## v0.7.3.3724 Release Note | 2024.08.21
+  - [MSSR] 修改部分效果调试参数默认值与属性配置建议值一致
+  - [RKNN] RKNN符号动态加载的预设路径扩充，库加载后将尝试从`/vendor`、`/usr`等路径下寻找`librknnrt.so`文件的符号;
+
+## v0.7.2.3719 Release Note | 2024.08.20
+  - [MSSR] 优化Decontour处理之后PQ处理会把色带阶梯再次强化的问题（需要配合PQ的修改）
+
+## v0.7.1.3714 Release Note | 2024.08.17
+  - [DD]  在 RGB系列格式基础上增加了对 YUV4xxSP 和 Y8 格式的输入输出支持
+  - [DHW] 在 RGB系列格式基础上增加了对 YUV4xxSP 和 Y8 格式的输入输出支持；去手写模型由RGB输入改为黑白图像输入，输出的RGB图像会丢失颜色信息
+  - [MSSR] RK3576-Linux-NVR修正概率跑挂问题
+  - [MSSR] 增加输出`DC_Score`到接口数组中`rkpq_mssr_cfg::pSDConfig->aSDResult`，场景数涨到9，每帧前8个数据与旧版一致，最后1个数据存储每帧的`DC_Score`值，用于后端PQ优化效果
+
+## v0.7.0.3703 Release Note | 2024.08.14
+  - [MSSR] 增加支持属性配置选择SR模型：`persist.vendor.rkpq.iptv_sr_enable`，`0`表示投影SR模型，`1`表示盒子SR模型
+  - [Auth] 授权文件夹创建权限由700提升至755;
+  - [RKNN] 将RKNN符号改用动态加载，使算法库脱离对`librknnrt.so`文件的依赖;
+  - [DD] 文档检测后处理操作升级，增强鲁棒性
+  - [DHW] 增加文档增强的前处理，提升擦除效果（非正式版本）; 增加 `rkpq_dhw_cfg::nDocEnhanceLevel` 属性参数（暂不生效）
+  - [ALL] API修改：
+    - `RKPQ_FLAG_HIGH_PERFORM` flag 生效，建议在CPU负载比较低时开启使程序效率增加。
+    - `RKPQ_FLAG_CIRCULAR_BUF_IN` 和 `RKPQ_FLAG_CIRCULAR_BUF_OUT` flag 生效，仅在输入/输出缓冲区显示指定为 **ring-buffer** 机制时才开启内部的 buffer-cache 功能，节省零拷贝的映射耗时;
+    - 增加 `rkpq_init_params::bLazyInit` 属性参数，用于指明 pipeline 内各模块执行延迟初始化操作，默认为0;
+    - 增加 `rkpq_proc_params::bEnableIncreaseCpuUtl` 属性参数，用于开关子线程以控制CPU利用率，仅在`RKPQ_FLAG_HIGH_PERFORM` flag 指定时生效。
+
+## v0.6.2.3680 Release Note | 2024.08.06
+  - [MSSR] RK3576-Android平台更新540p/720p/1080p->1080p通路增加Decontour算法处理
+
+## v0.6.1.3666 Release Note | 2024.08.02
+  - [MSSR] RK3576-Linux-NVR增加支持水印定制
+
+## v0.6.0.3663 Release Note | 2024.08.01
+  - [MSSR] RK3576-Android-IPTV更新1080p-4k的SR通路增加Decontour算法处理
+  - [DFC] 使用新的训练模型优化算法效果
+  - [DHW] 增加**AI-DHW**模块，用于文档增强应用中的手写擦除场景
+  - [DD] 增加一个API参数用于表明当前帧输出是否有效
+  - [SD] 修正水印开启后读取无效SD模块信息导致的程序闪退问题
+  - [ALL] 修正当输入帧号无效时会存在dump无限帧数的问题
+  - [ZME] 修正对RGB系列图像任意倍率缩放结果偏差一个像素的错误
+  - [CSC] 修正`YUV601L_TO_YUV601L`, `YUV601L_TO_YUV709L`, `YUV709L_TO_YUV709L`三种色彩空间转换的系数错误
+
+## v0.5.9.3625 Release Note | 2024.07.19
+  - [MSSR] RK3576-Linux-NVR初版串联集成库
+
+## v0.5.8.3618 Release Note | 2024.07.15
+  - [SD] 增加RK3576平台支持（需要RKNN 2.0版本）
+  - [SD] 增加AIPQ通路（请参考`rkpq_demo_aipq.cpp`），修正PQTool调试不生效的问题
+
+## v0.5.7.3596 Release Note | 2024.07.10
+  - [MSSR] RK3576-Android-IPTV增加支持1080p-4k的SR通路
+  - [MSSR] RK3576-Android-IPTV增加支持客户配置水印标题
+  - [CGC] 新增RGBA格式输入和输出，支持在模块中配置`nR(G/B)gain`参数以进行色温调整
+
+## v0.5.6.3519 Release Note | 2024.06.20
+  - [MSSR] RK3576-Android-IPTV更新SR模型
 
 ## v0.5.5.3507 Release Note | 2024.06.19
   - [MSSR] 修复FE通路下人脸边界跳变明显问题
@@ -12,6 +118,7 @@
 
 ## v0.5.3.3490 Release Note | 2024.06.17
   - [MSSR] 修改演示水印：显示输入输出的分辨率、帧率，各种开关状态
+  - [CGC] 新增类纸功能，使用`bEnablePaperMode`进行功能开关，`nTextureStrength`进行纹理强度模配置；强度越大纹理越明显
 
 ## v0.5.2.3476 Release Note | 2024.06.11
   - [MSSR] SR模型修改，默认用USM效果，修复文字边缘瑕疵
@@ -30,6 +137,7 @@
   - [MSSR] 关闭MEMC的SR通路输出场景检测结果数据。
   - [MSSR] 优化720pSR的效果
   - [MSSR] 接口增加MEMC强度参数`nMEMCStrength`
+  - [CGC] 增加CGC模块
 
 ## v0.3.0.3378 Release Note | 2024.05.17
   - [MSSR] 增加支持三套ME金字塔分辨率方案，由api新增参数`nSchemeIdx`指定并传入相应数据

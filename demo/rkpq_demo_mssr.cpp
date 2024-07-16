@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Last update 2024-04-10 for librkswpq.so v0.1.0
+// Last update 2024-09-02 for librkswpq.so v0.7.0
 
 #include "rkpq_api.h"
 #include <stdio.h>
@@ -79,6 +79,7 @@ int main(int argc, const char *argv[])
     /* 步骤1: 填写初始化参数'rkpq_init_params'然后通过接口`rkpq_init()`初始化`rkpq_context`上下文实例 */
     initParams.nInitFlag = RKPQ_FLAG_DEFAULT;
     initParams.nInitFlag |= RKPQ_FLAG_ASYNC_MODE;       // 某些模块支持异步模式，请指明这个flag
+    initParams.nInitFlag |= RKPQ_FLAG_CIRCULAR_BUF_IN | RKPQ_FLAG_CIRCULAR_BUF_OUT; /* 如果输入/输出是环形缓冲区，请显示指定此flag，可节省buffer映射时间 */
     initParams.aModPipeOrder[0] = RKPQ_MIXTURE_MSSR;    // 这里pipeline中只包含`MSSR`这一个模块
     initParams.nModNumInPipe = 1;                       // 这里pipeline中模块数量为1
     ret = rkpq_init(&context, &initParams);             // 注意这里参数是两个指针!
@@ -94,31 +95,67 @@ int main(int argc, const char *argv[])
      * 注: `MSSR`模块是一个支持多输入多输出的模块，需要通过`rkpq_set_inputs()`和`rkpq_set_outputs()`接口设置输入输出的图像和缓冲区信息。
      * `rkpq_proc_params::stSrcImgInfo`和`rkpq_proc_params::stDstImgInfo`结构体内的数据将会被忽略！
      */
-    rkpq_imgbuf_info stSrcImgInfos[1] = {0}; // 创建新的`rkpq_imgbuf_info`对象，本例中输入和输出的数量均为1
-    rkpq_imgbuf_info stDstImgInfos[1] = {0}; // 请注意这里变量的生命周期
+    rkpq_imgbuf_info stSrcImgInfos[5] = {0}; // 创建新的`rkpq_imgbuf_info`对象，本例中输入和输出的数量均为1
+    rkpq_imgbuf_info stDstImgInfos[3] = {0}; // 请注意这里变量的生命周期
 
     /* 步骤2.1: 设置输入输出图像信息 */
-    stSrcImgInfos[0].nColorSpace = RKPQ_CLR_SPC_YUV_601_FULL;   // see rkpq_clr_spc, full-range here
-    stSrcImgInfos[0].nPixFmt = RKPQ_IMG_FMT_NV12;               // see rkpq_img_fmt, YUV420SP_NV12 here
-    stSrcImgInfos[0].nPixWid = 640;                             // set the input image width
-    stSrcImgInfos[0].nPixHgt = 480;                             // set the input image height
-    stSrcImgInfos[0].nEleDepth = 8;                             // set the first component(Y or R) depth [bit]
-    stSrcImgInfos[0].nAlignment = 64;                           // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
-    stSrcImgInfos[0].aWidStrides[0] = 640;                      // in this case, no padding in the width dimension
-    stSrcImgInfos[0].aHgtStrides[0] = 480;                      // in this case, there are 8 lines padding after the first (luma) plane
-    stDstImgInfos[0].nColorSpace = RKPQ_CLR_SPC_YUV_601_FULL;   // see rkpq_clr_spc, full-range here
-    stDstImgInfos[0].nPixFmt = RKPQ_IMG_FMT_NV12;               // see rkpq_img_fmt, YUV420SP_NV12 here
-    stDstImgInfos[0].nPixWid = 1280;                            // set the input image width
-    stDstImgInfos[0].nPixHgt = 960;                             // set the input image height
-    stDstImgInfos[0].nEleDepth = 8;                             // set the first component(Y or R) depth [bit]
-    stDstImgInfos[0].nAlignment = 64;                           // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
-    stDstImgInfos[0].aWidStrides[0] = 1280;                     // in this case, no padding in the width dimension
-    stDstImgInfos[0].aHgtStrides[0] = 960;                      // in this case, there are 8 lines padding after the first (luma) plane
+    // NV24[n]
+    stSrcImgInfos[0].nColorSpace    = RKPQ_CLR_SPC_YUV_601_FULL;// see rkpq_clr_spc
+    stSrcImgInfos[0].nPixFmt        = RKPQ_IMG_FMT_NV24;        // see rkpq_img_fmt
+    stSrcImgInfos[0].nPixWid        = 960;                      // set the input image width
+    stSrcImgInfos[0].nPixHgt        = 544;                      // set the input image height
+    stSrcImgInfos[0].nEleDepth      = 8;                        // set the first component(Y or R) depth [bit]
+    stSrcImgInfos[0].nAlignment     = 128;                      // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
+    stSrcImgInfos[0].aWidStrides[0] = 1024;                     // in this case, no padding in the width dimension
+    stSrcImgInfos[0].aHgtStrides[0] = 544;                      // in this case, there are 8 lines padding after the first (luma) plane
+    // NV24[n-1]
+    memcpy(&stSrcImgInfos[1], &stSrcImgInfos[0], sizeof(rkpq_imgbuf_info));
+    // NV24[n-2]
+    memcpy(&stSrcImgInfos[2], &stSrcImgInfos[0], sizeof(rkpq_imgbuf_info));
+    // RGB2[n]
+    stSrcImgInfos[3].nColorSpace    = RKPQ_CLR_SPC_RGB_FULL;    // see rkpq_clr_spc
+    stSrcImgInfos[3].nPixFmt        = RKPQ_IMG_FMT_RGB;         // see rkpq_img_fmt
+    stSrcImgInfos[3].nPixWid        = 960;                      // set the input image width
+    stSrcImgInfos[3].nPixHgt        = 544;                      // set the input image height
+    stSrcImgInfos[3].nEleDepth      = 8;                        // set the first component(Y or R) depth [bit]
+    stSrcImgInfos[3].nAlignment     = 64;                       // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
+    stSrcImgInfos[3].aWidStrides[0] = 2880;                     // in this case, no padding in the width dimension
+    stSrcImgInfos[3].aHgtStrides[0] = 544;                      // in this case, there are 8 lines padding after the first (luma) plane
+    // RGB1[n]
+    stSrcImgInfos[4].nColorSpace    = RKPQ_CLR_SPC_RGB_FULL;    // see rkpq_clr_spc
+    stSrcImgInfos[4].nPixFmt        = RKPQ_IMG_FMT_RGB;         // see rkpq_img_fmt
+    stSrcImgInfos[4].nPixWid        = 480;                      // set the input image width
+    stSrcImgInfos[4].nPixHgt        = 272;                      // set the input image height
+    stSrcImgInfos[4].nEleDepth      = 8;                        // set the first component(Y or R) depth [bit]
+    stSrcImgInfos[4].nAlignment     = 64;                       // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
+    stSrcImgInfos[4].aWidStrides[0] = 1536;                     // in this case, no padding in the width dimension
+    stSrcImgInfos[4].aHgtStrides[0] = 272;                      // in this case, there are 8 lines padding after the first (luma) plane
+
+    // NV12 dst#0
+    stDstImgInfos[0].nColorSpace    = RKPQ_CLR_SPC_YUV_601_FULL;// see rkpq_clr_spc
+    stDstImgInfos[0].nPixFmt        = RKPQ_IMG_FMT_NV12;        // see rkpq_img_fmt
+    stDstImgInfos[0].nPixWid        = 1920;                     // set the input image width
+    stDstImgInfos[0].nPixHgt        = 1080;                     // set the input image height
+    stDstImgInfos[0].nEleDepth      = 8;                        // set the first component(Y or R) depth [bit]
+    stDstImgInfos[0].nAlignment     = 128;                      // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
+    stDstImgInfos[0].aWidStrides[0] = 1920;                     // in this case, no padding in the width dimension
+    stDstImgInfos[0].aHgtStrides[0] = 1080;                     // in this case, there are 8 lines padding after the first (luma) plane
+    // NV12 dst#1
+    memcpy(&stDstImgInfos[1], &stDstImgInfos[0], sizeof(rkpq_imgbuf_info));
+    // NV12 dst#2
+    memcpy(&stDstImgInfos[2], &stDstImgInfos[0], sizeof(rkpq_imgbuf_info));
+
 
     /* 步骤2.2: 调用`rkpq_query()`接口填充剩下的图像信息，如果`rkpq_imgbuf_info`内所有属性你都填好了，这一步可以省略 */
-#if 1
-    ret |= rkpq_query(NULL, RKPQ_QUERY_IMG_BUF_INFO, sizeof(rkpq_imgbuf_info), &stSrcImgInfos[0]);
-    ret |= rkpq_query(NULL, RKPQ_QUERY_IMG_BUF_INFO, sizeof(rkpq_imgbuf_info), &stDstImgInfos[0]);
+#if 1 /* not necessary */
+    for (int i=0; i<5; i++)
+    {
+        ret |= rkpq_query(NULL, RKPQ_QUERY_IMG_BUF_INFO, sizeof(rkpq_imgbuf_info), &stSrcImgInfos[i]);
+    }
+    for (int i=0; i<2; i++)
+    {
+        ret |= rkpq_query(NULL, RKPQ_QUERY_IMG_BUF_INFO, sizeof(rkpq_imgbuf_info), &stDstImgInfos[i]);
+    }
     if (ret)
     {
         printf("Failed to call rkpq_query() %d, Please check the API parameters!\n", ret);
@@ -133,6 +170,13 @@ int main(int argc, const char *argv[])
         printf("Get an invalid config! \n");
         return -1;
     }
+    pConfig->bEnableMEMC = 1;
+    pConfig->nModelIdx  = 0; // 插帧模型序号
+    pConfig->nMemcScale = 4; // 插帧倍率
+    pConfig->aDstIdx[0] = 0; // 选择输出帧0的MC序号
+    pConfig->aDstIdx[1] = 2; // 选择输出帧1的MC序号
+    pConfig->nDstNum    = 2; // 每次输出帧数
+    pConfig->nMEMCStrength = 100; // MEMC强度，范围0-100，越大越强
 
     /* 步骤4: 调用`rkpq_proc()`执行算法 */
     int frameIdx = 0;
@@ -155,17 +199,37 @@ int main(int argc, const char *argv[])
          *      使用`nFdIndex`属性可以对缓存的有效性做一次双重检验，避免出现上诉问题。 如果你的fd-buffer有对应的唯一标识符，可以使用此唯一标识符作为`nFdIndex`；
          *      如果没有唯一标识符，可以使用一个初始数值作为（当前这一组所有）buffer的`nFdIndex`，在（当前这一组所有）buffer被释放后将此数值递增。
          */
-        stSrcImgInfos[0].nFdValue = fdSrc;
-        stDstImgInfos[0].nFdValue = fdDst;
-        stSrcImgInfos[0].nFdIndex = fdSrcIdx;   // unique identifier of the device buffer
-        stDstImgInfos[0].nFdIndex = fdDstIdx;
+        for (int i=0; i<5; i++)
+        {
+            // create hardware buffer then import through fd value
+            stSrcImgInfos[i].nFdValue = fdSrc;      // different fd value for each buffer
+            stSrcImgInfos[i].nFdIndex = fdSrcIdx;   // unique identifier of the device buffer
+        }
+        for (int i=0; i<2; i++)
+        {
+            // create hardware buffer then import through fd value
+            stDstImgInfos[i].nFdValue = fdDst;      // different fd value for each buffer
+            stDstImgInfos[i].nFdIndex = fdDstIdx;   // unique identifier of the device buffer
+        }
     #else
         // 直接使用`malloc`申请内存，这种情况下不具有零拷贝功能，算法会显示地对输入和输出做一次拷贝操作
-        stSrcImgInfos[0].aPlaneAddrs[0] = (unsigned char*)malloc(stSrcImgInfos[0].nFrameSize);
-        stDstImgInfos[0].aPlaneAddrs[0] = (unsigned char*)malloc(stDstImgInfos[0].nFrameSize);
+        for (int i=0; i<5; i++)
+        {
+            stSrcImgInfos[i].aPlaneAddrs[0] = (unsigned char*)malloc(stSrcImgInfos[0].nFrameSize);
+        }
+        for (int i=0; i<2; i++)
+        {
+            stDstImgInfos[i].aPlaneAddrs[0] = (unsigned char*)malloc(stDstImgInfos[0].nFrameSize);
+        }
     #endif
-        stSrcImgInfos[0].nBufferSize = stSrcImgInfos[0].nFrameSize; /* real buffer sieze, should be >= nFrameSize! unit: byte */
-        stDstImgInfos[0].nBufferSize = stDstImgInfos[0].nFrameSize; /* real buffer sieze, should be >= nFrameSize! unit: byte */
+        for (int i=0; i<5; i++)
+        {
+            stSrcImgInfos[i].nBufferSize = stSrcImgInfos[i].nFrameSize; /* real buffer sieze, should be >= nFrameSize! unit: byte */
+        }
+        for (int i=0; i<2; i++)
+        {
+            stDstImgInfos[i].nBufferSize = stDstImgInfos[i].nFrameSize; /* real buffer sieze, should be >= nFrameSize! unit: byte */
+        }
 
         /* 步骤4.2: 帧级参数更新 */
         // 本模块MSSR的分辨率变换信息`stPipeResInfo`需要填写
@@ -180,13 +244,140 @@ int main(int argc, const char *argv[])
         pConfig->pSRConfig->stPipeFmtInfo.nDstClrSpc = stDstImgInfos[0].nColorSpace;
         pConfig->pSRConfig->stPipeFmtInfo.nDstPixFmt = stDstImgInfos[0].nPixFmt;
         memcpy(&pConfig->pSRConfig->stPipeResInfo, &pConfig->stPipeResInfo, sizeof(rkpq_pipe_res_info));
-        pConfig->bEnableMEMC = 0;           // 这里关闭了 MEMC 子模块
-        pConfig->pSDConfig->bEnableSD = 1;  // 这里开启了 SD 子模块
+        pConfig->bEnableMEMC = 1;           // 这里关闭了 MEMC 子模块
+        pConfig->pSDConfig->bEnableSD = 0;  // 这里开启了 SD 子模块
+
+        int inputFPS = 20;
+        int outputFPS = 30;
+        int kk = frameIdx;
+        if (inputFPS == 15 && outputFPS == 30) // 15->30
+        {
+            // 0 - 0.5
+            pConfig->nModelIdx = 0;
+            pConfig->nMemcScale = 4;
+            pConfig->aDstIdx[0] = 0;
+            pConfig->aDstIdx[1] = 2;
+            pConfig->nDstNum = 2;
+        }
+        else if (inputFPS == 20 && outputFPS == 30) // 20->30
+        {
+            if (kk%2==0)
+            {
+                // 0 - 0.6
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 0;
+                pConfig->aDstIdx[1] = 3;
+                pConfig->nDstNum = 2;
+            }
+            else if (kk%2==1)
+            {
+                // 1.4
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 2;
+                pConfig->nDstNum = 1;
+            }
+        }
+        else if (inputFPS == 25 && outputFPS == 30) // 25->30
+        {
+            if (kk%2==0)
+            {
+                // 0 - 0.8
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 0;
+                pConfig->aDstIdx[1] = 4;
+                pConfig->nDstNum = 2;
+            }
+            else if (kk%2==1)
+            {
+                // 1.6
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 3;
+                pConfig->nDstNum = 1;
+            }
+            else if (kk%2==2)
+            {
+                // 2.5
+                pConfig->nModelIdx = 0;
+                pConfig->nMemcScale = 4;
+                pConfig->aDstIdx[0] = 2;
+                pConfig->nDstNum = 1;
+            }
+            else if (kk%2==3)
+            {
+                // 3.4
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 2;
+                pConfig->nDstNum = 1;
+            }
+            else if (kk%2==4)
+            {
+                // 3.4
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 1;
+                pConfig->nDstNum = 1;
+            }
+        }
+        else if (inputFPS == 25 && outputFPS == 60) // 25->60
+        {
+            if (kk%5==0)
+            {
+                // 0 - 0.4 - 0.8
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 0;
+                pConfig->aDstIdx[1] = 2;
+                pConfig->aDstIdx[2] = 4;
+                pConfig->nDstNum = 3;
+            }
+            else if (kk%5==1)
+            {
+                // 1.25 - 1.75
+                pConfig->nModelIdx = 0;
+                pConfig->nMemcScale = 4;
+                pConfig->aDstIdx[0] = 1;
+                pConfig->aDstIdx[1] = 3;
+                pConfig->nDstNum = 2;
+            }
+            else if (kk%5==2)
+            {
+                // 2.2 - 2.6
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 1;
+                pConfig->aDstIdx[1] = 3;
+                pConfig->nDstNum = 2;
+            }
+            else if (kk%5==3)
+            {
+                // 3.0 - 3.4 - 3.8
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 0;
+                pConfig->aDstIdx[1] = 2;
+                pConfig->aDstIdx[2] = 4;
+                pConfig->nDstNum = 3;
+            }
+            else if (kk%5==4)
+            {
+                // 4.2 - 4.6
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 1;
+                pConfig->aDstIdx[1] = 3;
+                pConfig->nDstNum = 2;
+            }
+        }
 
         /* 步骤4.3: 设置输入和输出 */
         // 设置输入输出图像和缓冲区信息；一般每帧的缓冲区不同，每帧都要设置一次
-        rkpq_set_inputs(context, stSrcImgInfos, 1);
-        rkpq_set_outputs(context, stDstImgInfos, 1);
+        rkpq_set_inputs(context, stSrcImgInfos, 5);
+        rkpq_set_outputs(context, stDstImgInfos, 2);
 
         /* 步骤4.4: 执行算法 */
         ret = rkpq_proc(context, &procParams); // 算法阻塞执行
@@ -195,6 +386,15 @@ int main(int argc, const char *argv[])
             printf("Fail to rkpq_proc() %d\n", ret);
             break;
         }
+        else
+        {
+            // output yuv
+            printf("Writing frame data ...\n");
+            for (int i=0; i < pConfig->nDstNumPrev; i++)
+            {
+                // TODO...
+            }
+        }
 
         /* 步骤4.5: 释放帧级资源 */
     #if USE_HARDWARE_BUFFER
@@ -202,7 +402,7 @@ int main(int argc, const char *argv[])
         /* ... */
     #else
         // free the buffers that you allocated
-        for (int i = 0; i < 1; i++) // 本例只有1个输入
+        for (int i = 0; i < 5; i++) // 本例有5个输入
         {
             if (stSrcImgInfos[i].aPlaneAddrs[0] != NULL)
             {
@@ -210,7 +410,7 @@ int main(int argc, const char *argv[])
                 stSrcImgInfos[i].aPlaneAddrs[0] = NULL;
             }
         }
-        for (int i = 0; i < 1; i++) // 本例只有1个输出
+        for (int i = 0; i < 2; i++) // 本例有2个输出
         {
             if (stDstImgInfos[i].aPlaneAddrs[0] != NULL)
             {

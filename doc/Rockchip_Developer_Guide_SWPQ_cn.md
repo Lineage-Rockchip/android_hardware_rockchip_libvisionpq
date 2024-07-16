@@ -1,8 +1,8 @@
 # RK SW(SoftWare) PQ SDK 使用指南
 
-发布版本：v1.2.0
+发布版本：v1.2.4
 
-发布日期：2024-06-27
+发布日期：2024-09-24
 
 文件密级：□绝密   □秘密   ■内部资料   □公开
 
@@ -53,8 +53,12 @@ Rockchip Electronics Co., Ltd.
 |:----------:|:--------:|:--------------:|:----------:|:-------:|:---------------------------------------- |
 | 2022/08/18 | 1.0.0    | librkswpq_v6.0.0 (pre) | 吴方熠 | 夏海军 | 初始版本                                 |
 | 2022/11/28 | 1.0.1    | librkswpq_v8.0.0 (pre) | 吴方熠 | 夏海军 | 增加支持图像格式和ZME模块，增加计算精度和性能 |
-| 2023/04/11 | 1.1.0    | librkswpq v0.1.0 | 吴方熠 |   \    | 基于 pipeline 框架修改为通用版本              |
+| 2023/04/11 | 1.1.0    | librkswpq v0.1.0 | 吴方熠 |   \  | 基于 pipeline 框架修改为通用版本              |
 | 2024/06/27 | 1.2.0    | librkswpq v0.5.0 | 吴方熠 |   \  | 开发指南全面更新，增加新的模块说明和性能数据等 |
+| 2024/07/15 | 1.2.1    | librkswpq v0.5.0 | 吴方熠 |   \  | 更新平台支持情况等数据 |
+| 2024/08/01 | 1.2.2    | librkswpq v0.6.0 | 吴方熠 |   \  | 新增 AI_DHW 模块说明 |
+| 2024/09/18 | 1.2.3    | librkswpq v0.10.0| 吴方熠 |   \  | API修改，对应内容补充；新增 DCI_ACM 模块相关说明；Android属性名称调整 |
+| 2024/09/24 | 1.2.4    | librkswpq v0.11.0| 吴方熠 |   \  | API flag调整，信息更新 |
 
 ## 目 录
 
@@ -67,7 +71,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 目前 SWPQ 中大部分模块主要运行于在**GPU**设备上，部分AI模块（如：AIDM, AISD, AISR, MIXFE）还需要通过RKNN在**NPU**设备上运行。
 
 ### 1.2. Feature支持
-- 数据格式
+- **数据格式**
   - 输入格式支持：
     - RGBA8888 / BGRA8888 / RGB888 / BGR888 / RGB565 / BGR565
     - YUV444SP_NV24 / YUV422SP_NV16 / YUV420SP_NV12 / YUV420SP_NV30 / YUV420SP_NV20 / YUV420SP_NV15 / YUV444I_VU24
@@ -79,89 +83,121 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
     - 理论最低: 128x128
     - 理论最高: 16384x16384, 高于 8K(7680x4320) 分辨率暂未经过验证
   - 当前版本**只支持Non-FBC格式**，FBC格式目前不支持
+<br>
 
-- 色域变换模块(Corlor Space Convert, CSC)
+- **色域变换模块(Corlor Space Convert, CSC)**
   - 支持 Y2R, Y2Y, R2Y, R2R
   - 支持 YCbCr BT.601 / BT.709 完整特性
   - 支持 Full-Range / Limited-Range 相互转换
   - 支持调整亮度、色调、对比度、饱和度、色温和颜色增益
+<br>
 
 <!-- - 图像格式转换模块(Format Convert, CVT)
   - 主要用于同类图像格式下不同通道间的转换(Y2Y/R2R)，如NV12到NV24, RGBA到RGB等
   - 内部模块，无需特别指定参数 -->
 
-- 动态对比度模块(Dynamic Contrast Improvement, DCI)
+- **动态对比度模块(Dynamic Contrast Improvement, DCI)**
   - 支持全局动态对比度调整
   - 支持调整亮区/暗区对比度增益
+<br>
 
-- 自动色彩管理模块(Auto Color Management, ACM)
+- **自动色彩管理模块(Auto Color Management, ACM)**
   - 支持自动调整亮度、色调、饱和度
   - 支持特定亮度、色调、饱和度改变
+<br>
 
-- 缩放管理引擎模块(Zoom Manage Engine, ZME)
+- **缩放管理引擎模块(Zoom Manage Engine, ZME)**
   - 支持任意倍率缩放
   - 支持deringing功能
+<br>
 
-- 锐化(Sharpen, SHP)
+- **锐化(Sharpen, SHP)**
   - 支持全局清晰度调整
   - 支持调整 coring / gain / limit 等相关配置
+<br>
 
-- MLC
+- **MLC**
   - TODO (@wfy)
+<br>
 
-- CGC
+- **CGC**
   - TODO (@lqq)
+<br>
 
-- BLR
+- **BLR**
   - TODO (@ysf)
+<br>
 
-- AI超分辨率模块(AI Super Resolution, AISR)
+- **AI超分辨率模块(AI Super Resolution, AI-SR)**
   - 超分辨率放大，**仅支持2倍率放大**
   - ~~方向滤波 + 双三次插值, 支持任意分辨率输入~~ （暂不支持）
   - **RK3588**平台仅支持分辨率 1080P => 4K (RKNN版本需大于等于1.4)
   - **RK356X**平台仅支持分辨率 540P => 1080P (RKNN版本需大于等于1.4)
+<br>
 
-- AI场景检测模块(AI Scene Detection, AISD)
+- **AI场景检测模块(AI Scene Detection, AI-SD)**
   - 用于场景检测，目前支持场景分类: 自然 / 文字
   - 目前主要用于辅助其他模块(AISR)搭配使用
-  - 仅支持**RK3588**平台(RKNN版本需大于等于1.4)
+  - 支持**RK3588**平台(RKNN版本需大于等于1.4), **RK3576**(RKNN版本需大于等于2.0)
+<br>
 
-- AI去噪模块(AI DeMosquito, AIDM)
+- **AI去噪模块(AI DeMosquito, AI-DM)**
   - 去蚊虫噪声, 主要用于处理压缩率比较高的图像，或码率较低的视频
   - 应用项目：云办公场景等
   - 仅支持分辨率为**1080P**的**YUV**图像输入输出
   - 仅支持**RK356X**平台(RKNN版本需大于等于1.4)
+<br>
 
-- AI去伪色模块(AI DeFalseColor, AIDFC）
+- **AI去伪色模块(AI DeFalseColor, AI-DFC)**
   - 用于从YUV420转换至YUV444场景，还原YUV420丢失的颜色信息
   - 支持**RK3588**(RKNN版本需大于等于1.5), **RK3576**(RKNN版本需大于等于2.0)
+<br>
 
-- AI文档检测模块(AI Document Detection, AIDD)
+- **AI文档检测模块(AI Document Detection, AI-DD)**
   - 检测图像内的文档区域，得到四个顶点
   - 支持**RK3588**(RKNN版本需大于等于1.5), **RK3576**(RKNN版本需大于等于2.0)
+<br>
 
-- AI文档增强模块(AI Document Enhancement, AIDE)
+- **AI文档增强模块(AI Document Enhancement, AI-DE)**
   - 将带有四个顶点信息的文档图像变换为正投影，并进行AI文档增强
   - 支持**RK3588**(RKNN版本需大于等于1.5), **RK3576**(RKNN版本需大于等于2.0)
+<br>
 
-- AI人脸增强混合模块(Mixture Face Enhancement, MixFE)
+- **AI文档手写擦除模块(AI DeHandWriting, AI-DHW)**
+  - 将文档增强后的图像进行手写文字擦除，还原文档/试卷的原貌
+  - 支持**RK3576**(RKNN版本需大于等于2.0)
+<br>
+
+- **AI人脸增强混合模块(Mixture Face Enhancement, Mix-FE)**
   - 人脸检测+增强+4x放大
   - 仅支持**RK3588**(RKNN版本需大于等于1.5)
+<br>
 
-- AI视频插帧混合模块(MixMSSR)
+- **AI视频插帧混合模块(Mix-MSSR)**
   - 支持MEMC,SD,SR,RD等，24/25/30 fps => 60fps
   - 支持**RK3588**(RKNN版本需大于等于2.0)，支持**RK3576**(RKNN版本需大于等于2.0)
+<br>
 
+### 1.3. 平台支持情况和特殊硬件需求
+| **平台支持情况** | RK3588 | RK3576 | RK356X | RK3399 | ... |
+|:----------------|:------:|:------:|:------:|:------:|:---:|
+| Android         | ✔️     | ✔️    | ✔️     | ✔️    | ... |
+| Linux           | ✔️     | ✔️    | ✔️     | TBD   | ... |
 
-### 1.3. 特殊硬件需求
-| **特殊硬件**   | **说明**                  |
+| **特殊硬件需求**   | **说明**                  |
 | --- | ------------------------------------ |
 | GPU | 绝大部分模块运行于GPU，需求OpenCL 2.0及以上 |
 | NPU | AISR/AISD等模块需NPU硬件，RKNN 1.4及以上版本，部分AI模块需要2.0以上版本 |
 
+注：
+1. 部分非AI模块在RK356X和RK3399平台上不支持
+2. 因为RKNN模型与平台强相关，所以AI模块的支持与否也与平台强相关
+3. 每个模块对所支持的平台上实测数据记录在对应模块的**支持平台及性能数据参考**小节内容中，若表中标注`N/A`则表示对应的平台或对应图像分辨率通路不支持。
+
+
 ## 2. 模块数据汇总
 ### 2.1. 各模块理论数据汇总
-| 模块 | GPU算力[GFLOPS] | NPU算力[GFLOPS] |  GPU带宽[MB/帧] | NPU带宽[MB/帧] | 总带宽[MB/帧] | 总带宽备注 |
+| 模块 | GPU算力[FLOPS] | NPU算力[FLOPS] |  GPU带宽[MB/帧] | NPU带宽[MB/帧] | 总带宽[MB/帧] | 总带宽备注 |
 |:----:|----------------| ---------------|:-----------------|:---------------|:-------------|:----------|
 | CSC  | 3.0G | \ | 3+3=6 | \      | 6   | 1080P NV12 => 1080P NV12 |
 | DCI  | 0.6G | \ | 4+2=6 | \      | 6   | 1080P NV12 => 1080P NV12, 仅计算Y通道 |
@@ -175,11 +211,12 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | AIDFC| TBD | TBD | TBD | TBD | TBD | TBD |
 | AIDE | TBD | TBD | TBD | TBD | TBD | TBD |
 | AIDD | TBD | TBD | TBD | TBD | TBD | TBD |
+| AIDHW | TBD | TBD | TBD | TBD | TBD | TBD |
 | MixFE | TBD | TBD |   TBD   | ~430 |   TBD    | 540P  NV12 => 4K NV12; 异步模式，延迟1帧 |
 | MixMSSR | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
 
 注：
-1. 带宽数据根据右侧备注中输入输出图像和格式计算得到
+1. 算力（以60pfs计）和带宽数据根据右侧备注中输入输出图像和格式计算得到
 2. GPU带宽数据格式为"**输入带宽 + 输出带宽 = 总带宽**"
 3. 以上理论数值跟实际测量情况可能存在差异
 
@@ -192,11 +229,12 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | SHP  | 否 | 输入: YUV4xxSP_8bit, YUV444I_VU24, Y8 <br> 输出: YUV4xxSP_8bit, YUV444I_VU24, Y8 | 输出格式和输入相同，只处理Y通道，full-range |
 | ZME  | 否 | 输入: YUV4xxSP_8bit, YUV444I_VU24, API中所有RGB系列, Y8, UV8 <br> 输出: YUV4xxSP_8bit, YUV444I_VU24, API中所有RGB系列, Y8, UV8 | 一般不改变输入格式，注5 |
 | AISR | 是 | 输入: YUV4xxSP_8bit, YUV444I_VU24, Y8 <br> 输出: YUV4xxSP_8bit, YUV444I_VU24, Y8 | 一般不改变输入格式，注5 |
-| AISD | 否 | 输入: YUV4xxSP_8bit, YUV444I_VU24, API中所有RGB系列 <br> 输出: 非图像输出 | 无图像输出 |
+| AISD | 否 | 输入: YUV4xxSP_8bit, YUV444I_VU24, API中所有RGB系列 <br> 输出: 各场景和类别得分 | 无图像对象输出 |
 | AIDM | 是 | 输入: YUV4xxSP_8bit, Y8 <br> 输出: YUV4xxSP_8bit, Y8 | 输出格式和输入相同，只处理Y通道 |
 | AIDFC| 是 | 输入: YUV420SP_NV12 <br> 输出: YUV444SP_NV24, RGBA8888 | \ |
-| AIDE | 否 | 输入: RGB888 <br> 输出: RGB888 | \ |
-| AIDD | 否 | 输入: YUV420SP_NV12, RGB[A8]888 <br> 输出: YUV420SP_NV12 | \ |
+| AIDE | 否 | 输入: YUV420SP_NV12, RGB[A8]888 <br> 输出: YUV420SP_NV12 | \ |
+| AIDD | 否 | 输入: YUV4xxSP_8bit, RGB[A8]888, Y8 <br> 输出: YUV4xxSP_8bit, RGB[A8]888, Y8 | 输出格式和输入相同 |
+| AIDHW| 否 | 输入: YUV4xxSP_8bit, RGB[A8]888, Y8 <br> 输出: YUV4xxSP_8bit, RGB[A8]888, Y8 | 输出格式和输入相同 |
 | MixSHPACM | 否 | 输入: YUV420SP_NV12, RGBA8888 <br> 输出: YUV420SP_NV12 | \ |
 | MixFE | 否 | 输入: TBD <br> 输出: TBD | TBD |
 | MixMSSR | 否 | 输入: YUV4xxSP_8bit, Y8, UV88 <br> 输出: TBD | TBD |
@@ -214,8 +252,8 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 ### 2.3. 各模块详细性能数据
 
 注：
-1. 以下表中符号`N/A`表示相应分辨率情况下对应的模块不支持；
-2. 以下表中符号`TBD`表示未经过测试，数据缺失；
+1. 以下表中符号`N/A`表示该模块在对应平台或对应分辨率情况下不支持；
+2. 以下表中符号`TBD`表示该模块在对应平台或对应分辨率情况下未经过测试，数据缺失；
 3. 如果AI模块的性能不符合预期，大概率和`librknnrt.so`的版本有关系，可以将板上`librknnrt.so`版本切换到模块对应模型编译的版本再次测试。（比如低版本的多核模型在高版本`librknnrt.so`环境中运行时，可能无法跑多核）
 
 #### CSC 模块
@@ -257,6 +295,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | BGR565       |  Yes |  Yes |  Yes |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
 
 ##### CSC 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -335,6 +374,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 
 #### DCI 模块
 ##### DCI 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -410,6 +450,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 
 #### ACM 模块
 ##### ACM 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -481,6 +522,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 
 #### ZME 模块
 ##### ZME 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -552,6 +594,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 
 #### SHP 模块
 ##### SHP 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -629,6 +672,7 @@ TODO
 
 #### AI-SR 模块
 ##### AI-SR 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -691,6 +735,7 @@ TODO
 
 #### AI-SD 模块
 ##### AI-SD 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -738,6 +783,7 @@ TODO
 
 #### AI-DM 模块
 ##### AI-DM 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -785,6 +831,7 @@ TODO
 
 #### AI-DFC 模块
 ##### AI-DFC 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -832,6 +879,7 @@ TODO
 
 #### AI-DE 模块
 ##### AI-DE 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -879,6 +927,7 @@ TODO
 
 #### AI-DD 模块
 ##### AI-DD 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -924,8 +973,13 @@ TODO
   </tr>
 </table>
 
+#### AI-DHW 模块
+##### AI-DHW 支持平台及性能数据参考
+TODO
+
 #### MIX-FE 模块
 ##### MIX-FE 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -973,6 +1027,7 @@ TODO
 
 #### MIX-MSSR 模块
 ##### MIX-MSSR 支持平台及性能数据参考
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="center">
     <td rowspan="2"><b>平台</b></td>
@@ -1022,12 +1077,13 @@ TODO
 ### 2.4. AI 模块运行所需模型文件列表
 | 模块 | 发布模型文件 | 内部文件md5值（仅供内部开发人员审核使用，与发布模型文件无关） |
 |:----|:-------|:----|
-| AISR  | rkaipq_sr_model_rknn140_rk356x_540p.bin <br> rkaipq_sr_model0_rknn140_rk3588_1080p.bin <br> rkaipq_sr_model1_rknn140_rk3588_1080p.bin | 080d8cc840f38a7ed3602bdc0a9acc6a <br> e0bd9da45fd5c598b11d46731308c0eb <br> ba3b4a372ef72cd365bf377f80016d52 |
-| AISD  | rkaipq_sd_model_rknn140_rk3588.bin | abfd6d291e0cb017c2306b565e432c8f |
+| AISR  | rkaipq_sr_model_540p_rknn140_rk356x.bin <br> rkaipq_sr_model0_1080p_rknn140_rk3588.bin <br> rkaipq_sr_model1_1080p_rknn140_rk3588.bin | 080d8cc840f38a7ed3602bdc0a9acc6a <br> e0bd9da45fd5c598b11d46731308c0eb <br> ba3b4a372ef72cd365bf377f80016d52 |
+| AISD  | rkaipq_sd_model_rknn140_rk3588.bin <br> rkaipq_mssr_model0_sd_rknn200_rk3576.bin | abfd6d291e0cb017c2306b565e432c8f <br> \ |
 | AIDM  | rkaipq_dm_model_rknn140_rk356x.bin | afcfdc7b24f88390b24eb5ba57061b82 |
-| AIDFC | rkaipq_dfc_model_rknn150_rk3588.bin | 3cb6e9905915af4965693e84f16ec973 |
+| AIDFC | rkaipq_dfc_model_rknn150_rk3588.bin <br> rkaipq_dfc_model[~10]_rknn200_rk3576.bin | 3cb6e9905915af4965693e84f16ec973 <br> \ |
 | AIDE  | rkaipq_de_model_rknn150_rk3588.bin <br> rkaipq_de_model_rknn162_rk3576.bin |b6a1dd05b0df34b788f55cc968bbd71f <br> 416afaa26c159809a5475d5f43f98e6e |
-| AIDD  | rkaipq_dd_model0_rknn150_rk3588.bin <br> rkaipq_dd_model1_rknn150_rk3588.bin | 5d33642ab5cd2346eb4aa7b782c16977 <br> 257945db4dc3197e188ed0e9e69f7598 |
+| AIDD  | rkaipq_dd_model0_rknn150_rk3588.bin <br> rkaipq_dd_model1_rknn150_rk3588.bin <br> rkaipq_dd_model0_rknn200_rk3576.bin <br> rkaipq_dd_model1_rknn200_rk3576.bin | 5d33642ab5cd2346eb4aa7b782c16977 <br> 257945db4dc3197e188ed0e9e69f7598 <br> \ <br> \ |
+| AIDHW | rkaipq_dhw_model0_rknn200_rk3576.bin <br> rkaipq_dhw_model1_rknn200_rk3576.bin | TBD |
 | MixFE |  TBD | TBD |
 | MixFE2 | TBD | TBD |
 | MixFE3 | TBD | TBD |
@@ -1036,8 +1092,8 @@ TODO
 | MixMSSR | rkaipq_mssr_model0_IFBlockX4Stage0_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX4Stage1_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX4Stage2_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX5Stage0_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX5Stage1_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX5Stage2_rknn162_rk3576.bin <br> rkaipq_mssr_model0_NaturalSR540to1080_rknn162_rk3576.bin <br> rkaipq_mssr_model0_NaturalSR1080to4K_rknn162_rk3576.bin <br> rkaipq_mssr_model0_EbookSR480to960_rknn162_rk3576.bin <br> rkaipq_mssr_model0_rd_rknn162_rk3576.bin <br> rkaipq_mssr_model0_sd_rknn162_rk3576.bin | 666d32453a82120735a238f2b2f723b0 <br> eb13784d88fd0b6788774b3832b9e614 <br> af98b60b1394df8e0b75943785d440a3 <br> 71ba442eb493c4a84c89201f6c1daa8a <br> 620161e6dd71ccb1e32d0241d268d12b <br> 4b2a3bafe215f816ac1251f463374ded <br> 70caba7674a7bb149102cbddb69e673e <br> b424c8159331ac993f555b7be32ff0ea <br> 9b435ba3603b06b909fc35ecc02c34fe <br> 315a865fbb8c0447fe3fe6bd7e0ddca0 <br> 8bf9787b62242f79ebd5904e80cd378f|
 
 注：
-1. 随库提供的模型文件默认加载地址为: Android:`/vendor/etc/`, Linux: `/etc/`;
-2. `rkpq_set_cache_path()`接口结合`target=4`参数可以修改RKNN模型的加载地址，需要在`rkpq_init()`前调用。
+1. 随库提供的模型文件默认加载路径为: Android: `/vendor/etc/`, Linux: `/etc/`;
+2. `rkpq_set_cache_path()`接口结合`target=4`参数可以修改RKNN模型的加载路径，需要在`rkpq_init()`前调用。
 
 
 ## 3. 关键数据结构与应用接口说明
@@ -1134,6 +1190,7 @@ typedef enum _rkpq_query_cmd
     RKPQ_QUERY_IMG_ALIGNMENT_OCL,       /* 用于查询OpenCL图像在宽度上的对齐量，单位：pixel */
     RKPQ_QUERY_BUF_ALIGNMENT_OCL,       /* 用于查询OpenCL子图像需要的偏移(offset)的对齐量，单位：byte */
     RKPQ_QUERY_RKNN_SUPPORT,            /* 用于查询是否支持RKNN模型在NPU上运行 */
+    RKPQ_QUERY_MEAN_LUMA_OUTPUT,        /* 用于查询输出帧图像的平均亮度(需要指定`RKPQ_FLAG_CALC_MEAN_LUMA`) */
     RKPQ_QUERY_MAX,                     /* 条目数量标志，无实际意义 */
 } rkpq_query_cmd;
 ```
@@ -1162,8 +1219,8 @@ typedef struct _rkpq_imgbuf_info
     uint32_t    nPlaneNum;                          /* [o] 图像的平面数量，由其格式决定 */
     size_t      nFrameSize;                         /* [o] 整幅图像对应的buffer占用大小, 等于所有平面的占用大小之和，单位：byte */
 
-    uint8_t    *aPlaneAddrs[RKPQ_MAX_PLANE_NUM];    /* [i] 每个平面数据的起始虚地址 */
-    int32_t     nFdValue;                           /* [i] 输入buffer的硬件描述符，用于实现零拷贝 */
+    uint8_t    *aPlaneAddrs[RKPQ_MAX_PLANE_NUM];    /* [i] 每个平面数据的起始虚地址，如果在零拷贝时buffer被映射过，则虚地址需要被正确设置！ */
+    int32_t     nFdValue;                           /* [i] buffer的硬件描述符，用于实现零拷贝 */
     uint32_t    nFdIndex;                           /* [i] fd的索引，必须是fd的唯一标识符，用于缓存映射的检验，解决缓存失效问题，详见下文中的`rkpq_clear_caches()`接口说明 */
     size_t      nBufferSize;                        /* [i] buffer的总大小, 应 >= nFrameSize，单位：byte */
 } rkpq_imgbuf_info;
@@ -1242,8 +1299,30 @@ typedef struct _rkpq_init_params
 
     uint32_t    nModNumInPipe;                              /* [i] 自定义 pipeline 中模块的数量 */
     uint32_t    aModPipeOrder[RKPQ_MAX_PIPE_MODULE_NUM];    /* [i] 自定义 pipeline 中模块的顺序，值为rkpq_module枚举值 */
+
+    uint32_t    bLazyInit;                                  /* [i] 延迟初始化开关: 开启后提升 rkpq_context 的初始化速度(即降低 rkpq_init() 接口的返回时间)，
+                                                             但内部各模块的初始化会到运行时才进行，首帧的处理速度会下降；关闭后内部所有模块的初始化操作在
+                                                             rkpq_init() 接口调用期间完成，该情况下初始化返回时间与模块数量正相关，后续各帧处理时间保持稳定。 */
+    uint32_t    aModSetupFlags[RKPQ_MAX_PIPE_MODULE_NUM];   /* [i] 每个模块的初始化标志位，用于节省内存占用以及初始化耗时。默认值应全为0 */
+    int32_t     nMaxIoBufCacheNum;                          /* [i] 最大IO buffer缓存数量, 取值范围:[(0), 256] (=0时将使用默认值32, <0时关闭缓存功能) */
+
 } rkpq_init_params;
+
+/* 初始化标志位取值说明 */
+#define RKPQ_FLAG_PERF_DETAIL           (1 << 0)    /* 保留标志位，暂无作用 */
+#define RKPQ_FLAG_HIGH_PERFORM          (1 << 1)    /* 提升CPU利用率以提升性能，在CPU无法定频的情况下使用，开启后允许通过`bEnableIncreaseCpuUtl`参数开关 */
+#define RKPQ_FLAG_HIGH_PRECISION        (1 << 2)    /* 保留标志位，暂无作用 */
+#define RKPQ_FLAG_ASYNC_MODE            (1 << 3)    /* 异步开关标志位，部分模块支持异步处理，开启后增加送显延迟 */
+#define RKPQ_FLAG_FIX_RES_IMG_IO        (1 << 4)    /* 保留标志位，暂无作用 */
+#define RKPQ_FLAG_CIRCULAR_BUF_IN       (1 << 5)    /* 输入缓冲区采用ring-buffer机制，开启后可以降低零拷贝的映射开销（分辨率与格式需保持一致） */
+#define RKPQ_FLAG_CIRCULAR_BUF_OUT      (1 << 6)    /* 输出缓冲区采用ring-buffer机制，开启后可以降低零拷贝的映射开销（分辨率与格式需保持一致） */
+#define RKPQ_FLAG_CALC_MEAN_LUMA        (1 << 7)    /* 允许计算输出帧图像的平均亮度，开启后会略微增加处理时间 */
+#define RKPQ_FLAG_CVT_RANGE_ONLY        (1 << 4)    /* 已废弃 */
 ```
+
+注：
+1. 只有指定了`RKPQ_FLAG_CIRCULAR_BUF_IN`或`RKPQ_FLAG_CIRCULAR_BUF_OUT`的情况下，IO buffer缓存功能才会生效。
+2. 不建议开启`RKPQ_FLAG_HIGH_PERFORM`，请在开发人员指导下使用。
 
 #### rkpq_proc_params
 ```c
@@ -1263,13 +1342,14 @@ typedef struct _rkpq_proc_params
     uint32_t            nFrameIdx;            /* [i] 帧序号 */
     uint32_t            bEnablePropControl;   /* [i] 属性tuning开关，与`bEnableSliderControl`互斥 */
     uint32_t            bEnableSliderControl; /* [i] PQTool tuning开关 */
+    uint32_t            bEnableIncreaseCpuUtl;/* [i] 提升CPU利用率开关，仅在`RKPQ_FLAG_HIGH_PERFORM`指定后生效（不建议开启） */
 
     uint32_t            aReservedData[1];     /* reserved, for future use */
 } rkpq_proc_params;
 ```
 注：
 1. 对于大部分PQ模块来说都是“**单输入-单输出**”的模式，其输入和输出图像信息目前必须由`rkpq_proc_params`参数传入；
-2. 对于少数“**多输入-多输出**”模式的PQ模块来说，其输入和输出的图像信息由`rkpq_set_inputs()`和`rkpq_set_outputs()`接口传入。
+2. 对于少数“**多输入-多输出**”模式的PQ模块（目前仅`AI-MSSR`模块）来说，其输入和输出的图像信息由`rkpq_set_inputs()`和`rkpq_set_outputs()`接口传入。
 
 #### rkpq_pipe_fmt_info 和 rkpq_pipe_res_info
 ```c
@@ -1314,14 +1394,16 @@ int rkpq_init(rkpq_context *pCtxPtr, rkpq_init_params *pInitParam);
 - `rkpq_init_params *pInitParam`: `rkpq_init_params`结构体对象指针
 
 注：
-- 如果没有OpenCL程序缓存文件，第一次调用`rkpq_init()`进行初始化耗时会比较长（秒级）。
-- 初始化成功后OpenCL程序会**自动写出缓存文件**，之后的初始化耗时将大幅度降低（毫秒级）。
-- 自动写出缓存文件可能会因为程序权限等问题失败。
-- OpenCL程序默认缓存路径: `/data/rkalgo/` 或 `/data/vendor/rkalgo/`
+- 如果没有OpenCL程序缓存文件，第一次调用`rkpq_init()`进行初始化耗时会比较长（秒级）;
+- 初始化成功后OpenCL程序会**自动写出缓存文件**，之后的初始化耗时将大幅度降低（毫秒级）;
+- 自动写出缓存文件可能会因为程序权限等问题失败;
+- 缓存文件与OpenCL驱动版本强相关，OTA升级后如若更新了驱动，缓存文件会重新生成，造成单次初始化耗时增加;
+- OpenCL程序默认缓存路径: `/data/rkalgo/` 或 `/data/vendor/rkalgo/`;
+- `rkpq_set_cache_path()`接口结合`target=1`参数可以修改OpenCL缓存的保存和加载路径，需要在`rkpq_init()`前调用。
 
 #### rkpq_proc()
 接口作用:
-根据传入的`rkpq_proc_params`参数，调用`rkpq_context`上下文对象执行PQ处理，处理过程会阻塞调用线程，直到接口程序返回。
+根据传入的`rkpq_proc_params`参数，调用`rkpq_context`上下文对象执行PQ处理，处理过程会**阻塞调用线程**，直到接口程序返回。
 
 接口定义：
 ```c
@@ -1365,16 +1447,19 @@ int rkpq_query(rkpq_context ctx, rkpq_query_cmd cmd, size_t size, void* info);
 | --------------------------------- |:-----------------:| ----------------- |
 | RKPQ_QUERY_SDK_VERSION            |       no          | rkpq_version_info |
 | RKPQ_QUERY_PERF_INFO              |       YES         | rkpq_perf_info    |
+| RKPQ_QUERY_MODULES_SUPPORT        |       YES         | rkpq_module_info  |
+| RKPQ_QUERY_MODULES_ROI_SUPPORT    |       YES         | rkpq_module_info  |
 | RKPQ_QUERY_IMG_RES_CHANGE_SUPPORT |       no          | uint32_t          |
+| RKPQ_QUERY_IMG_FMT_CHANGE_SUPPORT |       no          | uint32_t          |
 | RKPQ_QUERY_IMG_FMT_INPUT_SUPPORT  |       no          | rkpq_imgfmt_info  |
 | RKPQ_QUERY_IMG_FMT_OUTPUT_SUPPORT |       no          | rkpq_imgfmt_info  |
-| RKPQ_QUERY_IMG_FMT_CHANGE_SUPPORT |       no          | uint32_t          |
 | RKPQ_QUERY_IMG_COLOR_SPACE_SUPPORT|       no          | rkpq_clrspc_info  |
 | RKPQ_QUERY_IMG_BUF_INFO           |       no          | rkpq_imgbuf_info  |
 | RKPQ_QUERY_IMG_ALIGNMENT_OCL      |       YES         | uint32_t          |
+| RKPQ_QUERY_BUF_ALIGNMENT_OCL      |       YES         | uint32_t          |
 | RKPQ_QUERY_RKNN_SUPPORT           |       YES         | uint32_t          |
-| RKPQ_QUERY_MEAN_LUMA              |       YES         | uint32_t          |
-| RKPQ_QUERY_MODULES_SUPPORT        |       YES         | rkpq_module_info  |
+| RKPQ_QUERY_MEAN_LUMA_OUTPUT       |       YES         | int32_t           |
+
 
 #### rkpq_set_loglevel()
 接口作用:
@@ -1391,21 +1476,27 @@ int rkpq_set_loglevel(rkpq_context ctx, int logLevel);
 
 #### rkpq_set_cache_path()
 接口作用:
-用于设置算法库缓存文件路径（存放OpenCL程序缓存，用于程序初始化加速）。
+用于设置算法库缓存文件路径，包括：（存放OpenCL程序缓存，用于程序初始化加速）。
 默认路径为`/data/rkalgo/`
 
 接口定义：
 ```c
-int rkpq_set_cache_path(rkpq_context ctx, const char *pPath);
+int rkpq_set_cache_path(rkpq_context ctx, const char *pPath, int target);
 ```
 
 参数说明：
 - `rkpq_context ctx`: `rkpq_context`对象，将此参数设为`NULL`使缓存路径全局生效。（目前暂不支持按实例设置缓存路径）
 - `const char *pPath`: 缓存路径字符串，请以'/'结尾
+- `int target`: 缓存目标类型，二进制位域取值/所需权限/对应功能说明如下:
+  - 0x0 / rw- / 表示对所有类型都是用同一个缓存路径
+  - 0x1 / rw- / 表示设置OpenCL的缓存文件路径
+  - 0x2 / r-- / 表示设置RKNN模型文件路径
+  - 0x4 / rw- / 表示存放license授权文件路径
+  - 0x8 / r-- / 表示指定`librga.so`库文件的路径
 
 #### rkpq_clear_caches()
 接口作用:
-清除在SDK内部缓存的输入输出fd-buffer对象。
+清除在SDK内部输入输出fd-buffer对象的缓存，清除老旧的buffer缓存条目，避免占用过多的虚拟内存。
 
 接口定义：
 ```c
@@ -1424,8 +1515,8 @@ int rkpq_clear_caches(rkpq_context ctx, int flag);
     - 存在一帧或多帧历史帧闪烁显示（输入`fd-buffer`与缓存不对应）
     - 存在一帧或多帧绿屏画面帧闪烁显示（输出`fd-buffer`与缓存不对应）
 - 若出现上诉问题，可以调用此接口对失效的缓存进行清除。另外也可以：
-    - 使用`setprop test.vendor.rkpq.io.cache.clear`命令进行临时手动缓存清除，强制`fd-buffer`重新映射；
-    - 使用`setprop test.vendor.rkpq.io.cache.enbale`命令进行临时禁用缓存功能，强制`fd-buffer`每帧都进行一次映射操作；
+    - 使用`setprop vendor.rkpq.io.cache.clear`命令进行临时手动缓存清除，强制`fd-buffer`重新映射；
+    - 使用`setprop persist.vendor.rkpq.io.cache.enbale`命令进行临时禁用缓存功能，强制`fd-buffer`每帧都进行一次映射操作；
     - 最佳方式是获取`fd-buffer`的**唯一标识符**，并将其填至`rkpq_imgbuf_info::nFdIndex`属性上，由SDK进行一致性检验；
     - 次佳方式是为同一批次的`fd-buffers`设置同一个`nFdIndex`值，在批次变化时将此值自增。
 
@@ -1477,9 +1568,9 @@ int rkpq_set_outputs(rkpq_context ctx, rkpq_imgbuf_info *pOutputBufs, int num);
 ## 4. 快速部署和集成
 ### 4.1. 集成调用示例
 随SDK提供的几个详细的调用示例如下：
-- 通用SWPQ处理流程调用示例：[rkpq_demo_common_pipeline.cpp](demo/rkpq_demo_common_pipeline.cpp)
-- `MIX-SSMR`模块使用调用示例：[rkpq_demo_mssr.cpp](demo/rkpq_demo_mssr.cpp)
-- 其他多个应用场景的调用示例：[rkpq_demo.cpp](demo/rkpq_demo.cpp)
+- 通用SWPQ处理流程调用示例：[rkpq_demo_common_pipeline.cpp](../demo/rkpq_demo_common_pipeline.cpp)
+- `MIX-SSMR`模块使用调用示例：[rkpq_demo_mssr.cpp](../demo/rkpq_demo_mssr.cpp)
+- 其他多个应用场景的调用示例：[rkpq_demo.cpp](../demo/rkpq_demo.cpp)
 
 ### 4.2 仿真程序使用
 使用可执行程序进行仿真前先使用`update_32bit.bat`或`update_64bit.bat`脚本先将可执行程序`rk_swpq_exe`与库文件`librkswpq.so`推送到`/vendor`对应目录下，且添加对应可执行权限。
@@ -1542,13 +1633,14 @@ int rkpq_set_outputs(rkpq_context ctx, rkpq_imgbuf_info *pOutputBufs, int num);
 | --------------- | ----------------- | ------- | -------- | ---- |
 | persist.vendor.rkpq.watermark | rkpq_watermark | [0, 1, 2] | 是否显示水印 | 开启后在零拷贝模式且没有虚地址传入的情况下，会做mmap，影响帧率 |
 | persist.vendor.rkpq.loglevel  | rkpq_loglevel | {[0, 4], 603892, 603893} | 控制log等级 | log等级超过INFO，会影响帧率 |
-| persist.vendor.rkpq.logstep   | rkpq_logstep | [0, 512] | 控制log显示频率 | -|
-| persist.vendor.rkpq.corenum   | rkpq_corenum | [0, 8] | Reserved | - |
-| test.vendor.rkpq.dump         | rkpq_dump | [0, 15] | 控制dump行为 | 见后文详解 |
-| test.vendor.rkpq.roi.enable   | rkpq_roi_enable | {0, 1} | 控制ROI行为开关 | 目前仅支持DCI/AI-SR/AI-DM/AI-DFC模块 |
-| persist.vendor.rkpq.all.prop_cover  | \ | {0, 1} | **强行覆盖设置标志** | 设1后由adb properties设定的参数会强制覆盖输入参数 |
+| persist.vendor.rkpq.logstep   | rkpq_logstep | [0, 512] | 控制log显示频率 | 目前仅少部分log受此属性影响，推荐通过设置log等级来控制日志输出量 |
+| vendor.rkpq.dump              | rkpq_dump | [0, 15] | 控制dump行为 | 见后文详解 |
+| persist.vendor.rkpq.init_flag | rkpq_init_flag | bitfield | 覆盖`rkpq_init_params::nInitFlag`的值 | 需要在`rkpq_init()`接口调用前才会生效 |
+| vendor.rkpq.roi.enable        | rkpq_roi_enable | {0, 1} | 控制ROI行为开关 | 目前仅支持DCI/ACM/AI-SR/AI-DM/AI-DFC模块 |
+| ~~persist.vendor.rkpq.all.prop_cover~~ | \ | {0, 1} | **强行覆盖设置标志** | 设1后由adb properties设定的参数会强制覆盖输入参数 |
 | persist.vendor.rkpq.io.cache.enable | rkpq_io_cache_enable | {0, 1} | 控制IO缓存行为 | 设0后强制关闭buffer缓存功能 |
-| test.vendor.rkpq.io.cache.clear     | rkpq_io_cache_clear  | {0, 1} | 控制IO缓存行为 | 每次设一个不同的数字，对缓存buffer做一次清除操作 |
+| persist.vendor.rkpq.io.cache.limit  | rkpq_io_cache_limit  | \      | 控制IO缓存上限 | 0表示默认值(32)，负数等效于关闭buffer缓存功能 |
+| vendor.rkpq.io.cache.clear          | rkpq_io_cache_clear  | {0, 1} | 控制IO缓存行为 | 每次设一个不同的数字，对缓存buffer做一次清除操作 |
 | persist.vendor.rkpq.io.alignUnitPixel | rkpq_io_alignUnitPixel | {0, 1} | 改变buffer对齐单位 | 设1后强制将对齐单位由Byte改为Pixel，在一些低版本的设备上可能需要 |
 
 注：
@@ -1562,15 +1654,17 @@ adb shell setprop persist.vendor.rkpq.dump <X>
 \<X\> 为二进制数`0bxxxx`， **从低到高位**分别表示 dump 所有输入, 所有输出, 单帧输入, 单帧输出。
 
 **有效数值列表**
-| X取值 | 二进制值 | dump行为解释        | 生效条件 |
-|:-----:|:-------:|:------------------- |:-------- |
-| 1     | 0b0001  | dump所有输入        | 在`rkpq_init()`调用前设置此属性才能生效 |
-| 2     | 0b0010  | dump所有输出        | 在`rkpq_init()`调用前设置此属性才能生效 |
-| 4     | 0b0100  | 按帧dump即时输入    | `/data/dump/rkpq.dump.src.cfg`内指定帧数后生效 |
-| 8     | 0b1000  | 按帧dump即时输出    | `/data/dump/rkpq.dump.dst.cfg`内指定帧数后生效 |
-| 3     | 0b0011  | dump所有输入+输出   | 同1    |
-| 12    | 0b1100  | 按帧dump即时输入+输出| 同4,8 |
-| 15    | 0b1111  | 开启全部dump功能    | 对应条件生效后其对应dump功能开启 |
+
+| X取值 | 十六进制值 | dump行为解释        | 生效条件 |
+|:-----:|:-------:|:--------------------|:---------|
+| 1     | 0x01    | dump所有输入        | 在`rkpq_init()`调用前设置此属性才能生效 (**deprecated**) |
+| 2     | 0x02    | dump所有输出        | 在`rkpq_init()`调用前设置此属性才能生效 (**deprecated**) |
+| 4     | 0x04    | 按帧dump即时输入    | `/data/dump/rkpq.dump.src.cfg`内指定帧数后生效 |
+| 8     | 0x08    | 按帧dump即时输出    | `/data/dump/rkpq.dump.dst.cfg`内指定帧数后生效 |
+| 16    | 0x10    | \                  | \ |
+| 32    | 0x20    | dump每个子模块的输出| 程序对`/data/dump/`有写入权限时生效 |
+| 12(4+8)| 0x0c   | 按帧dump即时输入+输出| 同4,8 |
+| 44(4+8+32)| 0x2c| 按帧dump即时输入+输出和每个子模块输出 | 对应条件生效后其对应dump功能开启 |
 
 **举例**
 ```shell
@@ -1617,6 +1711,7 @@ adb shell setprop persist.vendor.rkpq.dump 12   # 命令3
 OpenCL错误码请见其头文件定义`cl.h`，常见于`rkpq_init()`初始化调用错误中。
 这里总结了一些**OpenCL使用中常见的错误码**如下，以便自查错误原因并快速定位错误位置:
 
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
 <table>
   <tr align="left">
     <td> 错误类型 </td>
@@ -1759,7 +1854,7 @@ PQ程序错误码如下：
     - 水印显示错位，输出图像显示正常，有可能混淆了图像的宽和高两个参数。
 
 9. 显示画面每隔一段时间会发生闪烁，闪烁内容是之前的画面
-   - 执行命令`adb shell setprop test.vendor.rkpq.io.cache.clear 1`，查看是否解决问题，如果解决问题，则原因如下：
+   - 执行命令`adb shell setprop vendor.rkpq.io.cache.clear 1`，查看是否解决问题，如果解决问题，则原因如下：
       - fd-buffer存在释放和重新申请的操作，新申请的buffer的fd数值与之前释放的一致，导致算法内部缓存的buffer数据无法和实际buffer对应上，往往在输入信号源变化时发生；
-      - `setprop test.vendor.rkpq.io.cache.clear`命令清除了算法内的缓存，强制fd-buffer重新映射，故能解决该问题；
+      - `setprop vendor.rkpq.io.cache.clear`命令清除了算法内的缓存，强制fd-buffer重新映射，故能解决该问题；
       - 最佳方式是获取fd-buffer的**唯一标识符**，并将其填至`rkpq_imgbuf_info::nFdIndex`属性上。

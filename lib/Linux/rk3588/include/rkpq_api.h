@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Last update on 2024-04-09
+// Last update on 2024-09-23 for v0.11.0
 
 #pragma once
 #ifndef __RKPQ_API_H_
@@ -43,13 +43,13 @@ extern "C"
 /* flags definition for rkpq_init() */
 #define RKPQ_FLAG_DEFAULT               (0)
 #define RKPQ_FLAG_PERF_DETAIL           (1 << 0)    /* reserved */ /* enable logging out performance info */
-#define RKPQ_FLAG_HIGH_PERFORM          (1 << 1)    /* reserved */ /* fuse some PQ modules to achive high performence */
+#define RKPQ_FLAG_HIGH_PERFORM          (1 << 1)    /* enlarge CPU utitlization to achive high performence */
 #define RKPQ_FLAG_HIGH_PRECISION        (1 << 2)    /* reserved */ /* enlarge bit width to achive high precision */
 #define RKPQ_FLAG_ASYNC_MODE            (1 << 3)    /* flag for async processing */
 #define RKPQ_FLAG_FIX_RES_IMG_IO        (1 << 4)    /* reserved */ /* fixed resolution image input/output, better performance */
-#define RKPQ_FLAG_CIRCULAR_BUF_IN       (1 << 5)    /* reserved */ /* circular input buffer with same size & format, better performance */
-#define RKPQ_FLAG_CIRCULAR_BUF_OUT      (1 << 6)    /* reserved */ /* circular output buffer with same size & format, better performance */
-#define RKPQ_FLAG_CALC_MEAN_LUMA        (1 << 3)    /* deprecated */
+#define RKPQ_FLAG_CIRCULAR_BUF_IN       (1 << 5)    /* circular input  buffer with same size & format, better performance */
+#define RKPQ_FLAG_CIRCULAR_BUF_OUT      (1 << 6)    /* circular output buffer with same size & format, better performance */
+#define RKPQ_FLAG_CALC_MEAN_LUMA        (1 << 7)    /* calculate mean luminance for output image */
 #define RKPQ_FLAG_CVT_RANGE_ONLY        (1 << 4)    /* deprecated */
 
 /* const numbers definition */
@@ -76,13 +76,14 @@ extern "C"
 
 /* forward declaration */
 typedef void * rkpq_context;
-struct _rkpq_cvt_cfg;
+struct _rkpq_cvt_cfg; /* reserved */
 struct _rkpq_csc_cfg;
 struct _rkpq_dci_cfg;
 struct _rkpq_acm_cfg;
 struct _rkpq_zme_cfg;
 struct _rkpq_shp_cfg;
-struct _rkpq_mlc_cfg;
+struct _rkpq_mlc_cfg; /* reserved */
+struct _rkpq_cgc_cfg;
 struct _rkpq_sr_cfg;
 struct _rkpq_sd_cfg;
 struct _rkpq_dbmsr_cfg;
@@ -90,9 +91,13 @@ struct _rkpq_dm_cfg;
 struct _rkpq_dfc_cfg;
 struct _rkpq_de_cfg;
 struct _rkpq_dd_cfg;
+struct _rkpq_dhw_cfg;
+struct _rkpq_dmr_cfg;
 struct _rkpq_shp_acm_cfg;
+struct _rkpq_dci_acm_cfg;
 struct _rkpq_fe_cfg;
 struct _rkpq_mssr_cfg;
+
 
 /* the RKPQ modules, use rkpq_query() to check if supported */
 typedef enum _rkpq_module
@@ -106,7 +111,9 @@ typedef enum _rkpq_module
     RKPQ_MODULE_ACM     = 4,        /* Auto Color Management */
     RKPQ_MODULE_ZME     = 5,        /* Zoom Manage Engine */
     RKPQ_MODULE_SHP     = 6,        /* Sharpen */
-    RKPQ_MODULE_MLC     = 7,        /* Mean Luminance Calculation */
+    RKPQ_MODULE_MLC     = 7,        /* reserved */ /* Mean Luminance Calculation */
+    RKPQ_MODULE_CGC     = 8,        /* Color Gamut Conversion */
+    RKPQ_MODULE_BLR     = 9,        /* Region Gauss Blur */
     RKPQ_MODULE_MAX,                /* please DO NOT use this item! */
 
     /* AI Modules, need RKNN support */
@@ -117,6 +124,8 @@ typedef enum _rkpq_module
     RKPQ_MODULE_AI_DFC  = 103,      /* AI DeFalseColor */
     RKPQ_MODULE_AI_DE   = 104,      /* AI Doc Enhance */
     RKPQ_MODULE_AI_DD   = 105,      /* AI Doc Detection */
+    RKPQ_MODULE_AI_DHW  = 106,      /* AI Doc DeHandWriting */
+    RKPQ_MODULE_AI_DMR  = 107,      /* AI Demoire */
     RKPQ_MODULE_AI_MAX,             /* please DO NOT use this item! */
 
     /* Mixture Modules, better performance for a specific scene */
@@ -127,6 +136,7 @@ typedef enum _rkpq_module
     RKPQ_MIXTURE_FE3     = 1003,    /* Mixture modules: AI Face Enhance v3*/
     RKPQ_MIXTURE_FE4     = 1004,    /* Mixture modules: AI Face Enhance v4*/
     RKPQ_MIXTURE_MSSR    = 1005,    /* Mixture modules: MEMC + SD + SR + RD */
+    RKPQ_MIXTURE_DCI_ACM = 1006,    /* Mixture modules: DCI + ACM */
     RKPQ_MIXTURE_MAX                /* please DO NOT use this item! */
 } rkpq_module;
 
@@ -146,6 +156,7 @@ typedef enum _rkpq_query_cmd
     RKPQ_QUERY_IMG_ALIGNMENT_OCL,       /* get the OpenCL image alignment size in width, unit: pixel */
     RKPQ_QUERY_BUF_ALIGNMENT_OCL,       /* get the OpenCL sub-buffer alignment size, unit: byte */
     RKPQ_QUERY_RKNN_SUPPORT,            /* get the RKNN supported flag for AIPQ */
+    RKPQ_QUERY_MEAN_LUMA_OUTPUT,        /* get the mean luma value of the output image (need RKPQ_FLAG_CALC_MEAN_LUMA) */
     // RKPQ_QUERY_LAST_ERRORS,             /* get the last error messages */
     RKPQ_QUERY_MAX,                     /* the max query command value, please DO NOT use this item! */
 } rkpq_query_cmd;
@@ -163,9 +174,9 @@ typedef enum _rkpq_image_format
     RKPQ_IMG_FMT_NV24    = 0,   /* DRM_FORMAT_NV24,   YUV444SP, 24bpp(8|8*2)   */
     RKPQ_IMG_FMT_NV16    = 1,   /* DRM_FORMAT_NV16,   YUV422SP, 16bpp(8|8*2/2) */
     RKPQ_IMG_FMT_NV12    = 2,   /* DRM_FORMAT_NV12,   YUV420SP, 12bpp(8|8*2/4) */
-    RKPQ_IMG_FMT_NV30    = 3,   /* DRM_FORMAT_NV30,   YUV444SP, 30bpp(10|10*2),   10bit packed */ /* reserved */
-    RKPQ_IMG_FMT_NV20    = 4,   /* DRM_FORMAT_NV20,   YUV422SP, 20bpp(10|10*2/2), 10bit packed */ /* reserved */
-    RKPQ_IMG_FMT_NV15    = 5,   /* DRM_FORMAT_NV15,   YUV420SP, 15bpp(10|10*2/4), 10bit packed */ /* reserved */
+    RKPQ_IMG_FMT_NV30    = 3,   /* DRM_FORMAT_NV30,   YUV444SP, 30bpp(10|10*2),   10bit packed */
+    RKPQ_IMG_FMT_NV20    = 4,   /* DRM_FORMAT_NV20,   YUV422SP, 20bpp(10|10*2/2), 10bit packed */
+    RKPQ_IMG_FMT_NV15    = 5,   /* DRM_FORMAT_NV15,   YUV420SP, 15bpp(10|10*2/4), 10bit packed */
     RKPQ_IMG_FMT_YU24    = 6,   /* DRM_FORMAT_YUV444, YUV444P,  24bpp(8|8|8)     */ /* reserved */
     RKPQ_IMG_FMT_YU16    = 7,   /* DRM_FORMAT_YUV422, YUV422P,  16bpp(8|8/2|8/2) */ /* reserved */
     RKPQ_IMG_FMT_YU12    = 8,   /* DRM_FORMAT_YUV420, YUV420P,  12bpp(8|8/4|8/4) */ /* reserved */
@@ -204,6 +215,61 @@ typedef enum _rkpq_color_space
     RKPQ_CLR_SPC_RGB_FULL,              /* RGB Full-range */
     RKPQ_CLR_SPC_MAX,                   /* the max color space value, please DO NOT use this item! */
 } rkpq_clr_spc;
+
+typedef enum _rkpq_color_gamut_conversion_mode
+{
+    RKPQ_CGC_MANUAL = 0, //use api config mat
+    RKPQ_CGC_BT2020_TO_BT709,
+    RKPQ_CGC_BT2020_TO_P3,
+    RKPQ_CGC_P3_TO_BT709,
+    RKPQ_CGC_MAT_MAX,
+}rkpq_cgc_mat;
+
+typedef enum _rkpq_color_transfer_characteristics
+{
+    RKPQ_CGC_TRC_DEFAULT = 0, //gamma 2.2
+    RKPQ_CGC_TRC_BT1886,      //gamma 2.4
+    RKPQ_CGC_TRC_ST2084,      //ST2084(HDR10) for HDR
+    RKPQ_CGC_TRC_MAX,
+}rkpq_cgc_trc;
+
+typedef enum _rkpq_mssr_initflag
+{
+    RKPQ_MSSR_INIT_FLAG_ALL 	            = ( 0x0),//  0: All
+    RKPQ_MSSR_INIT_FLAG_MSSR                = (1<<0),//  1: MSSR
+    RKPQ_MSSR_INIT_FLAG_SR                  = (1<<1),//  2: SR
+    RKPQ_MSSR_INIT_FLAG_SR2                 = (1<<2),//  4: SR2
+    RKPQ_MSSR_INIT_FLAG_MSSR2               = (1<<3),//  8: MSSR2
+    RKPQ_MSSR_INIT_FLAG_FESR                = (1<<4),// 16: FaceEnhanceSR
+    RKPQ_MSSR_INIT_FLAG_FESRMEMC            = (1<<5),// 32: FaceEnhanceSRMEMC
+    RKPQ_MSSR_INIT_FLAG_EBPPKSR             = (1<<6),// 64: EbookSR
+    // typical customized InitFlags
+    RKPQ_MSSR_INIT_FLAGS_OUT1080P           = ( 3),// MSSR | SR = 1 | 2 = 3
+    RKPQ_MSSR_INIT_FLAGS_OUT4K              = ( 4),// SR2 = 4
+    RKPQ_MSSR_INIT_FLAGS_FESR               = (16),// FaceEnhanceSR = 16
+    RKPQ_MSSR_INIT_FLAGS_OUT1080P_FESR      = (19),// MSSR | SR | FaceEnhanceSR = 1 | 2 | 16 = 19
+    // MAX
+    RKPQ_MSSR_INIT_FLAGS_MAX                = ((1<<7)-1) // 127
+}rkpq_mssr_initflag;
+
+typedef enum _rkpq_mssr_procflag
+{
+    RKPQ_MSSR_PROC_FLAG_DEFAULT 	        = ( 0x0),//  0: Default = RKPQ_MSSR_PROC_FLAGS_SD_DC_SR_MEMC = 15
+    RKPQ_MSSR_PROC_FLAG_SD                  = (1<<0),//  1: SD
+    RKPQ_MSSR_PROC_FLAG_DC                  = (1<<1),//  2: DC
+    RKPQ_MSSR_PROC_FLAG_SR                  = (1<<2),//  4: SR
+    RKPQ_MSSR_PROC_FLAG_MEMC                = (1<<3),//  8: MEMC
+    RKPQ_MSSR_PROC_FLAG_FE                  = (1<<4),// 16: FE
+    // typical customized ProcFlags
+    RKPQ_MSSR_PROC_FLAGS_SD_SR              = (RKPQ_MSSR_PROC_FLAG_SD | RKPQ_MSSR_PROC_FLAG_SR)         ,// SD | SR             = 1 | 4 = 5
+    RKPQ_MSSR_PROC_FLAGS_SD_DC              = (RKPQ_MSSR_PROC_FLAG_SD | RKPQ_MSSR_PROC_FLAG_DC)         ,// SD | DC             = 1 | 2 = 3
+    RKPQ_MSSR_PROC_FLAGS_SD_DC_MEMC         = (RKPQ_MSSR_PROC_FLAGS_SD_DC | RKPQ_MSSR_PROC_FLAG_MEMC)   ,// SD | DC | MEMC      = 3 | 8 = 11
+    RKPQ_MSSR_PROC_FLAGS_SD_DC_SR           = (RKPQ_MSSR_PROC_FLAGS_SD_DC | RKPQ_MSSR_PROC_FLAG_SR)     ,// SD | DC | SR        = 3 | 4 = 7
+    RKPQ_MSSR_PROC_FLAGS_SD_DC_SR_MEMC      = (RKPQ_MSSR_PROC_FLAGS_SD_DC_SR | RKPQ_MSSR_PROC_FLAG_MEMC),// SD | DC | SR | MEMC = 7 | 8 = 15
+    RKPQ_MSSR_PROC_FLAGS_FE_SR              = (RKPQ_MSSR_PROC_FLAG_FE | RKPQ_MSSR_PROC_FLAG_SR)         ,// FE | SR             =16 | 4 = 20
+    // MAX
+    RKPQ_MSSR_PROC_FLAGS_MAX                = ((1<<5)-1) // 31
+}rkpq_mssr_procflag;
 
 /* the information for RKPQ_QUERY_SDK_VERSION */
 typedef struct _rkpq_version_info
@@ -260,7 +326,7 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_imgbuf_info
     size_t      nFrameSize;                         /* [o] full frame size, unit: byte */
 
     /* buffer info */
-    uint8_t    *aPlaneAddrs[RKPQ_MAX_PLANE_NUM];    /* [i] virtual address of each plane, could be NULL if nFdValue set */
+    uint8_t    *aPlaneAddrs[RKPQ_MAX_PLANE_NUM];    /* [i/o] virtual address of each plane, could be NULL if nFdValue set ONLY IF the buffer has not been mapped to user space! */
     int32_t     nFdValue;                           /* [i] file descriptor, used to import device buffer */
     uint32_t    nFdIndex;                           /* [i] unique identifier of the device buffer, like frame buffer id */
     size_t      nBufferSize;                        /* [i] it should be >= nFrameSize! unit: byte */
@@ -287,19 +353,34 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_roi
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_init_params
 {
     /* Initialization flag, control the initialization behavior of a rkpq_context */
-    uint32_t    nInitFlag;          /* see RKPQ_FLAG_XXX */
+    uint32_t    nInitFlag;          /* [i] see RKPQ_FLAG_XXX */
 
     /* Extension flag, set to 0 if no extension loaded */
-    uint32_t    nExtenFlag;         /* reserved */
+    uint32_t    nExtenFlag;         /* [i] reserved */
 
     /**
      * set the rkpq_module pipeline, such as:
-     * { CVT(or CSC) [-> ZME] -> CVT(or CSC) ... }
+     * { CSC -> ZME -> CSC ... }
      * { CSC -> DCI -> ACM [-> ZME(or SR)] -> SHP ... }
      * { CSC -> DBMSR -> SHP ... }
     */
     uint32_t    nModNumInPipe;                           /* [i] number of modules in the pipeline */
     uint32_t    aModPipeOrder[RKPQ_MAX_PIPE_MODULE_NUM]; /* [i] order of the modules (see rkpq_module) in the pipeline */
+
+    uint32_t    bLazyInit;                               /* [i] lazy init flag: if set to 1, the modules in the pipeline will not be initialized until the first process;
+                                                            if set to 0, all the modules in the pipeline will be initialized in rkpq_init() */
+
+    /**
+     * to reduce the memory consumption & time cost of initialization, use setup flags to control the allocation of OpenCL & RKNN resouce.
+     * if you want to use the default setting, just set this flags to 0.
+     * supported module & setup flags:
+     *  - RKPQ_MODULE_CSC,   range: [0, 15], bitfield (0-ALL, 1-R2Y, 2-Y2R, 4-R2R, 8-Y2Y)
+     *  - RKPQ_MIXTURE_MSSR, range: [0, 127], bitfield
+     */
+    uint32_t    aModSetupFlags[RKPQ_MAX_PIPE_MODULE_NUM];/* [i] setup flag of the modules */
+
+    int32_t     nMaxIoBufCacheNum;                       /* [i] the max io-buffer cache number, range:[(0), 256] (=0 means default value(32), <0 means no cache) */
+
     uint32_t    aReservedData[1];                        /* reserved, for future use */
 } rkpq_init_params;
 
@@ -309,7 +390,7 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_proc_params
     // Image & buffer info
     rkpq_imgbuf_info    stSrcImgInfo;                   /* [i] src image buffer info */
     rkpq_imgbuf_info    stDstImgInfo;                   /* [i] dst image buffer info */
-    rkpq_roi            stImgRoi;                       /* [i] src image ROI, use 'RKPQ_QUERY_MODULES_ROI_SUPPORT' to query the ROI-supported modules */
+    rkpq_roi            stImgRoi;                       /* [i] dst image ROI, use 'RKPQ_QUERY_MODULES_ROI_SUPPORT' to query the ROI-supported modules */
 
     // Extension config
     uint32_t            nExtenType;                     /* [i] set equal to rkpq_init_params::nExtenFlag for now */
@@ -317,8 +398,9 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_proc_params
 
     // Parameter info
     uint32_t            nFrameIdx;                      /* [i] frame index in the video sequence */
-    uint32_t            bEnablePropControl;             /* [i] enable real-time control with env(like adb properties). PQTool will not work if set to 1 */
-    uint32_t            bEnableSliderControl;           /* [i] enable real-time control with PQTool */
+    uint32_t            bEnablePropControl;             /* [i] enable real-time controlling with environment variables(like adb properties). PQTool will not work if set to 1 */
+    uint32_t            bEnableSliderControl;           /* [i] enable real-time controlling with PQTool */
+    uint32_t            bEnableIncreaseCpuUtl;          /* [i] enable increasing CPU utilization, ONLY work with RKPQ_FLAG_HIGH_PERFORM */
 
     uint32_t            aReservedData[1];               /* reserved, for future use */
 } rkpq_proc_params;
@@ -473,15 +555,55 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_shp_cfg
     uint32_t    aReservedData[1];                           // reserved for future use
 } rkpq_shp_cfg;
 
-/* MLC configuration */
+/* MLC configuration, reserved */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_mlc_cfg
 {
     uint32_t    bEnableMLC;         /* [i] {0, (1)} */
     uint32_t    nBlockNumX;         /* [i] [(1), 16] */
     uint32_t    nBlockNumY;         /* [i] [(1), 16] */
-
+    uint32_t    nMeanLuma;          /* [o] output mean luma value */
     uint32_t    aReservedData[1];   /* reserved for future use */
 } rkpq_mlc_cfg;
+
+/* CGC configuration */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_cgc_cfg
+{
+//    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+//    rkpq_pipe_res_info  stPipeResInfo;  /* resolution change info, must set manually */
+
+    uint32_t    bEnableCGC;         /* [i] {0, (1)} */
+    uint32_t    nCgcTrcMode;        /* [i] refer to "rkpq_cgc_trc" */
+    uint32_t    nCgcMatMode;        /* [i] refer to "rkpq_cgc_mat" */
+    int32_t     nCgcMatCoef[9];     /* [i] matrix coefficients for color gamut conversion, fixed point in 10bit(1024) */
+
+    // color temperature calibration
+    uint32_t    nRgain;             /* [i] 8bit fixed point */
+    uint32_t    nGgain;             /* [i] 8bit fixed point */
+    uint32_t    nBgain;             /* [i] 8bit fixed point */
+
+    uint32_t    bEnablePaperMode;   /* [i] {0, (1)} */
+    uint32_t    nTextureStrength;   /* [i] texture strength, range: [0, 15] */
+
+    uint32_t    aReservedData[1];   /* reserved for future use */
+} rkpq_cgc_cfg;
+
+/* Region Gauss Blur */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_blr_cfg
+{
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+
+    uint32_t    bEnableBLR;         // [i] {0, (1)}
+    uint32_t    nCenterX;           // [i] blur region center point-x [0, (960), 1920)
+    uint32_t    nCenterY;           // [i] blur region center point-y [0, (540), 1080)
+    uint32_t    nRadius;            // [i] blur region radius         [0, (100), Inf)
+    uint32_t    nGaussKerWid;       // [i] gauss ker width            {1, (3), 5, 7, ..., 63}
+    uint32_t    nGaussKerHgt;       // [i] gauss ker herght           {1, (3), 5, 7, ..., 63}
+    float       fGaussKerSigma;     // [i] gauss ker sigma            [0, (0.5), Inf)
+    uint32_t    nBlurChannel;       // [i] blur channel               [0=None | 1=R | 2=G | 4=B]
+    uint32_t    nBlurMode;          // [i] blur mode                  {0=InnerBlur, 1=OuterBlur, 2=InnerBlack, 3=OuterBlack}
+
+    uint32_t    aReservedData[1];   // reserved for future use
+} rkpq_blr_cfg;
 
 /* AI SR configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_sr_cfg
@@ -516,6 +638,8 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_sd_cfg
 {
     uint32_t    bEnableSD;          // [0, (1)]
     uint32_t    bEnableAISD;        // [0, (1)]
+
+    float       aSDResult[128];     // output: [NumScene, SceneDataFrame#0, SceneDataFrame#1, ...]
 
     uint32_t    aReservedData[1];   // reserved for future use
 } rkpq_sd_cfg;
@@ -565,16 +689,33 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_de_cfg
     uint32_t    aReservedData[1];       // reserved for future use
 } rkpq_de_cfg;
 
-/* AI DocEnhance configuration */
+/* AI DocDetection configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_dd_cfg
 {
     uint32_t    bEnableDD;              // [i] range: [0, (1)]
-    uint32_t    bDrawLines;             // [i] draw boundary lines
+    uint32_t    bDrawLines;             // [i] draw boundary lines, ONLY valid when RGB formats input
     int32_t     aRectPointsX[4];        // [o] LeftTop, RightTop, LeftBottom, RightBottom
     int32_t     aRectPointsY[4];        // [o] LeftTop, RightTop, LeftBottom, RightBottom
+    uint32_t    bResultOK;              // [o] detection result is valid or not
 
     uint32_t    aReservedData[1];       // reserved for future use
 } rkpq_dd_cfg;
+
+/* AI DeHandWriting configuration */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_dhw_cfg
+{
+    uint32_t    bEnableDHW;             // [i] range: [0, (1)]
+    uint32_t    nDocEnhanceLevel;       // [i] range: [0, (2)]
+
+    uint32_t    aReservedData[1];       // reserved for future use
+} rkpq_dhw_cfg;
+
+/* AI Demoire configuration */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_dmr_cfg
+{
+    uint32_t    bEnableDMR;             // [0, (1)]
+    uint32_t    aReservedData[1];       // reserved for future use
+} rkpq_dmr_cfg;
 
 /* Mixture SHP + ACM configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_shp_acm_cfg
@@ -638,14 +779,32 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_mssr_cfg
     uint32_t        aDstIdx[16];        /* [i] next output buffer indexs */
     uint32_t        nDstNum;            /* [i] next output number */
     uint32_t        nDstNumPrev;        /* [o] current output number */
-    uint8_t        *pHist;              /* [i] pointer of histogram */
+    uint8_t        *pHist;              /* [i] pointer of src histogram */
 
-    rkpq_sr_cfg    *pSRConfig;
-    rkpq_sd_cfg    *pSDConfig;
+    rkpq_sr_cfg    *pSRConfig;          /* [o] no need to asign this pointer */
+    rkpq_sd_cfg    *pSDConfig;          /* [o] no need to asign this pointer */
+
+    uint32_t        nSchemeIdx;         /* [i] ME scheme idx  {(0), 1, 2} */
+    uint32_t        nMEMCStrength;      /* [i] MEMC strength  [0, (100)] */
+    uint32_t        bEnableFE;          /* [i] enable FaceEnhance {0, (1)} */
+
+    int32_t         aDstHistIdx[16];    /* [o] idx of dst histogram  {0, 1, 2, ...} */
+
+    uint32_t        nProcFlag;          /* [i] range: [0, 127], bitfield, see rkpq_mssr_procflag*/
 
     uint32_t        aReservedData[1];   /* reserved for future use */
 } rkpq_mssr_cfg;
 
+/* Mixture DCI + ACM configuration */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_dci_acm_cfg
+{
+    uint32_t        bEnableDCIACM;      /* [i] {0, (1)} */
+
+    rkpq_dci_cfg   *pDCIConfig;        /* [o] no need to asign this pointer */
+    rkpq_acm_cfg   *pACMConfig;        /* [o] no need to asign this pointer */
+
+    uint32_t        aReservedData[1];   /* reserved for future use */
+} rkpq_dci_acm_cfg;
 
 
 /**
@@ -702,6 +861,7 @@ int rkpq_deinit(rkpq_context ctx);
  *  | RKPQ_QUERY_IMG_ALIGNMENT_OCL      |       YES         | uint32_t          |
  *  | RKPQ_QUERY_BUF_ALIGNMENT_OCL      |       YES         | uint32_t          |
  *  | RKPQ_QUERY_RKNN_SUPPORT           |       YES         | uint32_t          |
+ *  | RKPQ_QUERY_MEAN_LUMA_OUTPUT       |       YES         | int32_t           |
  *  | RKPQ_QUERY_LAST_ERRORS            |       YES         | reserved          |
  */
 int rkpq_query(rkpq_context ctx, rkpq_query_cmd cmd, size_t size, void *info);
@@ -719,13 +879,24 @@ int rkpq_set_loglevel(rkpq_context ctx, int logLevel);
 /**
  * @Function: rkpq_set_cache_path()
  * @Descrptn: set the cache data path, for fast initilization, RKNN model etc.
+ *      Call this function before rkpq_init().
  * @Params:
  *      rkpq_context ctx - set to NULL before calling rkpq_init()
  *      const char *pPath - the folder path, ends with '/'
- *      int target - bitfield, 1 for Ocl caches, 2 for RKNN models, 4 for license path, 0 for all
+ *      int target - bitfield, 1 for Ocl caches, 2 for RKNN models, 4 for license path, 8 for librga path, 0 for all
  * @Return: error code, 0 indicates everything is ok.
  */
 int rkpq_set_cache_path(rkpq_context ctx, const char *pPath, int target);
+
+/**
+ * @Function: rkpq_clear_caches()
+ * @Descrptn: clear the old IO buffer caches, used when the input/output buffers are changed.
+ * @Params:
+ *      rkpq_context ctx - the pq handle of context
+ *      int flag - bitfield, set to 1 for now
+ * @Return: error code, 0 indicates everything is ok.
+ */
+int rkpq_clear_caches(rkpq_context ctx, int flag);
 
 /**
  * @Function: rkpq_set_default_cfg()
@@ -768,7 +939,7 @@ int rkpq_set_outputs(rkpq_context ctx, rkpq_imgbuf_info *pOutputBufs, int num);
  *      const char *pPlatformName - the target platform name, case insensitive
  * @Return: error code, 0 indicates everything is ok.
 */
-int rkpq_set_target_platform(const char *pPlatformName);
+int rkpq_set_target_platform(const char *pPlatformName); /* Deprecated */
 
 
 #ifdef __cplusplus

@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Last update 2024-06-13 for librkswpq.so v0.3.0
+// Last update 2024-09-02 for librkswpq.so v0.7.0
 
 #include "rkpq_api.h"
 #include <stdio.h>
@@ -60,14 +60,14 @@ void optionalQueryContextInfo(rkpq_context ctx)
  *  2. 图像增强，通过DCI模块调整对比度，通过ACM模块调整色彩，通过SHP模块对图像进行锐化处理;
  *  3. 图像缩放，通过ZME模块实现任意倍率缩放;
  *  4. 以上功能全部开启，支持大部分图像转为YUV，再进行图像增强和缩放，最后再转至目标格式和色彩空间。
- * 本例的数据流: 1080P RGB => 4K NV16, 内部各模块的输入输出数据如下：
+ * 本例的数据流: 1080P RGB => 4K BGR, 内部各模块的输入输出数据如下：
  *  input  : [1920x1080 rgb888 (limited-range)] =CSC=> (需要设置格式变换信息`rkpq_pipe_fmt_info`)
  *  CSC out: [1920x1080 yuv444sp (full-range)]  =DCI=>
  *  DCI out: [1920x1080 yuv444sp (full-range)]  =ACM=>
  *  ACM out: [1920x1080 yuv444sp (full-range)]  =ZME=> (需要设置格式变换信息`rkpq_pipe_fmt_info`和分辨率变换信息`rkpq_pipe_res_info`)
- *  ZME out: [3840x2160 yuv422sp (full-range)]  =SHP=>
- *  SHP out: [3840x2160 yuv422sp (full-range)]  =CSC=> (需要设置格式变换信息`rkpq_pipe_fmt_info`)
- *  output : [3840x2160 yuv422sp (limited-range)]
+ *  ZME out: [3840x2160 yuv444sp (full-range)]  =SHP=>
+ *  SHP out: [3840x2160 yuv444sp (full-range)]  =CSC=> (需要设置格式变换信息`rkpq_pipe_fmt_info`)
+ *  output : [3840x2160 bgr888   (full-range)]         (如果是YUV4xxSP full-range输出，可以不需要最后一级CSC模块)
  */
 int main(int argc, const char *argv[])
 {
@@ -92,6 +92,7 @@ int main(int argc, const char *argv[])
 
     /* 步骤1: 填写初始化参数'rkpq_init_params'然后通过接口`rkpq_init()`初始化`rkpq_context`上下文实例 */
     initParams.nInitFlag = RKPQ_FLAG_DEFAULT;
+    initParams.nInitFlag |= RKPQ_FLAG_CIRCULAR_BUF_IN | RKPQ_FLAG_CIRCULAR_BUF_OUT; /* 如果输入/输出是环形缓冲区，请显示指定此flag，可节省buffer映射时间 */
     int order = 0;
     initParams.aModPipeOrder[order++] = RKPQ_MODULE_CSC;    /* order 0 */
     initParams.aModPipeOrder[order++] = RKPQ_MODULE_DCI;    /* order 1 */
@@ -123,8 +124,8 @@ int main(int argc, const char *argv[])
     stSrcImgInfo.nAlignment = 64;                           // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
     stSrcImgInfo.aWidStrides[0] = 5760;                     // in this case, no padding in the width dimension
     stSrcImgInfo.aHgtStrides[0] = 1088;                     // in this case, there are 8 lines padding after the first plane
-    stDstImgInfo.nColorSpace = RKPQ_CLR_SPC_YUV_709_FULL;   // see rkpq_clr_spc, full-range here
-    stDstImgInfo.nPixFmt = RKPQ_IMG_FMT_NV16;               // see rkpq_img_fmt, YUV420SP_NV16 here
+    stDstImgInfo.nColorSpace = RKPQ_CLR_SPC_RGB_FULL;       // see rkpq_clr_spc, full-range here
+    stDstImgInfo.nPixFmt = RKPQ_IMG_FMT_BGR;                // see rkpq_img_fmt, BGR888 here
     stDstImgInfo.nPixWid = 3840;                            // set the input image width
     stDstImgInfo.nPixHgt = 2160;                            // set the input image height
     stDstImgInfo.nEleDepth = 8;                             // set the first component(Y or R) depth [bit]
@@ -211,19 +212,27 @@ int main(int argc, const char *argv[])
     pZmeConfig->stPipeFmtInfo.nDstClrSpc = pZmeConfig->stPipeFmtInfo.nSrcClrSpc;
     pZmeConfig->stPipeFmtInfo.nDstPixFmt = pZmeConfig->stPipeFmtInfo.nSrcPixFmt;
     //!NOTE: ZME的输出在YUV格式的情况下可以直接在YUV4xxsp(NV24/NV16/NV12)之间转换，这里也可以不要此步骤，直接交给最后一级CSC完成转换
-    // if (stDstImgInfo.nPixFmt <= RKPQ_IMG_FMT_NV12) {
-    //     pZmeConfig->stPipeFmtInfo.nDstPixFmt = stDstImgInfo.nPixFmt;
-    // }
+    if (stDstImgInfo.nPixFmt <= RKPQ_IMG_FMT_NV12) {
+        pZmeConfig->stPipeFmtInfo.nDstPixFmt = stDstImgInfo.nPixFmt;
+    }
     //!NOTE: ZME模块前/后面均没有其他模块会改变图像的分辨率，故这里的输入/输出分辨率一定是src和dst的分辨率
     pZmeConfig->stPipeResInfo.nSrcImgWid = stSrcImgInfo.nPixWid;
     pZmeConfig->stPipeResInfo.nSrcImgHgt = stSrcImgInfo.nPixHgt;
     pZmeConfig->stPipeResInfo.nDstImgWid = stDstImgInfo.nPixWid;
     pZmeConfig->stPipeResInfo.nDstImgHgt = stDstImgInfo.nPixHgt;
     //!NOTE: CSC1模块的输入格式是前一级ZME(SHP不改变输出格式)的输出格式和色彩空间, 输出格式和色彩空间一定和dst一致
-    pCscConfig1->stPipeFmtInfo.nSrcClrSpc = pZmeConfig->stPipeFmtInfo.nDstClrSpc;
-    pCscConfig1->stPipeFmtInfo.nSrcPixFmt = pZmeConfig->stPipeFmtInfo.nDstPixFmt;
-    pCscConfig1->stPipeFmtInfo.nDstClrSpc = stDstImgInfo.nColorSpace; // from full to limited
-    pCscConfig1->stPipeFmtInfo.nDstPixFmt = stDstImgInfo.nPixFmt; // from NV24 to NV12
+    if (stDstImgInfo.nPixFmt <= RKPQ_IMG_FMT_NV12 &&
+        (stDstImgInfo.nColorSpace == RKPQ_CLR_SPC_YUV_709_FULL || stDstImgInfo.nColorSpace == RKPQ_CLR_SPC_YUV_601_FULL))
+    {
+        pCscConfig1->bEnableCSC = 0; // 如果是YUV4xxSP full-range输出，可以不需要最后一级CSC模块
+    }
+    else
+    {
+        pCscConfig1->stPipeFmtInfo.nSrcClrSpc = pZmeConfig->stPipeFmtInfo.nDstClrSpc;
+        pCscConfig1->stPipeFmtInfo.nSrcPixFmt = pZmeConfig->stPipeFmtInfo.nDstPixFmt;
+        pCscConfig1->stPipeFmtInfo.nDstClrSpc = stDstImgInfo.nColorSpace; // from full to limited
+        pCscConfig1->stPipeFmtInfo.nDstPixFmt = stDstImgInfo.nPixFmt; // from NV24 to NV12
+    }
 
     /* 步骤4: 调用`rkpq_proc()`执行算法 */
     int frameIdx = 0;
