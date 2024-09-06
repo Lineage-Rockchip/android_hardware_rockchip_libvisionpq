@@ -100,6 +100,11 @@ ifeq ($(strip $(USE_LIBHWPQ)), true)
     LOCAL_CHECK_ELF_FILES := false
     LOCAL_VENDOR_MODULE := true
     LOCAL_MODULE_SUFFIX := .so
+
+    # copy vop base config
+    SOURCE_VOP_CONFIG_PATH := $(LOCAL_PATH)/config/$(TARGET_SOC_PLATFORM)/vop_base_config.json
+    TARGET_VOP_CONFIG_PATH := $(TARGET_OUT_VENDOR)/etc/vop_base_config.json
+    $(shell cp -f $(SOURCE_VOP_CONFIG_PATH) $(TARGET_VOP_CONFIG_PATH))
     include $(BUILD_PREBUILT)
 endif
 

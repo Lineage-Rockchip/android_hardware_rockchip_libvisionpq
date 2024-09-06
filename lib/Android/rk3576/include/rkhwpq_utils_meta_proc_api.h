@@ -18,6 +18,7 @@ typedef enum{
     RK_HWPQ_UTILS_META_PROC_PACK_PAYLOAD, 
     RK_HWPQ_UTILS_META_PROC_UNPACK_PAYLOAD, 
     RK_HWPQ_UTILS_META_PROC_GET_PAYLOAD_DATA, 
+    RK_HWPQ_UTILS_META_PROC_CHECK_HDR_META, 
     RK_HWPQ_UTILS_META_PROC_MAX, 
 } RK_HWPQ_UTILS_META_PROC_CMD;
 
@@ -63,12 +64,14 @@ enum MetaProcProcType {
     META_PROC_PARAM_TYPE_PAYLOAD, 
     META_PROC_PARAM_TYPE_QUERY, 
     META_PROC_PARAM_TYPE_META_ADDR, 
+    META_PROC_PARAM_TYPE_IS_HDRMETA, 
 };
 union MetaProcPorcConfig {
     RkHwpqMetaProcCommonCfg   common_cfg;
     RkHwpqMetaProcPayloadInfo curr_payload_info;
     RkHwpqMetaProcQueryInfo   query_ret_info;
-    void*                    meta_addr;
+    void*                     meta_addr;
+    unsigned int              is_hdrmeta;
 };
 typedef struct RkHwpqMetaProcCfg_t {
     enum MetaProcProcType ptype;

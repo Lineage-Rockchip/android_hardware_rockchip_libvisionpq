@@ -20,21 +20,13 @@ typedef enum{
 } RK_HWPQ_UTILS_AIPQ_MERGE_CMD;
 
 
-/* Hwpq aipq merge config structure */
-#define RK_HWPQ_AIPQ_MERGE_SCENE_TYPE_MAX 3
-#define RK_HWPQ_AIPQ_MERGE_SCENE_CONTENT_MAX 5
-typedef struct RkHwpqAisdInfo_t {
-    float sd_curr_type_scores[RK_HWPQ_AIPQ_MERGE_SCENE_TYPE_MAX]; 
-    float sd_curr_content_scores[RK_HWPQ_AIPQ_MERGE_SCENE_CONTENT_MAX]; 
-    int reserve0[4];
-} RkHwpqAisdInfo;
-
 typedef struct RkHwpqAipqMergeCfg_t {
-    const char* p_aipq_cfg_file; 
+    const char *p_aipq_cfg_file; 
     void* hwpq_cfg_addr; 
     int reserve0[4];
-    RkHwpqAisdInfo* p_aisd_info;
-    int reserve1[4];
+    unsigned char *p_pq_cfg_data;
+    unsigned int pq_cfg_bytes;
+    int reserve1[3];
 } RkHwpqAipqMergeCfg;
 
 
