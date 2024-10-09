@@ -80,16 +80,17 @@ int main(int argc, const char *argv[])
     initParams.nInitFlag = RKPQ_FLAG_DEFAULT;
     initParams.nInitFlag |= RKPQ_FLAG_ASYNC_MODE;       // 某些模块支持异步模式，请指明这个flag
     initParams.nInitFlag |= RKPQ_FLAG_CIRCULAR_BUF_IN | RKPQ_FLAG_CIRCULAR_BUF_OUT; /* 如果输入/输出是环形缓冲区，请显示指定此flag，可节省buffer映射时间 */
-    
+
     initParams.nModNumInPipe     = 1;                       // 这里pipeline中模块数量为1
     initParams.bLazyInit         = 0;
     initParams.aModPipeOrder[0]  = RKPQ_MIXTURE_MSSR;       // 这里pipeline中只包含`MSSR`这一个模块
     initParams.aModSetupFlags[0] = RKPQ_MSSR_INIT_FLAGS_OUT1080P; // 参考 rkpq_mssr_initflag
-    initParams.nMaxIoBufCacheNum = 64; // 
+    initParams.nMaxIoBufCacheNum = 64; //
     ret = rkpq_init(&context, &initParams);             // 注意这里参数是两个指针!
     if (ret)
     {
         printf("Failed to call rkpq_init() %d, Please check the API parameters!\n", ret);
+        ret = rkpq_deinit(context); // need to call rkpq_deinit to release the invalid context
         return ret;
     }
 
@@ -181,6 +182,13 @@ int main(int argc, const char *argv[])
     pConfig->aDstIdx[1] = 2; // 选择输出帧1的MC序号
     pConfig->nDstNum    = 2; // 每次输出帧数
     pConfig->nMEMCStrength = 100; // MEMC强度，范围0-100，越大越强
+#if 1 // for hdmi
+    pConfig->bEnableHDMI            = 1;
+    pConfig->pSRConfig->nSRStrength = 50;
+#else // for codec
+    pConfig->bEnableHDMI            = 0;
+    pConfig->pSRConfig->nSRStrength = 100;
+#endif
 
     /* 步骤4: 调用`rkpq_proc()`执行算法 */
     int frameIdx = 0;
@@ -250,7 +258,7 @@ int main(int argc, const char *argv[])
         memcpy(&pConfig->pSRConfig->stPipeResInfo, &pConfig->stPipeResInfo, sizeof(rkpq_pipe_res_info));
         pConfig->bEnableMEMC = 1;           // 这里关闭了 MEMC 子模块
         pConfig->pSDConfig->bEnableSD = 0;  // 这里开启了 SD 子模块
-        // 
+        //
         pConfig->nProcFlag = RKPQ_MSSR_PROC_FLAGS_SD_DC_SR_MEMC; // 参考 rkpq_mssr_procflag
 
         int inputFPS = 20;
@@ -287,7 +295,7 @@ int main(int argc, const char *argv[])
         }
         else if (inputFPS == 25 && outputFPS == 30) // 25->30
         {
-            if (kk%2==0)
+            if (kk%5==0)
             {
                 // 0 - 0.8
                 pConfig->nModelIdx = 1;
@@ -296,7 +304,7 @@ int main(int argc, const char *argv[])
                 pConfig->aDstIdx[1] = 4;
                 pConfig->nDstNum = 2;
             }
-            else if (kk%2==1)
+            else if (kk%5==1)
             {
                 // 1.6
                 pConfig->nModelIdx = 1;
@@ -304,7 +312,7 @@ int main(int argc, const char *argv[])
                 pConfig->aDstIdx[0] = 3;
                 pConfig->nDstNum = 1;
             }
-            else if (kk%2==2)
+            else if (kk%5==2)
             {
                 // 2.5
                 pConfig->nModelIdx = 0;
@@ -312,7 +320,7 @@ int main(int argc, const char *argv[])
                 pConfig->aDstIdx[0] = 2;
                 pConfig->nDstNum = 1;
             }
-            else if (kk%2==3)
+            else if (kk%5==3)
             {
                 // 3.4
                 pConfig->nModelIdx = 1;
@@ -320,13 +328,54 @@ int main(int argc, const char *argv[])
                 pConfig->aDstIdx[0] = 2;
                 pConfig->nDstNum = 1;
             }
-            else if (kk%2==4)
+            else if (kk%5==4)
             {
                 // 3.4
                 pConfig->nModelIdx = 1;
                 pConfig->nMemcScale = 5;
                 pConfig->aDstIdx[0] = 1;
                 pConfig->nDstNum = 1;
+            }
+        }
+        else if (inputFPS == 15 && outputFPS == 60) // 15->60
+        {
+            pConfig->nModelIdx = 0;
+            pConfig->nMemcScale = 4;
+            pConfig->aDstIdx[0] = 1;
+            pConfig->aDstIdx[1] = 2;
+            pConfig->aDstIdx[2] = 3;
+            pConfig->aDstIdx[3] = 4;
+            pConfig->nDstNum = 4;
+        }
+        else if (inputFPS == 20 && outputFPS == 60) // 20->60
+        {
+            pConfig->nModelIdx = 0;
+            pConfig->nMemcScale = 5;
+            pConfig->aDstIdx[0] = 0;
+            pConfig->aDstIdx[1] = 2;
+            pConfig->aDstIdx[2] = 3;
+            pConfig->nDstNum = 3;
+        }
+        else if (inputFPS == 24 && outputFPS == 60) // 24->60
+        {
+            if (kk%2==0)
+            {
+                // 0 - 0.4 - 0.8
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 0;
+                pConfig->aDstIdx[1] = 2;
+                pConfig->aDstIdx[2] = 4;
+                pConfig->nDstNum = 3;
+            }
+            else if (kk%2==1)
+            {
+                // 1.2 - 1.6
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 1;
+                pConfig->aDstIdx[1] = 3;
+                pConfig->nDstNum = 2;
             }
         }
         else if (inputFPS == 25 && outputFPS == 60) // 25->60
@@ -378,6 +427,36 @@ int main(int argc, const char *argv[])
                 pConfig->aDstIdx[1] = 3;
                 pConfig->nDstNum = 2;
             }
+        }
+        else if (inputFPS == 30 && outputFPS == 60) // 30->60
+        {
+            pConfig->nModelIdx = 0;
+            pConfig->nMemcScale = 4;
+            pConfig->aDstIdx[0] = 0;
+            pConfig->aDstIdx[1] = 2;
+            pConfig->nDstNum = 2;
+        }
+        else if (inputFPS == 50 && outputFPS == 60) // 50->60
+        {
+            if (kk % 5 == 4)
+            {
+                pConfig->bEnableMEMC = 0;
+                pConfig->aDstIdx[0]  = 0;
+                pConfig->aDstIdx[1]  = 1;
+                pConfig->nDstNum     = 2;
+            }
+            else
+            {
+                pConfig->bEnableMEMC = 0;
+                pConfig->aDstIdx[0]  = 0;
+                pConfig->nDstNum     = 1;
+            }
+        }
+        else if (inputFPS == 60 && outputFPS == 60) // 60->60
+        {
+            pConfig->bEnableMEMC = 0;
+            pConfig->aDstIdx[0]  = 0;
+            pConfig->nDstNum     = 1;
         }
 
         /* 步骤4.3: 设置输入和输出 */

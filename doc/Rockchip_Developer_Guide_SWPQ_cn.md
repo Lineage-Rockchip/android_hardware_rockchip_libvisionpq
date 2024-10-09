@@ -116,16 +116,13 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
   - 支持调整 coring / gain / limit 等相关配置
 <br>
 
-- **MLC**
-  - TODO (@wfy)
-<br>
-
 - **CGC**
-  - TODO (@lqq)
+  - 色域转换功能和类纸模式
+  - 支持配置3x3色域转换矩阵
+  - 支持配置色温校正的Rgain 和 Bgain
+  - 支持类纸纹理效果，纹理样式和纹理强度可配，可与色域转换功能同时开启
 <br>
 
-- **BLR**
-  - TODO (@ysf)
 <br>
 
 - **AI超分辨率模块(AI Super Resolution, AI-SR)**
@@ -213,7 +210,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | AIDD | TBD | TBD | TBD | TBD | TBD | TBD |
 | AIDHW | TBD | TBD | TBD | TBD | TBD | TBD |
 | MixFE | TBD | TBD |   TBD   | ~430 |   TBD    | 540P  NV12 => 4K NV12; 异步模式，延迟1帧 |
-| MixMSSR | TBD | TBD | 5+6=11 <br> 6+6=12 <br> 9+6=15 <br> 9+12=21 | 21 <br> 21 <br> 23 <br> 35 | 32 <br> 43 <br> 38 <br> 56 | 3x540P NV24 => 2x1080P NV12;异步延迟2帧 <br> 3x720P Y+C => 2x1080P NV12;异步延迟2帧 <br> 3x1080P NV12 => 2x1080P NV12;异步延迟2帧 <br> 3x1080P NV12 => 1x4K NV12;异步延迟2帧 |
+| MixMSSR | TBD | TBD | 5+6=11 <br><br> 6+6=12 <br><br> 9+6=15 <br><br> 9+12=21 <br><br> 36+24=60 <br><br> 71+47=118 <br><br> 71+47=118 | 21 <br><br> 21 <br><br> 23 <br><br> 35 <br><br> 18 <br><br> 18 <br><br> 18 | 32 <br><br> 43 <br><br> 38 <br><br> 56 <br><br> 78 <br><br> 136 <br><br> 136 | 3x540P NV24 => 2x1080P NV12;异步延迟2帧 <br> 3x720P Y+C => 2x1080P NV12;异步延迟2帧 <br> 3x1080P NV12 => 2x1080P NV12;异步延迟2帧 <br> 3x1080P NV12 => 1x4K NV12;异步延迟2帧 <br> 3x4K NV12 => 2x4K NV12;异步延迟2帧  <br> 3x4K NV24 => 2x4K NV24;异步延迟2帧 <br> 3x4K RGB => 2x4K RGB;异步延迟2帧  |
 
 注：
 1. 算力（以60pfs计）和带宽数据根据右侧备注中输入输出图像和格式计算得到
@@ -227,6 +224,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | DCI  | 是 | 输入: YUV4xxSP_8bit, YUV444I_VU24, Y8 <br> 输出: YUV4xxSP_8bit, YUV444I_VU24, Y8 | 输出格式和输入相同，只处理Y通道 |
 | ACM  | 否 | 输入: YUV4xxSP_8bit, YUV444I_VU24 <br> 输出: YUV4xxSP_8bit, YUV444I_VU24 | 输出格式和输入相同 |
 | SHP  | 否 | 输入: YUV4xxSP_8bit, YUV444I_VU24, Y8 <br> 输出: YUV4xxSP_8bit, YUV444I_VU24, Y8 | 输出格式和输入相同，只处理Y通道，full-range |
+| CGC  | 否 | 输入: RGB(A)888(8) <br> 输出:  RGB(A)888(8) | 一般情况下输出格式或色彩空间和输入相同 |
 | ZME  | 否 | 输入: YUV4xxSP_8bit, YUV444I_VU24, API中所有RGB系列, Y8, UV8 <br> 输出: YUV4xxSP_8bit, YUV444I_VU24, API中所有RGB系列, Y8, UV8 | 一般不改变输入格式，注5 |
 | AISR | 是 | 输入: YUV4xxSP_8bit, YUV444I_VU24, Y8 <br> 输出: YUV4xxSP_8bit, YUV444I_VU24, Y8 | 一般不改变输入格式，注5 |
 | AISD | 否 | 输入: YUV4xxSP_8bit, YUV444I_VU24, API中所有RGB系列 <br> 输出: 各场景和类别得分 | 无图像对象输出 |
@@ -236,8 +234,8 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | AIDD | 否 | 输入: YUV4xxSP_8bit, RGB[A8]888, Y8 <br> 输出: YUV4xxSP_8bit, RGB[A8]888, Y8 | 输出格式和输入相同 |
 | AIDHW| 否 | 输入: YUV4xxSP_8bit, RGB[A8]888, Y8 <br> 输出: YUV4xxSP_8bit, RGB[A8]888, Y8 | 输出格式和输入相同 |
 | MixSHPACM | 否 | 输入: YUV420SP_NV12, RGBA8888 <br> 输出: YUV420SP_NV12 | \ |
-| MixFE | 否 | 输入: TBD <br> 输出: TBD | TBD |
-| MixMSSR | 否 | 输入: YUV4xxSP_8bit, Y8, UV88 <br> 输出: YUV420SP_NV12 | TBD |
+| MixFE | 否 | 输入: 540p YUV420SP_NV12 <br> 输出: 4k YUV420SP_NV12 | 只支持指定的分辨率和指定的输入输出格式 |
+| MixMSSR | 否 | 输入 $\xrightarrow{主要算法处理}$ 输出： <br> 540pNV24 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 720pY8+UV88 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 1080pNV12 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 1080pNV24 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV24 <br> 1080pRGB $\xrightarrow{SD+MEMC}$ 1080pRGB <br> 1080pNV12 $\xrightarrow{SD+DC+SR}$ 4kNV12 <br> 540pNV24 $\xrightarrow{SR+MEMC+FE}$ 1080pNV12 <br> 4kNV12 $\xrightarrow{SD+MEMC}$ 4kNV12 <br> 4kNV24 $\xrightarrow{SD+MEMC}$ 4kNV24 <br> 4kRGB $\xrightarrow{SD+MEMC}$  4kRGB| 只支持指定的分辨率和指定的输入输出格式 |
 
 注：
 1. `YUV4xxSP_8bit`表示`YUV420SP_NV12, YUV422SP_NV16, YUV444SP_NV24`均支持。
@@ -665,9 +663,52 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 </table>
 
 #### CGC 模块
-TODO
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
+以下为只开启色域转换功能测试的性能数据
+<table>
+  <tr align="center">
+    <td rowspan="2"><b>平台</b></td>
+    <td rowspan="2"><b>GPU型号与频率</b></td>
+    <td rowspan="2"><b>输入图像分辨率和格式</b></td>
+    <td rowspan="2"><b>固定帧率[fps]</b></td>
+    <td rowspan="1" colspan="3"><b>性能数据<b> (performance mode)</td>
+    <tr align="center">
+      <td><b>GPU占用率[%]</b></td>
+      <td><b>带宽占用[MB/s]</b></td>
+      <td><b>耗时[ms]</b></td>
+    </tr>
+  </tr>
+  <!-- RK3588 -->
+  <tr align="center">
+    <td rowspan="2">RK3588</td>
+    <td rowspan="2">Mali-G610 MC4 @1000MHz</td>
+    <td>3840x2160, rgba8bit</td>
+    <td>60</td>
+    <td>60</td>
+    <td>gpu-7300</td>
+    <td>4.5</td>
+    <tr align="center">
+      <td>1920x1080, rgba8bit</td>
+      <td>60</td>
+      <td>24</td>
+      <td>gpu-3000</td>
+      <td>2</td>
 
-#### BLR 模块
+    </tr>
+  </tr>
+  <!-- RK3576 -->
+  <tr align="center">
+    <td rowspan="2">RK3576</td>
+    <td rowspan="2">Mali-G52 MC4EE2 @800MHz</td>
+    <td>TBD</td>
+    <td>TBD</td>
+    <td>TBD</td>
+    <td>TBD</td>
+    <td>TBD</td>
+  </tr>
+</table>
+
+
 TODO
 
 #### AI-SR 模块
@@ -859,7 +900,7 @@ TODO
   <tr align="center">
     <td>RK3588</td>
     <td>Mali-G610 MC4 @1000MHz</td>
-    <td>TBD</td>
+    <td>1920x1080 NV12</td>
     <td>TBD</td>
     <td>TBD</td>
     <td>TBD</td>
@@ -869,11 +910,11 @@ TODO
   <tr align="center">
     <td>RK3576</td>
     <td>Mali-G52 MC4EE2 @800MHz</td>
-    <td>TBD</td>
-    <td>TBD</td>
-    <td>TBD</td>
-    <td>TBD</td>
-    <td>TBD</td>
+    <td>1920x1080 NV12</td>
+    <td>30</td>
+    <td>30</td>
+    <td>N/A</td>
+    <td>28</td>
   </tr>
 </table>
 
@@ -1017,11 +1058,11 @@ TODO
   <tr align="center">
     <td>RK3576</td>
     <td>Mali-G52 MC4EE2 @800MHz</td>
-    <td>TBD</td>
-    <td>TBD</td>
-    <td>TBD</td>
-    <td>TBD</td>
-    <td>TBD</td>
+    <td>960x540,NV24</td>
+    <td>30</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>30</td>
   </tr>
 </table>
 
@@ -1065,11 +1106,11 @@ TODO
   <tr align="center">
     <td>RK3576</td>
     <td>Mali-G52 MC4EE2 @900MHz</td>
-    <td>960x540,NV24</td>
-    <td>30->60</td>
-    <td>TBD</td>
-    <td>TBD</td>
-    <td>TBD</td>
+    <td>540pNV24 <br> 720pY8+UV88 <br> 1080pNV12 <br> 1080pNV24 <br> 1080pRGB <br> 4kNV12 <br> 4kNV24 <br> 4kRGB </td>
+    <td>15/20/24/25/30 ⟶ 30 <br> 15/20/24/25/30/50/60 ⟶ 60</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>N/A</td>
   </tr>
 </table>
 
@@ -1089,7 +1130,7 @@ TODO
 | MixFE3 | TBD | TBD |
 | MixFE4 | TBD | TBD |
 | MixFE4 | TBD | TBD |
-| MixMSSR | rkaipq_mssr_model0_IFBlockX4Stage0_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX4Stage1_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX4Stage2_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX5Stage0_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX5Stage1_rknn162_rk3576.bin <br> rkaipq_mssr_model0_IFBlockX5Stage2_rknn162_rk3576.bin <br> rkaipq_mssr_model0_NaturalSR540to1080_rknn162_rk3576.bin <br> rkaipq_mssr_model0_NaturalSR1080to4K_rknn162_rk3576.bin <br> rkaipq_mssr_model0_EbookSR480to960_rknn162_rk3576.bin <br> rkaipq_mssr_model0_rd_rknn162_rk3576.bin <br> rkaipq_mssr_model0_sd_rknn162_rk3576.bin | 666d32453a82120735a238f2b2f723b0 <br> eb13784d88fd0b6788774b3832b9e614 <br> af98b60b1394df8e0b75943785d440a3 <br> 71ba442eb493c4a84c89201f6c1daa8a <br> 620161e6dd71ccb1e32d0241d268d12b <br> 4b2a3bafe215f816ac1251f463374ded <br> 70caba7674a7bb149102cbddb69e673e <br> b424c8159331ac993f555b7be32ff0ea <br> 9b435ba3603b06b909fc35ecc02c34fe <br> 315a865fbb8c0447fe3fe6bd7e0ddca0 <br> 8bf9787b62242f79ebd5904e80cd378f|
+| MixMSSR | rkaipq_mssr_model0_EbookSR1920to1920_rknn200_rk3576.bin <br> rkaipq_mssr_model0_EbookSR480to960_rknn200_rk3576.bin <br> rkaipq_mssr_model0_NaturalSR540to1080_rknn200_rk3576.bin <br> rkaipq_mssr_model0_NaturalSR720to4K_rknn200_rk3576.bin <br> rkaipq_mssr_model0_fd_rknn200_rk3576.bin <br> rkaipq_mssr_model0_fe_rknn200_rk3576.bin <br> rkaipq_mssr_model0_fs_rknn200_rk3576.bin <br> rkaipq_mssr_model0_fsr_rknn200_rk3576.bin <br> rkaipq_mssr_model0_sd_rknn200_rk3576.bin <br> rkaipq_mssr_model0_std_rknn200_rk3576.bin <br> rkaipq_mssr_model1_DC1080p_rknn200_rk3576.bin <br> rkaipq_mssr_model1_DC540p_rknn200_rk3576.bin <br> rkaipq_mssr_model1_DC720p_rknn200_rk3576.bin <br> rkaipq_mssr_model1_IFBlockX5Stage0_rknn200_rk3576.bin <br> rkaipq_mssr_model1_IFBlockX5Stage1_rknn200_rk3576.bin <br> rkaipq_mssr_model1_IFBlockX5Stage2_rknn200_rk3576.bin <br> rkaipq_mssr_model1_NaturalSR1080to4K_rknn200_rk3576.bin <br> rkaipq_mssr_model1_fe_rknn200_rk3576.bin <br> rkaipq_mssr_model2_DC1080p_rknn200_rk3576.bin <br> rkaipq_mssr_model2_IFBlockX4Stage0_rknn200_rk3576.bin <br> rkaipq_mssr_model2_IFBlockX4Stage1_rknn200_rk3576.bin <br> rkaipq_mssr_model2_IFBlockX4Stage2_rknn200_rk3576.bin <br> rkaipq_mssr_model2_IFBlockX5Stage0_rknn200_rk3576.bin <br> rkaipq_mssr_model2_IFBlockX5Stage1_rknn200_rk3576.bin <br> rkaipq_mssr_model2_IFBlockX5Stage2_rknn200_rk3576.bin <br> rkaipq_mssr_model2_NaturalSR1080to4K_rknn200_rk3576.bin <br> rkaipq_mssr_model3_IFBlockX4Stage0_rknn200_rk3576.bin <br> rkaipq_mssr_model3_IFBlockX4Stage1_rknn200_rk3576.bin <br> rkaipq_mssr_model3_IFBlockX4Stage2_rknn200_rk3576.bin <br> rkaipq_mssr_model3_IFBlockX5Stage0_rknn200_rk3576.bin <br> rkaipq_mssr_model3_IFBlockX5Stage1_rknn200_rk3576.bin <br> rkaipq_mssr_model3_IFBlockX5Stage2_rknn200_rk3576.bin <br> rkaipq_mssr_model3_NaturalSR1080to4K_rknn200_rk3576.bin <br> rkaipq_mssr_model3_NaturalSR720to1080_rknn200_rk3576.bin <br> rkaipq_mssr_model4_IFBlockX4Stage0_rknn200_rk3576.bin <br> rkaipq_mssr_model4_IFBlockX4Stage1_rknn200_rk3576.bin <br> rkaipq_mssr_model4_IFBlockX4Stage2_rknn200_rk3576.bin <br> rkaipq_mssr_model4_IFBlockX5Stage0_rknn200_rk3576.bin <br> rkaipq_mssr_model4_IFBlockX5Stage1_rknn200_rk3576.bin <br> rkaipq_mssr_model4_IFBlockX5Stage2_rknn200_rk3576.bin <br> rkaipq_mssr_model4_IFBlockX5TxtSeg_rknn200_rk3576.bin <br> rkaipq_mssr_model4_NaturalSR1080to4K_rknn200_rk3576.bin <br> rkaipq_mssr_model4_NaturalSR720to1080_rknn200_rk3576.bin <br> rkaipq_mssr_model5_IFBlockX4Stage0_rknn200_rk3576.bin <br> rkaipq_mssr_model5_IFBlockX4Stage1_rknn200_rk3576.bin <br> rkaipq_mssr_model5_IFBlockX4Stage2_rknn200_rk3576.bin <br> rkaipq_mssr_model5_IFBlockX4TxtSeg_rknn200_rk3576.bin <br> rkaipq_mssr_model5_NaturalSR1080to4K_rknn200_rk3576.bin <br> rkaipq_mssr_model5_NaturalSR720to1080_rknn200_rk3576.bin <br>  | 4e6b01313838892bd821c7f7ccf7d45e <br> 6981f230a71dd942fa92b084f80855a5 <br> 9a997ba1c86760fce48f2e9cbad05161 <br> 626bf59c6ebb2be5f0ac0c16f4c9b355 <br> fd6ade66c0320d05f0916d10a738e624 <br> d99d5a9392c2450c29e8f9220bcc6170 <br> 261f1cba4b3ce02b8172543c7c443b23 <br> 2aaa8d32419b38c7cb19fe4be6678651 <br> 1f5187c937e87c364d378ab3ee950c2c <br> 1aba8c6b8f18db81e0cea2db35e847b8 <br> 75f176ca8befde487bc6832fa28c7091 <br> eb0009e4d4c59ff60069692b14502c41 <br> cfd4f9b58c58fda49cd53638ee113a78 <br> 42281ce98a209cd98f2f76d311dfc3a8 <br> 25f9d68111c0d0bf4a2810ede2a56bbc <br> 9cba025bb4291c38acc1ba1af702e53a <br> 2404c1fdb8ec5b0b22914c788b11bf6c <br> 1a3f2b897459f3bd6f2bd9edbff56800 <br> a750145fc97d1325e18fc93d544364f2 <br> 57ccfd4d429066a96af1fb54f2e4bef0 <br> af07923efbf0fd4be8a64f5b628630fa <br> 118498ba79da16aaf9ee05ad42b16b84 <br> 9fcbe23608f870f5a41f4d3e6c9121fe <br> 488bb9d3ad7563b5fd498f2e67976d91 <br> bbe1b39076db24413c08b45b16b90737 <br> d4aaf0b4f0918a7dffa1ea618888ab9f <br> 86aee47434e195c073bcffc58c6df59a <br> dd383c03a8d4fb97c90327416a5ff370 <br> dc3f5a1a9c9cc30d3e8559dc6f3c9c9b <br> 56c5d8731d5f43e5d1423e86ea142645 <br> 6232501c182cc789421c9d63a7e2466c <br> 5f779a55329d228e051c0e7adabd991a <br> 003e6ce6e973ae71c8b0ec6798a97bc2 <br> 295d7d7b08f0d9f96058d58c5161385c <br> e1740ff387ca2d54254dad2a77873d7e <br> 64abb0f5c47093def15bd11614cf3e37 <br> f463be62f318a2e98b16c28f702285ed <br> dae6f7fcf962caaa8f2f94fb0c7030b0 <br> 4ee9b467b7fdae7942949bbf27d278aa <br> 3bdf51f778722f83307ffb6cee75d308 <br> 82d5f1a63a7692cb031d547aa8d45bb3 <br> aca859650d5c53d8bbf3886c634c06eb <br> 6957daeaeb732efed97091294bd8760d <br> 0390823176f79df482bae99b0cdf2426 <br> 02e7843bbfd69dd5ded5170906334f9e <br> f265647cdce1a11381b1e1da8f4cbf22 <br> 16676f0a4f0af3eea4c615eb3c98bcbf <br> a626977fcedabd30cd240aa4fe4b51bc <br> 2cee5c3dee2b6971aafca651a6036ca3 <br> |
 
 注：
 1. 随库提供的模型文件默认加载路径为: Android: `/vendor/etc/`, Linux: `/etc/`;
@@ -1425,6 +1466,9 @@ int rkpq_deinit(rkpq_context ctx);
 
 参数说明：
 - `rkpq_context ctx`: 待析构的`rkpq_context`对象
+
+注:
+- 调用`rkpq_init()`后若返回一个无效值，仍需要退出程序前调用`rkpq_deinit()`以释放相关资源。
 
 #### rkpq_query()
 接口作用:

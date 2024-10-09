@@ -2,33 +2,146 @@
 
 ## coming next version
 
-## v0.11.2.3856  Release Note | 2024.09.29
-  - [MSSR] 4kMEMC通路部分RGA处理改成GPU处理，优化带宽分布
+## v0.14.4.4090 Release Note | 2024.12.18
+  - [ALL] OpenCL库增加`/system/lib/libOpenCL-system.so`搜索路径
+
+## v0.14.3.4088 Release Note | 2024.12.18
+  - [MSSR] 更新SR通路支持4kRGB输入时整数帧不输出、非整数帧输出
+
+## v0.14.2.4086 Release Note | 2024.12.17
+  - [MSSR] 更新MSSR2通路非标准4kNV12输入分辨率时的帧拷贝性能和效果修正
+  - [ALL] OpenCL库增加`/system/lib/libGLES_mali.so`搜索路径
+
+## v0.14.1.4082 Release Note | 2024.12.16
+  - [MSSR] 新加RK356X平台支持（暂只支持部分功能）
+  - [MSSR] 新加支持非标准分辨率NV12格式输入输出，如`2048x1080`、`2560x1440`、`4096x2160`等
+
+## v0.14.0.4068 Release Note | 2024.12.12
+  - [MSSR] 更新Api：`rkpq_mssr_cfg`新加`bEnableHDMI`参数，`rkpq_sr_cfg`新加`nSRStrength`参数，用于区分`codec`和`hdmi`不同输入及相关参数配置
+  - [MSSR] 修正CPU绑核失败导致GPU跑挂的问题
+  - [ALL] 将OpenCL缓存二进制文件名区分32位和64位，使得同一环境可以切换调用32位和64位算法库
+
+## v0.13.12.4049 Release Note | 2024.12.10
+  - [MSSR] 调整MSSR2通路部分log等级
+
+## v0.13.11.4048 Release Note | 2024.12.06
+  - [MSSR] 更新SR通路支持1080pNV24输入输出、4kRGB输入输出的50fps或60fps处理通路
+
+## v0.13.10.4045 Release Note | 2024.12.05
+  - [MSSR] 更新MSSR2通路增加支持NV24、RGB输入输出
+  - [MSSR] 更新MSSR2通路更新ME模型
+  - [MSSR] 优化4kRGB处理通路性能，优化大运动场景效果
+  - [MSSR] 调整MSSR2-1080p-HDMI通路的DC处理策略，调整DC默认效果参数
+  - [MSSR] 更新MSSR2通路调整DC时序优化整体性能
+
+## v0.13.9.4026 Release Note | 2024.11.29
+  - [DFC] 新加BlockDFC处理通路，支持ROI配置处理区域、锐化后处理、NV24或RGBA输出
+  - [SD/DD/DHW] 修正YUV2RGB的错误转换系数
+  - [MSSR] 更新MSSR通路支持属性配置走解码通路还是HDMI通路，HDMI通路增加属性配置效果参数、Api输出运动状态参数
+  - [MSSR] 在RK3588平台改用RGA3，解决RGA2内存访问超4G的问题
+  - [MSSR] 重新调整MSSR-HDMI通路的DC处理策略、输出SD数据策略
+
+## v0.13.8.3999 Release Note | 2024.11.21
+  - [MSSR] 更新parseME降低带宽优化性能的激活条件
+  - [MSSR] SR通路增加DC的激活条件
+
+## v0.13.7.3994 Release Note | 2024.11.19
+  - [MSSR] 修改SR、MEMC部分默认参数
+
+## v0.13.6.3992 Release Note | 2024.11.18
+  - [MSSR] 更新parseME降低带宽优化性能
+  - [MSSR] 修复MSSR4K通路RGB输入输出dump功能
+
+## v0.13.5.3972 Release Note | 2024.11.12
+  - [AUTH] 增加对`rkauth_config.json`授权配置文件的授权支持；`rkpq_set_cache_path()`接口增加对该文件的路径指定功能。
+
+## v0.13.4.3966 Release Note | 2024.11.12
+  - [MSSR] 修正NV24输入输出时UV通道出现错位的问题
+
+## v0.13.3.3958 Release Note | 2024.11.08
+  - [MSSR] MSSR4K通路支持NV12、NV24、RGB格式输入时不传RGB2和RGB1，关闭外部RGA相应处理，改由内部GPU生成
+  - [DCI_ACM] 修正 DCI_ACM 模块对 DCI/ACM 模块的相关继承用法，解决崩溃问题
+  - [MSSR] 更新schemeIdx={0,1}的X4的ME模型，优化个别视频运动画面破图问题
+  - [MSSR] MSSR和MSSR4K通路小运动闪烁问题进一步优化。
+  - [MSSR] 修正DC+HWPQ效果异常问题
+  - [MSSR] 更新场景切换检测
+  - [MSSR] 更新部分ME模型
+  - [RKNN] RKNN SDK支持版本提升至 v2.2.0
+
+## v0.13.2.3917 Release Note | 2024.10.31
+  - [MSSR] SR通路支持1080pNV24输入输出
+
+## v0.13.1.3915 Release Note | 2024.10.30
+  - [MSSR] 修正DC效果问题，简化parseDC计算优化性能
+
+## v0.13.0.3910 Release Note | 2024.10.29
+  - [MSSR] MSSR4K通路增加支持RGB输入输出，此时输入只需要配3帧RGB数据，不再需要配RGB2和RGB1两帧小分辨率数据
+  - [MSSR] MSSR通路增加支持1080p输入时可选DC模型
+  - [MSSR] SR通路支持4kNV24输入输出
+  - [LD] 新增`RKPQ_MODULE_LD`模块，支持Local Dimming相关处理
+
+## v0.12.6.3901 Release Note | 2024.10.23
+  - [MSSR] 更新DC支持自动处理不同的输入range
+  - [IO] 进一步增强对非对齐内存的自适应支持
+
+## v0.12.5.3898 Release Note | 2024.10.22
+  - [MSSR] HDMI通路DC优化（range改成Full2Full，优化随机噪声逻辑），小运动闪烁问题优化
+
+## v0.12.4.3896 Release Note | 2024.10.22
+  - [MSSR] MSSR、MSSR2通路增加支持1080pNV24输入输出
+  - [MSSR] NV24输出通路增加动静判决的MC优化性能
+  - [MSSR] MSSR4K通路增加支持4k输入时可选DC模型
+
+## v0.12.3.3888 Release Note | 2024.10.18
+  - [IO] 修正IO buffer缓存数量超过上限后的会将所有缓存都清除的错误行为（该错误会导致输入数据异常并可能造成程序退出）
+
+## v0.12.2.3885 Release Note | 2024.10.17
+  - [MSSR] MSSR4K通路增加属性控制MSSR4K整数帧输出方式
+  - [MSSR] MSSR4K通路增加属性控制4kDC使用的模型
+  - [MSSR] MSSR2通路增加支持1080p输入时可选DC模型
+  - [DFC] NV12->RGBA输出通路增加演示功能，可通过属性配置各种演示模式
+  - [MSSR] 修正MSSR4K通路DC结果异常问题
+  - [MSSR] MSSR4K通路增加支持NV24输入输出
+
+## v0.12.1.3873 Release Note | 2024.10.11
+  - [MSSR] 调整MSSR4K通路处理时序，优化处理性能
+  - [MSSR] 调整MSSR4K通路的DC处理，减少带宽使用
+  - [DFC] 修改默认走通路sendFrmN1：默认使用model11，支持Sharp后处理，结果送n-1帧
+
+## v0.12.0.3870 Release Note | 2024.10.09
+  - [MSSR] Api修改：`rkpq_mssr_initflag`增加`RKPQ_MSSR_INIT_FLAG_MSSR4K`参数，用于初始化MSSR4K通路
+  - [MSSR] 增加初版MSSR4K通路支持
+  - [RKNN] RKNN符号的动态加载由即时加载改为延迟加载，未调用AI模块时不会主动加载`librknnrt.so`文件的符号
+  - [IO] 修正在某些情况下计算输出图像平均亮度会失败的问题
+  - [DFC] 支持model11的异步并行处理，RK3576平台性能模式`1080pNV12->RGBA`处理耗时约30ms，算法处理接口约15ms内提前返回
+
+## v0.11.2.3856 Release Note | 2024.09.29
+  - [MSSR] MSSR4K通路部分RGA处理改成GPU处理，优化带宽分布
   - [MSSR] 修正SR解析结果写出到输出虚宽大于实宽时出现的花图问题
   - [MSSR] 修正调用`rkpq_deinit`报错问题
 
-## v0.11.1.3843  Release Note | 2024.09.25
+## v0.11.1.3843 Release Note | 2024.09.25
   - [MSSR] 重新调整输出SD数据：只有场景发生切换时输出场景类型及相关数据才能变化
   - [MSSR] 修改异步线程wait机制，避免wait启动失败的线程
   - [MSSR] 更新`watermark_type=4`的定制水印
   - [MSSR] 修正`v0.10.3.3828`引入的720p打开logD会闪退的问题
 
-## v0.11.0.3836  Release Note | 2024.09.24
+## v0.11.0.3836 Release Note | 2024.09.24
   - [ALL] 恢复并修改`RKPQ_FLAG_CALC_MEAN_LUMA`的值使其重新生效，结合新增的`RKPQ_QUERY_MEAN_LUMA_OUTPUT`可以获取输出图像的平均亮度值
   - [MSSR] 优化AIPQ处理效果：只有在场景发生切换时场景类型才能发生变化，保持同一场景的AIPQ处理效果时域一致，避免在同一场景时出现效果跳变
 
-## v0.10.3.3828  Release Note | 2024.09.23
+## v0.10.3.3828 Release Note | 2024.09.23
   - [MSSR] 重新支持接口'nSchemeIdx=2'的配置降低NPU-ME耗时，优化GPU-MC性能
 
-## v0.10.2.3824  Release Note | 2024.09.20
+## v0.10.2.3824 Release Note | 2024.09.20
   - [BLR] 修正`nBlurChannel`和`nBlurMode`从api传参失败的问题
 
-## v0.10.1.3819  Release Note | 2024.09.19
+## v0.10.1.3819 Release Note | 2024.09.19
   - [MSSR] 修改MSSR通路：支持4k输入、4k输出的MEMC处理通路
   - [MSSR] 修正输出虚宽大于实宽时出现的花图问题
   - [BLR] BLR模块配置参数`rkpq_blr_cfg`新加参数：`nBlurChannel`用于配置指定模糊的通道，`nBlurMode`用于配置模糊处理是在指定区域内还是指定区域外，详见`rkpq_blr_cfg`
 
-## v0.10.0.3812  Release Note | 2024.09.18
+## v0.10.0.3812 Release Note | 2024.09.18
   - [IO] 增加了`rkpq_init_params::nMaxIoBufCacheNum`用于设置 IO buffer cache 的上限数量(对应Android属性为`persist.vendor.rkpq.io.cache.limit`)，并将默认上限数还原为32个
   - [DCI_ACM] 新增`RKPQ_MIXTURE_DCI_ACM`混合模块，支持DCI+ACM合并处理减少耗时，新增对应的集成示例(rkpq_demo_dci_acm.cpp)
   - [ALL] 取消`SHP_ACM`和`DCI_ACM`两个模块的授权要求

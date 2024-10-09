@@ -65,6 +65,8 @@ int setPipelineDemoDFC(rkpq_context ctx, rkpq_init_params *pInitParam, rkpq_proc
 int setPipelineDemoCGC(rkpq_context ctx, rkpq_init_params *pInitParam, rkpq_proc_params *pProcParam);
 /* Input -> BLR -> Output */
 int setPipelineDemoBLR(rkpq_context ctx, rkpq_init_params *pInitParam, rkpq_proc_params *pProcParam);
+/* Input -> LD -> Output */
+int setPipelineDemoLD(rkpq_context ctx, rkpq_init_params *pInitParam, rkpq_proc_params *pProcParam);
 /* Input -> MSSR_FE -> Output */
 int setPipelineDemoMSSR_FE(rkpq_context ctx, rkpq_init_params *pInitParam, rkpq_proc_params *pProcParam);
 /* Input -> MSSR -> Output */
@@ -121,6 +123,9 @@ int main(int argc, const char *argv[])
     case 6:
         setPipelineDemoMSSR_540pMEMCSR(nullptr, &initParams, nullptr);  // demo that use MSSR to do 540pMEMCSR
         break;
+    case 7:
+        setPipelineDemoLD(nullptr, &initParams, nullptr);  // demo that use LD to do local dimming
+        break;
     default:
         setPipelineDemoZME(nullptr, &initParams, nullptr);  // demo that use ZME to do arbitrary resolution scaling
         break;
@@ -131,6 +136,7 @@ int main(int argc, const char *argv[])
     if (ret)
     {
         printf("Failed to call rkpq_init() %d, Please check the API parameters!\n", ret);
+        ret = rkpq_deinit(context); // need to call rkpq_deinit to release the invalid context
         return ret;
     }
 
@@ -164,6 +170,9 @@ int main(int argc, const char *argv[])
         break;
     case 6:
         setPipelineDemoMSSR_540pMEMCSR(context, nullptr, &procParams);  // demo that use MSSR to do 540pMEMCSR
+        break;
+    case 7:
+        setPipelineDemoLD(context, nullptr, &procParams);  // demo that use LD to do local dimming
         break;
     default:
         setPipelineDemoZME(context, nullptr, &procParams);  // demo that use ZME to do arbitrary resolution scaling
@@ -958,6 +967,148 @@ int setPipelineDemoBLR(rkpq_context ctx, rkpq_init_params *pInitParam, rkpq_proc
     return ret;
 }
 
+/* Below code shows a pipeline example for LD modules:
+ * The data flow is: [WxH rgb(a)888(8) (full-range)] = LD => [WxH rgb(a)888(8) (full-range)]
+*/
+int setPipelineDemoLD(rkpq_context ctx, rkpq_init_params *pInitParam, rkpq_proc_params *pProcParam)
+{
+    int ret = 0;
+
+    /* set init parameters */
+    if (pInitParam)
+    {
+        /* set the custom pipeline order */
+        int order = 0;
+        pInitParam->aModPipeOrder[order++] = RKPQ_MODULE_LD;   /* order 0 */
+
+        pInitParam->nModNumInPipe = order;                      /* module num in the pipeline */
+    }
+
+    /* set proc parameters */
+    if (pProcParam && ctx)
+    {
+        rkpq_imgbuf_info &stSrcImgInfo = pProcParam->stSrcImgInfo;
+        rkpq_imgbuf_info &stDstImgInfo = pProcParam->stDstImgInfo;
+
+        /* set the image info */
+        stSrcImgInfo.nColorSpace = RKPQ_CLR_SPC_RGB_FULL;    // refer to rkpq_clr_spc, limited-range here
+        stSrcImgInfo.nPixFmt = RKPQ_IMG_FMT_RGB;                // refer to rkpq_img_fmt, must be rgb or rgba; set as rgba8888 here
+        stSrcImgInfo.nPixWid = 1920;                            // set the input image width
+        stSrcImgInfo.nPixHgt = 1080;                            // set the input image height
+        stSrcImgInfo.nEleDepth = 8;                             // set the first component(Y or R) depth [bit]
+        stSrcImgInfo.nAlignment = 64;                           // set the pitch alignment [byte], better equal to 'imgAlignment' queried before
+        stDstImgInfo.nColorSpace = RKPQ_CLR_SPC_RGB_FULL;   // see rkpq_clr_spc, same as the input image
+        stDstImgInfo.nPixFmt = RKPQ_IMG_FMT_RGB;               // refer to rkpq_img_fmt, same as the input image
+        stDstImgInfo.nPixWid = 1920;                            // set the output image width
+        stDstImgInfo.nPixHgt = 1080;                            // set the output image height
+        stDstImgInfo.nEleDepth = 8;                             // set the first component(Y or R) depth [bit]
+        stDstImgInfo.nAlignment = 64;                            // aWidStrides[0] will be set to 3840 when rkpq_query() called with 'RKPQ_QUERY_IMG_BUF_INFO'
+        stDstImgInfo.aWidStrides[0] = 1920;                     // or you can set it manually according to the real case
+
+        /** (optional)
+         * call rkpq_query() to get the remain image buffer infos
+         * no need to call rkpq_query() ONLY IF you know and filled all the rkpq_imgbuf_info of the src & dst images
+         */
+    #if 1 /* not necessary */
+        ret |= rkpq_query(NULL, RKPQ_QUERY_IMG_BUF_INFO, sizeof(rkpq_imgbuf_info), &stSrcImgInfo);
+        ret |= rkpq_query(NULL, RKPQ_QUERY_IMG_BUF_INFO, sizeof(rkpq_imgbuf_info), &stDstImgInfo);
+        if (ret)
+        {
+            printf("Failed to call rkpq_query() %d, Please check the API parameters!\n", ret);
+            return ret;
+        }
+
+    #endif
+
+        /* set the buffer info */
+    #if 1
+        // set buffer info with imported hardware buffer of input & output. Recommend
+        int fdSrc = 0, fdDst = 0;           // create hardware buffer then import through fd value
+        int fdSrcIdx = 0, fdDstIdx = 0;     // create hardware buffer then import through fd value
+        /* create hardware buffers to make 'fdSrc' & 'fdDst' valid... */
+        /* ... */
+        // set the fd values
+        stSrcImgInfo.nFdValue = fdSrc;
+        stDstImgInfo.nFdValue = fdDst;
+        stSrcImgInfo.nFdIndex = fdSrcIdx;   // unique identifier of the device buffer
+        stDstImgInfo.nFdIndex = fdDstIdx;
+    #else
+        // or malloc input & output bufs
+        stSrcImgInfo.aPlaneAddrs[0] = (unsigned char*)malloc(stSrcImgInfo.nFrameSize);  // please make sure the src buffer is valid and >= stSrcImgInfo.nFrameSize
+        stDstImgInfo.aPlaneAddrs[0] = (unsigned char*)malloc(stDstImgInfo.nFrameSize);  // please make sure the dst buffer is valid and >= stDstImgInfo.nFrameSize
+    #endif
+        stSrcImgInfo.nBufferSize = stSrcImgInfo.nFrameSize; /* real buffer sieze, should be >= nFrameSize! unit: byte */
+        stDstImgInfo.nBufferSize = stDstImgInfo.nFrameSize; /* real buffer sieze, should be >= nFrameSize! unit: byte */
+
+        /* set other proc parameters */
+        pProcParam->bEnablePropControl   = 0;    // set to 1 if want to use `adb properties` to control the effects
+        pProcParam->bEnableSliderControl = 0;    // set to 1 if want to use `PQTool` to control the effects (works only when bEnablePropControl=0)
+        // set ROI to the area you want, value range: [0, src_width] / [0, src_height]
+        // below ROI set the processing area to the right half side of the output image
+        pProcParam->stImgRoi.bEnableRoi = 0;    // set to 1 if want to apply ROI feature
+        pProcParam->stImgRoi.x = stDstImgInfo.nPixWid / 2;
+        pProcParam->stImgRoi.y = 0;
+        pProcParam->stImgRoi.w = stDstImgInfo.nPixWid / 2;
+        pProcParam->stImgRoi.h = stDstImgInfo.nPixHgt;
+        pProcParam->nExtenType = 0;      // reserved, set to 0
+        pProcParam->pExtenConfig = NULL; // reserved, set to NULL
+
+
+        /* create buffer info of spi data for local dimming output */
+        int nSpiBuffLenMax = 8192;
+        uint8_t *SpiBuffAddr;
+#if 0
+        SpiBuffAddr = (uint8_t*)malloc(nSpiBuffLenMax); // malloc spi buffer
+#endif
+
+
+        rkpq_ld_cfg *pLdConfig = (rkpq_ld_cfg *)rkpq_get_default_cfg(ctx, 0, RKPQ_MODULE_LD);  // order 0 is the 1st module (LD) in the pipeline
+        /*set input parameters*/
+        if(pLdConfig)
+        {
+            pLdConfig->bEnableLD = 1;
+
+            //set panel format, refer to rkpq_api.h "_rkpq_ld_cfg" for details
+            pLdConfig->nLdHorNum = 48;    // horizontal dimming zone number, according to the panel features
+            pLdConfig->nLdVerNum = 24;    // vertical dimming zone number, according to the panel features
+            pLdConfig->nLdTotalNum = pLdConfig->nLdHorNum * pLdConfig->nLdVerNum; // total dimming zone number
+            pLdConfig->nLdBlMax = 0xFF;
+            pLdConfig->nLdBlMin = 0x0;
+
+            pLdConfig->bHDRFmt  = 0;    //for sdr, set to 0
+
+            //coefficients determined by "nLdFiltCoef" below; if selecting other modes, coefficients would be set in internal module
+            pLdConfig->nLdFiltMode = RKPQ_LD_FILTER_MANUAL;
+            // 10bit fixpoint color gamut converting matrix coefficients from testing result by user; Only works when pLdConfig->nLdMatMode == RKPQ_LD_FILTER_MANUAL
+            //Example:
+            pLdConfig->nLdFiltCoef[0] = 61; //m[0][0]
+            pLdConfig->nLdFiltCoef[1] = 113; //m[0][1]
+            pLdConfig->nLdFiltCoef[2] = 61;  //m[0][2]
+            pLdConfig->nLdFiltCoef[3] = 82;  //m[1][0]
+            pLdConfig->nLdFiltCoef[4] = 389; //m[1][1]
+            pLdConfig->nLdFiltCoef[5] = 82;  //m[1][2]
+            pLdConfig->nLdFiltCoef[6] = 61;    //m[2][0]
+            pLdConfig->nLdFiltCoef[7] = 113;  //m[2][1]
+            pLdConfig->nLdFiltCoef[8] = 61; //m[2][2]
+
+            pLdConfig->pSpiProtData = SpiBuffAddr; // assign spi buffer address to pLdConfig->pSpiProtData
+
+        }
+        /* get nSpiProtLength and pSpiProtData after rkpq_proc */
+
+        //int nSpiProtLength = pLdConfig->nSpiProtLength;
+        //uint8_t *pSpiProtData = pLdConfig->pSpiProtData;
+
+        /* send spi data to the hardware driver */
+        /* ... */
+#if 0
+        free(SpiBuffAddr); // free spi buffer after processing done
+#endif
+    }
+
+
+    return ret;
+}
 
 /* Below code shows a pipeline example for the only MSSR module */
 /* The data flow is: [(512)480x270 nv24 + 960x544 rgb] =MSSR=> [1920x1080 nv12] */

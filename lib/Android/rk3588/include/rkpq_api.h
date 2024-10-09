@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Last update on 2024-09-23 for v0.11.0
+// Last update on 2024-12-09 for v0.14.0
 
 #pragma once
 #ifndef __RKPQ_API_H_
@@ -97,7 +97,7 @@ struct _rkpq_shp_acm_cfg;
 struct _rkpq_dci_acm_cfg;
 struct _rkpq_fe_cfg;
 struct _rkpq_mssr_cfg;
-
+struct _rkpq_ld_cfg;
 
 /* the RKPQ modules, use rkpq_query() to check if supported */
 typedef enum _rkpq_module
@@ -114,6 +114,7 @@ typedef enum _rkpq_module
     RKPQ_MODULE_MLC     = 7,        /* reserved */ /* Mean Luminance Calculation */
     RKPQ_MODULE_CGC     = 8,        /* Color Gamut Conversion */
     RKPQ_MODULE_BLR     = 9,        /* Region Gauss Blur */
+    RKPQ_MODULE_LD      = 10,       /* Local Dimming */
     RKPQ_MODULE_MAX,                /* please DO NOT use this item! */
 
     /* AI Modules, need RKNN support */
@@ -233,6 +234,13 @@ typedef enum _rkpq_color_transfer_characteristics
     RKPQ_CGC_TRC_MAX,
 }rkpq_cgc_trc;
 
+typedef enum _rkpq_local_dimming_filter_mode
+{
+    RKPQ_LD_FILTER_MANUAL = 0, //use api config mat
+    RKPQ_LD_FILTER_MAX,
+
+}rkpq_ld_filt_mode;
+
 typedef enum _rkpq_mssr_initflag
 {
     RKPQ_MSSR_INIT_FLAG_ALL 	            = ( 0x0),//  0: All
@@ -243,13 +251,14 @@ typedef enum _rkpq_mssr_initflag
     RKPQ_MSSR_INIT_FLAG_FESR                = (1<<4),// 16: FaceEnhanceSR
     RKPQ_MSSR_INIT_FLAG_FESRMEMC            = (1<<5),// 32: FaceEnhanceSRMEMC
     RKPQ_MSSR_INIT_FLAG_EBPPKSR             = (1<<6),// 64: EbookSR
+    RKPQ_MSSR_INIT_FLAG_MSSR4K              = (1<<7),//128: MSSR4K
     // typical customized InitFlags
     RKPQ_MSSR_INIT_FLAGS_OUT1080P           = ( 3),// MSSR | SR = 1 | 2 = 3
     RKPQ_MSSR_INIT_FLAGS_OUT4K              = ( 4),// SR2 = 4
     RKPQ_MSSR_INIT_FLAGS_FESR               = (16),// FaceEnhanceSR = 16
     RKPQ_MSSR_INIT_FLAGS_OUT1080P_FESR      = (19),// MSSR | SR | FaceEnhanceSR = 1 | 2 | 16 = 19
     // MAX
-    RKPQ_MSSR_INIT_FLAGS_MAX                = ((1<<7)-1) // 127
+    RKPQ_MSSR_INIT_FLAGS_MAX                = ((1<<8)-1) // 255
 }rkpq_mssr_initflag;
 
 typedef enum _rkpq_mssr_procflag
@@ -604,6 +613,31 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_blr_cfg
 
     uint32_t    aReservedData[1];   // reserved for future use
 } rkpq_blr_cfg;
+/* LD configuration */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_ld_cfg
+{
+//    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+//    rkpq_pipe_res_info  stPipeResInfo;  /* resolution change info, must set manually */
+
+    uint32_t    bEnableLD;         /* [i] {0, (1)} */
+
+    uint32_t    nLdHorNum;              /* [i] local dimming backlight data horizontal block number */
+    uint32_t    nLdVerNum;              /* [i] local dimming backlight data vertical block number */
+    uint32_t    nLdTotalNum;             /* [i] local dimming backlight data total block number */
+    uint32_t    nLdBlMax;               /* [i] local dimming backlight max value */
+    uint32_t    nLdBlMin;               /* [i] local dimming backlight min value */
+
+    uint32_t    bHDRFmt;                /* [i] is hdr format or not. For SDR, set to 0*/
+
+    uint32_t    nLdFiltMode;        /* [i] refer to "rkpq_ld_filt_mode" */
+    int32_t     nLdFiltCoef[9];     /* [i] filter coefficients for LD filtering, fixed point in 10bit(1024) */
+
+    uint32_t    nSpiProtLength;     /* [o] local dimming spi data protocol length */
+    uint8_t     *pSpiProtData;      /* [o] local dimming spi data protocol */
+
+    uint32_t    aReservedData[1];   /* reserved for future use */
+} rkpq_ld_cfg;
+
 
 /* AI SR configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_sr_cfg
@@ -629,6 +663,7 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_sr_cfg
     uint32_t    nUsmCtrlUnder;          // [0, (32), 256]
     uint32_t    nColorStrength;         // [0, (128), 256], reserved
     uint32_t    nEdgeStrength;          // [0, (128), 256], reserved
+    uint32_t    nSRStrength;            // [0, 300]: 50-hdmi, 100-codec
 
     uint32_t    aReservedData[20];      // reserved for future use
 } rkpq_sr_cfg;
@@ -792,6 +827,8 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_mssr_cfg
 
     uint32_t        nProcFlag;          /* [i] range: [0, 127], bitfield, see rkpq_mssr_procflag*/
 
+    uint32_t        bEnableHDMI;        /* [i] {0, 1}: 0-codec, 1-hdmi*/
+
     uint32_t        aReservedData[1];   /* reserved for future use */
 } rkpq_mssr_cfg;
 
@@ -829,7 +866,7 @@ int rkpq_proc(rkpq_context ctx, rkpq_proc_params *pProcParam);
 
 /**
  * @Function: rkpq_deinit()
- * @Descrptn: release rkpq_context resource created by rkpq_init().
+ * @Descrptn: release rkpq_context resource (whether it's valid or not) created by rkpq_init().
  * @Params:
  *      rkpq_context ctx - the pq handle of context
  * @Return: error code, 0 indicates everything is ok.
@@ -883,7 +920,7 @@ int rkpq_set_loglevel(rkpq_context ctx, int logLevel);
  * @Params:
  *      rkpq_context ctx - set to NULL before calling rkpq_init()
  *      const char *pPath - the folder path, ends with '/'
- *      int target - bitfield, 1 for Ocl caches, 2 for RKNN models, 4 for license path, 8 for librga path, 0 for all
+ *      int target - bitfield, 1 for Ocl caches, 2 for RKNN models, 4 for license path, 8 for librga path, 16 for license json config file, 0 for all
  * @Return: error code, 0 indicates everything is ok.
  */
 int rkpq_set_cache_path(rkpq_context ctx, const char *pPath, int target);

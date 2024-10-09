@@ -104,6 +104,7 @@ int main(int argc, const char *argv[])
     if (ret)
     {
         printf("Failed to call rkpq_init() %d, Please check the API parameters!\n", ret);
+        ret = rkpq_deinit(ctx); // need to call rkpq_deinit to release the invalid context
         return ret;
     }
 
