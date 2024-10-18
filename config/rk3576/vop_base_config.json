@@ -221,9 +221,9 @@
             "i_peaking_edge_ctrl_en": 1, 
             "i_peaking_edge_shoot_ctrl_en": 1, 
             "i_shoot_ctrl_en": 1, 
-            "i_global_gain_en": 1, 
+            "i_global_gain_en": 0, 
             "i_color_adj_en": 0, 
-            "i_texture_adj_en": 1
+            "i_texture_adj_en": 0
         }, 
         "s_lti_h": {
             "i_Radius": 1, 
@@ -460,28 +460,28 @@
                 "s_edge_shoot_ctrl_param": {
                     "s_direct_h": {
                         "i_delta_offset": 4, 
-                        "i_alpha_over": 16, 
+                        "i_alpha_over": 8, 
                         "i_alpha_under": 32, 
                         "i_alpha_over_unlimit": 48, 
                         "i_alpha_under_unlimit": 64
                     }, 
                     "s_direct_v": {
                         "i_delta_offset": 4, 
-                        "i_alpha_over": 16, 
+                        "i_alpha_over": 8, 
                         "i_alpha_under": 32, 
                         "i_alpha_over_unlimit": 48, 
                         "i_alpha_under_unlimit": 64
                     }, 
                     "s_direct_d0": {
                         "i_delta_offset": 4, 
-                        "i_alpha_over": 16, 
+                        "i_alpha_over": 8, 
                         "i_alpha_under": 32, 
                         "i_alpha_over_unlimit": 48, 
                         "i_alpha_under_unlimit": 64
                     }, 
                     "s_direct_d1": {
                         "i_delta_offset": 4, 
-                        "i_alpha_over": 16, 
+                        "i_alpha_over": 8, 
                         "i_alpha_under": 32, 
                         "i_alpha_over_unlimit": 48, 
                         "i_alpha_under_unlimit": 64
@@ -555,7 +555,7 @@
         "s_shootCtrl": {
             "i_FilterRadius": 0, 
             "i_Delta_offset": 32, 
-            "i_Alpha_over": 16, 
+            "i_Alpha_over": 8, 
             "i_Alpha_under": 36, 
             "i_Alpha_over_unlimit": 48, 
             "i_Alpha_under_unlimit": 64
