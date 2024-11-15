@@ -68,7 +68,7 @@ typedef enum _rk_hwpq_platform
 {
     RK_HWPQ_PLAT_RK3576, 
     RK_HWPQ_PLAT_RK3588, 
-    RK_HWPQ_PLAT_RK3568, 
+    RK_HWPQ_PLAT_RK356X, 
     RK_HWPQ_PLAT_RK3528, 
     RK_HWPQ_PLAT_MAX, 
 } rk_hwpq_platform;
@@ -538,13 +538,24 @@ typedef struct _rk_hwpq_shp_cfg {
 }rk_hwpq_shp_cfg;
 typedef rk_hwpq_shp_cfg RKHWPQ_SHP_CFG;
 
-/* HW-PQ configuration*/
+/* AIPQ info for hwpq */
+#define RKHWPQ_AIPQ_INFO_VERSION 0x10000000
+typedef struct _rk_aipq_info
+{
+    uint32_t nHasAipqInfo;
+    uint32_t nVersion;
+    uint8_t  nReserved[16];
+    uint8_t  nAipqInfo[256];
+}rk_aipq_info;
+
+/* HW-PQ configuration */
 typedef struct _rk_hwpq_cfg
 {
     rk_hwpq_shp_cfg rk_hwpq_shp_cfg;
     rk_hwpq_csc_cfg rk_hwpq_csc_cfg;
     rk_hwpq_acm_cfg rk_hwpq_acm_cfg;
     rk_hwpq_dci_cfg rk_hwpq_dci_cfg;
+    rk_aipq_info    rk_hwpq_aipq_info;
 }rk_hwpq_cfg;
 
 typedef struct _rk_vop_status

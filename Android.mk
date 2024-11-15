@@ -112,6 +112,8 @@ endif
 SOURCE_RKNN_MODEL_PATH := $(LOCAL_PATH)/models/$(TARGET_SOC_PLATFORM)/
 TARGET_RKNN_MODEL_PATH := $(TARGET_OUT_VENDOR)/etc/
 
+DO_COPY_AIPQ_CONFIG := false
+
 # BOARD_ENABLE_AIPQ_DFC := true
 ifeq ($(BOARD_ENABLE_AIPQ_DFC), true)
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_dfc_*.bin $(TARGET_RKNN_MODEL_PATH))
@@ -124,6 +126,7 @@ endif
 ifeq ($(BOARD_ENABLE_AIPQ_SDSR), true)
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_sd_*.bin $(TARGET_RKNN_MODEL_PATH))
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_sr_*.bin $(TARGET_RKNN_MODEL_PATH))
+    DO_COPY_AIPQ_CONFIG := true
 endif
 # BOARD_ENABLE_AIPQ_DDDE := true
 ifeq ($(BOARD_ENABLE_AIPQ_DDDE), true)
@@ -143,6 +146,14 @@ ifeq ($(BOARD_ENABLE_AIPQ_PROJECTOR_PRODUCT), true)
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_mssr_model*_std*.bin $(TARGET_RKNN_MODEL_PATH))
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_mssr_model*_f*.bin $(TARGET_RKNN_MODEL_PATH))
     $(shell cp -f $(SOURCE_RKNN_MODEL_PATH)/rkaipq_mssr_model*_DC*.bin $(TARGET_RKNN_MODEL_PATH))
+    DO_COPY_AIPQ_CONFIG := true
+endif
+
+## AIPQ default config
+ifeq ($(DO_COPY_AIPQ_CONFIG), true)
+    SOURCE_AIPQ_CONFIG_PATH := $(LOCAL_PATH)/config/$(TARGET_SOC_PLATFORM)/aipq_config.json
+    TARGET_AIPQ_CONFIG_PATH := $(TARGET_OUT_VENDOR)/etc/aipq_config.json
+    $(shell cp -f $(SOURCE_AIPQ_CONFIG_PATH) $(TARGET_AIPQ_CONFIG_PATH))
 endif
 
 # endif
