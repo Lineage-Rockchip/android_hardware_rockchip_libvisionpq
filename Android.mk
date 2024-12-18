@@ -56,56 +56,12 @@ endif
 ## define target lib path according to TARGET_SOC_PLATFORM
 TARGET_PQ_LIB_PATH := lib/Android/$(TARGET_SOC_PLATFORM)/
 
-
-## SWPQ lib
-ifeq ($(strip $(USE_LIBSWPQ)), true)
-    include $(CLEAR_VARS)
-    LOCAL_MODULE := librkswpq
-    LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-    LOCAL_MODULE_SUFFIX := .so
-
-    LOCAL_SHARED_LIBRARIES += \
-        librknnrt
-
-    ifneq ($(strip $(TARGET_2ND_ARCH)), )
-        LOCAL_MULTILIB := both
-        LOCAL_SRC_FILES_$(TARGET_ARCH) := $(TARGET_PQ_LIB_PATH)/$(TARGET_CPU_ABI)/librkswpq.so
-        LOCAL_SRC_FILES_$(TARGET_2ND_ARCH) := $(TARGET_PQ_LIB_PATH)/$(TARGET_2ND_CPU_ABI)/librkswpq.so
-    else
-        LOCAL_SRC_FILES_$(TARGET_ARCH) := $(TARGET_PQ_LIB_PATH)/$(TARGET_CPU_ABI)/librkswpq.so
-    endif
-
-    LOCAL_CHECK_ELF_FILES := false
-    LOCAL_VENDOR_MODULE := true
-    LOCAL_MODULE_SUFFIX := .so
-    LOCAL_REQUIRED_MODULES := rkaipq_mssr_model0_EbookSR480to960_rknn162_rk3576.bin
-    include $(BUILD_PREBUILT)
-endif
-
 ## HWPQ lib
 ifeq ($(strip $(USE_LIBHWPQ)), true)
-    include $(CLEAR_VARS)
-    LOCAL_MODULE := librkhwpq
-    LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-    LOCAL_MODULE_SUFFIX := .so
-
-    ifneq ($(strip $(TARGET_2ND_ARCH)), )
-        LOCAL_MULTILIB := both
-        LOCAL_SRC_FILES_$(TARGET_ARCH) := $(TARGET_PQ_LIB_PATH)/$(TARGET_CPU_ABI)/librkhwpq.so
-        LOCAL_SRC_FILES_$(TARGET_2ND_ARCH) := $(TARGET_PQ_LIB_PATH)/$(TARGET_2ND_CPU_ABI)/librkhwpq.so
-    else
-        LOCAL_SRC_FILES_$(TARGET_ARCH) := $(TARGET_PQ_LIB_PATH)/$(TARGET_CPU_ABI)/librkhwpq.so
-    endif
-
-    LOCAL_CHECK_ELF_FILES := false
-    LOCAL_VENDOR_MODULE := true
-    LOCAL_MODULE_SUFFIX := .so
-
     # copy vop base config
     SOURCE_VOP_CONFIG_PATH := $(LOCAL_PATH)/config/$(TARGET_SOC_PLATFORM)/vop_base_config.json
     TARGET_VOP_CONFIG_PATH := $(TARGET_OUT_VENDOR)/etc/vop_base_config.json
     $(shell cp -f $(SOURCE_VOP_CONFIG_PATH) $(TARGET_VOP_CONFIG_PATH))
-    include $(BUILD_PREBUILT)
 endif
 
 ## RKNN models for AI sub-modules
