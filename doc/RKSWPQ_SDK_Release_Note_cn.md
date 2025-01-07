@@ -2,6 +2,66 @@
 
 ## coming next version
 
+## v0.17.3.4348 Release Note | 2025.03.18
+  - [MSSR] 新加BlockDFCSR通路
+  - [MSSR] 修正RGA拷贝高度非偶数对齐数据失败的问题
+
+## v0.17.2.4330 Release Note | 2025.03.12
+  - [MSSR] 修正SR通路非标准4k绿帧问题
+  - [MSSR] 更新DFCSR通路：更新模型优化效果
+
+## v0.17.1.4326 Release Note | 2025.03.11
+  - [MSSR] 增加DFCSR通路：支持1080pNV12->4kNV12处理通路
+  - [MSSR] 修正HDMI通路属性关闭MEMC时出现的闪帧问题
+
+## v0.17.0.4312 Release Note | 2025.03.06
+  - [IO] 修正`RGB565`和`BGR565`格式无法使用的错误；修正`RKPQ_IMG_FMT_NV15`到`RKPQ_IMG_FMT_VU24`格式转换的输出错误。
+  - [IO/CSC] 增加`RKPQ_IMG_FMT_LEGACY420`格式输入支持，允许转换输出为`RKPQ_IMG_FMT_NV24`/`RKPQ_IMG_FMT_NV16`/`RKPQ_IMG_FMT_NV12`三种格式。
+
+## v0.16.7.4292 Release Note | 2025.03.04
+  - [MSSR] 进一步优化4k视频播放卡顿问题
+
+## v0.16.6.4273 Release Note | 2025.02.28
+  - [MSSR] 优化4k视频播放卡顿问题
+
+## v0.16.5.4271 Release Note | 2025.02.25
+  - [MSSR] 引入`android_dlopen_ext`增强`dlopen`的相关权限
+  - [MSSR] 左右边界黑竖线闪现问题优化
+
+## v0.16.4.4256 Release Note | 2025.02.18
+  - [MSSR] 修改输出帧数：当关闭MEMC时只输出一帧
+
+## v0.16.3.4233 Release Note | 2025.02.07
+  - [MSSR] 更新输出当前算法功能开关状态：改成写出状态信息文件`data/ProcStatus.dat`，可以属性配置写出频次，默认不写出
+
+## v0.16.2.4230 Release Note | 2025.02.06
+  - [ALL] OpenCL缓存文件内置写出权限改为664
+  - [MSSR] 增加输出当前算法功能开关状态，调用后台线程写出状态值到属性`persist.vendor.rkpq.mssr.proc_status`，属性值含义参考`rkpq_mssr_procflag`，可以属性配置写出频次
+
+## v0.16.1.4220 Release Note | 2025.02.05
+  - [BLR] 算法级优化性能
+  - [ALL] 更新API接口`rkpq_set_callback()`回调函数提升稳定性
+
+## v0.16.0.4209 Release Note | 2025.01.24
+  - [ALL] 新增API接口`rkpq_prefetch_bufs()`，用于异步预导入帧缓存数据，减少主线程等待时间。
+  - [ALL] 新增API接口`rkpq_set_callback()`，用于设置回调函数，目前可用于OpenCL缓存文件的自定义读写，以绕过Android相关权限问题。
+  - [MSSR] 优化星空画面MEMC效果
+  - [MSSR] 解码通路改成与HDMI通路一致：增加Api输出运动状态参数
+  - [MSSR] 修复SR通路重置状态Y和UV不同步导致的重影问题
+
+## v0.15.2.4161 Release Note | 2025.01.09
+  - [MSSR] 更新ME模型优化效果
+
+## v0.15.1.4150 Release Note | 2025.01.08
+  - [MSSR] 更新实际帧率检测功能，防止数据冲突
+
+## v0.15.0.4146 Release Note | 2025.01.07
+  - [AUTH] 新增API接口`rkpq_set_auth_info()`，用于直接传递授权相关信息，避免因权限等问题导致授权信息读取失败的困扰。
+  - [CSC] 修正`YUV4xxSP => YUV444I`转换执行错误的问题。
+  - [MSSR] 更新Api: `rkpq_mssr_procflag`新加`RKPQ_MSSR_PROC_FLAG_FRD`选项用于实际帧率检测，`rkpq_mssr_cfg`增加数组`uint32_t aFrameRateInfo[2]`用于输出帧率信息
+  - [MSSR] 新加支持RK356X平台`540pNV12->1080pNV12`的SR处理通路
+  - [IO] 增加对**RGBA/BGRA**格式输入输出时**Alpha**通道的拷贝处理（需要通过pipeline最前和最后的两个CSC模块实现）。
+
 ## v0.14.4.4090 Release Note | 2024.12.18
   - [ALL] OpenCL库增加`/system/lib/libOpenCL-system.so`搜索路径
 

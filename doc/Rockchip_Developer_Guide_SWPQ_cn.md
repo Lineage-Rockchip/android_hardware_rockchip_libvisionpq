@@ -1,8 +1,8 @@
 # RK SW(SoftWare) PQ SDK 使用指南
 
-发布版本：v1.2.4
+发布版本：v1.2.5
 
-发布日期：2024-09-24
+发布日期：2025-03-07
 
 文件密级：□绝密   □秘密   ■内部资料   □公开
 
@@ -56,9 +56,11 @@ Rockchip Electronics Co., Ltd.
 | 2023/04/11 | 1.1.0    | librkswpq v0.1.0 | 吴方熠 |   \  | 基于 pipeline 框架修改为通用版本              |
 | 2024/06/27 | 1.2.0    | librkswpq v0.5.0 | 吴方熠 |   \  | 开发指南全面更新，增加新的模块说明和性能数据等 |
 | 2024/07/15 | 1.2.1    | librkswpq v0.5.0 | 吴方熠 |   \  | 更新平台支持情况等数据 |
-| 2024/08/01 | 1.2.2    | librkswpq v0.6.0 | 吴方熠 |   \  | 新增 AI_DHW 模块说明 |
-| 2024/09/18 | 1.2.3    | librkswpq v0.10.0| 吴方熠 |   \  | API修改，对应内容补充；新增 DCI_ACM 模块相关说明；Android属性名称调整 |
+| 2024/08/01 | 1.2.2    | librkswpq v0.6.0 | 吴方熠 |   \  | 新增 `AI_DHW` 模块说明 |
+| 2024/09/18 | 1.2.3    | librkswpq v0.10.0| 吴方熠 |   \  | API修改，对应内容补充；新增 `DCI_ACM` 模块相关说明；Android属性名称调整 |
 | 2024/09/24 | 1.2.4    | librkswpq v0.11.0| 吴方熠 |   \  | API flag调整，信息更新 |
+| 2025/02/24 | 1.2.5    | librkswpq v0.11.0| 周祥云 |   \  | 信息更新 |
+| 2025/03/07 | 1.2.6    | librkswpq v0.17.0| 周祥云 |   \  | `CSC`模块数据更新 |
 
 ## 目 录
 
@@ -268,107 +270,44 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 注：以上8个色彩空间中，除 `RKPQ_CLR_SPC_YUV_2020_LIMITED` 和 `RKPQ_CLR_SPC_YUV_2020_FULL`两种色彩空间暂不支持外，其他的色彩空间之间可以任意互相转换。
 
 ##### CSC 输入输出格式支持
-| 输入\输出格式 | NV24 | NV16 | NV12 | NV30 | NV20 | NV15 | YU24 | YU16 | YU12 | YUYV | VU24 | VU30 | Y8 | UV88 | VU88 | RGBA | BGRA | RGB | BGR | RGB565 | BGR565 |
-| ------------ | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | -- | ---- | ---- | ---- | ---- | --- | --- | ------ | ------ |
-| NV24         |  Yes |  Yes |  Yes |  Yes |  Yes |  Yes |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| NV16         |  Yes |  Yes |  Yes |  Yes |  Yes |  Yes |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| NV12         |  Yes |  Yes |  Yes |  Yes |  Yes |  Yes |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| NV30         |  Yes |  No  |  No  |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  No  |  No  | No  | No  |  No    |  No    |
-| NV20         |  Yes |  No  |  No  |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  No  |  No  | No  | No  |  No    |  No    |
-| NV15         |  Yes |  No  |  No  |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  No  |  No  | No  | No  |  No    |  No    |
-| YU24         |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   | \  |   \  |  \   |  \   |  \   | \   | \   |  \     |  \     |
-| YU16         |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   | \  |   \  |  \   |  \   |  \   | \   | \   |  \     |  \     |
-| YU12         |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   | \  |   \  |  \   |  \   |  \   | \   | \   |  \     |  \     |
-| YUYV         |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   |  \   | \  |   \  |  \   |  \   |  \   | \   | \   |  \     |  \     |
-| VU24         |  Yes |  Yes |  Yes |  Yes |  Yes |  Yes |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| VU30         |  Yes |  Yes |  Yes |  Yes |  Yes |  Yes |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| Y8           |  No  |  No  |  No  |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  No  |  No  | No |  No  |  No  |  No  |  No  | No  | No  |  No    |  No    |
-| UV88         |  No  |  No  |  No  |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  No  |  No  | No |  No  |  No  |  No  |  No  | No  | No  |  No    |  No    |
-| VU88         |  No  |  No  |  No  |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  No  |  No  | No |  No  |  No  |  No  |  No  | No  | No  |  No    |  No    |
-| RGBA         |  Yes |  Yes |  Yes |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| BGRA         |  Yes |  Yes |  Yes |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| RGB          |  Yes |  Yes |  Yes |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| BGR          |  Yes |  Yes |  Yes |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| RGB565       |  Yes |  Yes |  Yes |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
-| BGR565       |  Yes |  Yes |  Yes |  No  |  No  |  No  |  \   |  \   |  \   |  \   |  Yes |  Yes | No |  No  |  No  |  Yes |  Yes | Yes | Yes |  Yes   |  Yes   |
+| 输入\输出格式 | NV24 | NV16 | NV12 | NV30 | NV20 | NV15 | VU24 | VU30 | Y8 | UV88 | VU88 | LEGACY420 | RGBA | BGRA | RGB | BGR | RGB565 | BGR565 |
+| ------------ |:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:--:|:----:|:----:|:---------:|:----:|:----:|:---:|:---:|:------:|:------:|
+| (0) NV24     |  ✔️ |  ✔️  |  ✔️ |  ✔️ |  ✔️  |  ✔️  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (1) NV16     |  ✔️ |  ✔️  |  ✔️ |  ✔️ |  ✔️  |  ✔️  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (2) NV12     |  ✔️ |  ✔️  |  ✔️ |  ✔️ |  ✔️  |  ✔️  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (3) NV30     |  ✔️ |  ❌  |  ❌ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ❌  |  ❌ | ❌ | ❌  |  ❌   |  ❌   |
+| (4) NV20     |  ✔️ |  ❌  |  ❌ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ❌  |  ❌ | ❌ | ❌  |  ❌   |  ❌   |
+| (5) NV15     |  ✔️ |  ❌  |  ❌ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ❌  |  ❌ | ❌ | ❌  |  ❌   |  ❌   |
+| (10) VU24    |  ✔️ |  ✔️  |  ✔️ |  ✔️ |  ✔️  |  ✔️  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (11) VU30    |  ✔️ |  ✔️  |  ✔️ |  ✔️ |  ✔️  |  ✔️  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (12) Y8      |  ❌ |  ❌  |  ❌ |  ❌ |  ❌  |  ❌  |  ❌ |  ❌ | ❌ |  ❌  |  ❌  |    ❌    |  ❌  |  ❌ | ❌ | ❌  |  ❌   |  ❌   |
+| (13) UV88    |  ❌ |  ❌  |  ❌ |  ❌ |  ❌  |  ❌  |  ❌ |  ❌ | ❌ |  ❌  |  ❌  |    ❌    |  ❌  |  ❌ | ❌ | ❌  |  ❌   |  ❌   |
+| (14) VU88    |  ❌ |  ❌  |  ❌ |  ❌ |  ❌  |  ❌  |  ❌ |  ❌ | ❌ |  ❌  |  ❌  |    ❌    |  ❌  |  ❌ | ❌ | ❌  |  ❌   |  ❌   |
+| (15) LEGACY420| ✔️ |  ✔️  |  ✔️ |  ❌ |  ❌  |  ❌  |  ❌ |  ❌ | ❌ |  ❌  |  ❌  |    ❌    |  ❌  |  ❌ | ❌ | ❌  |  ❌   |  ❌   |
+| (1000) RGBA   | ✔️ |  ✔️  |  ✔️ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (1001) BGRA   | ✔️ |  ✔️  |  ✔️ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (1002) RGB    | ✔️ |  ✔️  |  ✔️ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (1003) BGR    | ✔️ |  ✔️  |  ✔️ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (1004) RGB565 | ✔️ |  ✔️  |  ✔️ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+| (1005) BGR565 | ✔️ |  ✔️  |  ✔️ |  ❌ |  ❌  |  ❌  |  ✔️ |  ✔️ | ❌ |  ❌  |  ❌  |    ❌    |  ✔️  |  ✔️ | ✔️ | ✔️  |  ✔️   |  ✔️   |
+
+:warning:注：
+- `YU24、YU16、YU12、YUYV`等格式暂不支持
 
 ##### CSC 支持平台及性能数据参考
-(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
-<table>
-  <tr align="center">
-    <td rowspan="2"><b>平台</b></td>
-    <td rowspan="2"><b>GPU型号与频率</b></td>
-    <td rowspan="2"><b>输入图像分辨率和格式</b></td>
-    <td rowspan="2"><b>固定帧率[fps]</b></td>
-    <td rowspan="1" colspan="3"><b>性能数据<b> (performance mode)</td>
-    <tr align="center">
-      <td><b>GPU占用率[%]</b></td>
-      <td><b>带宽占用[MB/s]</b></td>
-      <td><b>耗时[ms]</b></td>
-    </tr>
-  </tr>
-  <!-- RK3399 -->
-  <tr align="center">
-    <td>RK3399</td>
-    <td>Mali-T860 MP4 @800MHz</td>
-    <td>1920x1080 NV12 => RGB</td>
-    <td>60</td>
-    <td>27</td>
-    <td>cci-200, gpu-280</td>
-    <td>6.5</td>
-  </tr>
-  <!-- RK3568 -->
-  <tr align="center">
-    <td rowspan="3">RK3568</td>
-    <td rowspan="3">Mali-G52 2EE @800MHz</td>
-    <td>960x540 NV16 => NV24</td>
-    <td>60</td>
-    <td>11</td>
-    <td>cpu-240, gpu-105</td>
-    <td>3.5</td>
-      <tr align="center">
-        <td>1920x1080 NV12 => RGB</td>
-        <td>60</td>
-        <td>30</td>
-        <td>cpu-240, gpu-370</td>
-        <td>7.0</td>
-      </tr>
-      <tr align="center">
-        <td>1920x1080 RGB => NV24</td>
-        <td>60</td>
-        <td>40</td>
-        <td>cpu-240, gpu-500</td>
-        <td>8.5</td>
-      </tr>
-  </tr>
-  <!-- RK3588 -->
-  <tr align="center">
-    <td rowspan="2">RK3588</td>
-    <td rowspan="2">Mali-G610 MC4 @1000MHz</td>
-    <td>1920x1080 NV12 => RGB</td>
-    <td>60</td>
-    <td>5</td>
-    <td>gpu-560</td>
-    <td>2.0</td>
-    <tr align="center">
-      <td>3840x2160 RGB => NV12 </td>
-      <td>60</td>
-      <td>15</td>
-      <td>gpu-2250</td>
-      <td>3.5</td>
-    </tr>
-  </tr>
-  <!-- RK3576 -->
-  <tr align="center">
-    <td rowspan="2">RK3576</td>
-    <td rowspan="2">Mali-G52 MC4EE2 @800MHz</td>
-    <td>最大4K, IP support <br> (online display) </td>
-    <td>IP support</td>
-    <td>IP support</td>
-    <td>IP support</td>
-    <td>IP support</td>
-  </tr>
-</table>
+| 平台 | GPU型号与频率 | 输入图像分辨率和格式 | 固定帧率[fps] | GPU占用率[%] | 带宽占用[MB/s] | 耗时[ms] |
+|:---- |:------------ |:------------------- |:-------------:|:-----------:|:-------------:|:--------:|
+|RK3399| Mali-T860 MP4 @800MHz | 1920x1080 NV12 => RGB | 60 | 27 | cpu-200, gpu-280 | 6.5 |
+|RK3568| Mali-G52 2EE @800MHz  | 960x540 NV16 => NV24  | 60 | 11 | cpu-240, gpu-105 | 3.5 |
+| ^    | ^                     | 1920x1080 NV12 => RGB | 60 | 30 | cpu-240, gpu-370 | 7.0 |
+| ^    | ^                     | 1920x1080 RGB => NV24 | 60 | 40 | cpu-240, gpu-500 | 8.5 |
+|RK3588| Mali-G610 MC4 @1000MHz| 1920x1080 NV12 => RGB | 60 | 5  | gpu-560  | 2.0 |
+| ^    | ^                     | 3840x2160 RGB => NV12 | 60 | 15 | gpu-2250 | 3.5 |
+| ^    | ^                     | 3840x2160 Legacy420 => NV12 | 60 | 16 | TBD | 3.0 |
+| ^    | ^                     | 3840x2160 Legacy420 => NV24 | 60 | 25 | TBD | 4.5 |
+|RK3576|Mali-G52 MC4EE2 @800MHz| 最大4K, IP support<br>(online display) | IP support | IP support | IP support | IP support |
+| ^    | ^                     | 3840x2160 Legacy420 => NV12 | 60 | 33 | TBD | 6.5 |
+| ^    | ^                     | 3840x2160 Legacy420 => NV24 | 60 | 45 | TBD | 8.5 |
 
 #### DCI 模块
 ##### DCI 支持平台及性能数据参考
@@ -1853,24 +1792,24 @@ PQ程序错误码如下：
 
 ### 6.3. 常见异常现象分析解答
 1. 输出图像明显被放大且只显示了约原图左上角1/4左右的区域，或仅左上角1/4区域有内容
-   - 存在分辨率放大的模块(如ZME/AISR等)没有正确地开启或关闭，或者输出图像的分辨率大小设置不正确。
+    - 存在分辨率放大的模块(如ZME/AISR等)没有正确地开启或关闭，或者输出图像的分辨率大小设置不正确。
 
 2. 输出图像亮度/对比度/色调/饱和度怪异
-   - 检查每个开启模块的配置参数是否有初始化，以及取值是否在合理的范围。
-   - 可调用`rkpq_set_default_cfg`接口将配置的配置参数设为默认值，再对对应的参数进行修改。
-   - 可能造成这些影响的模块有：CSC, DCI, ACM 等。
+    - 检查每个开启模块的配置参数是否有初始化，以及取值是否在合理的范围。
+    - 可调用`rkpq_set_default_cfg`接口将配置的配置参数设为默认值，再对对应的参数进行修改。
+    - 可能造成这些影响的模块有：CSC, DCI, ACM 等。
 
 3. 输出图像全黑，开启水印后有水印显示
-   - 若CSC模块开启，请检查`rkpq_csc_cfg`参数是否正确，`nBrightness/nR[/G/B]Gain = 0`时图像会变黑。
+    - 若CSC模块开启，请检查`rkpq_csc_cfg`参数是否正确，`nBrightness/nR[/G/B]Gain = 0`时图像会变黑。
 
 4. 输出图像有重影或者花屏，水印显示不正确
-   - 一般是虚宽配置不对造成。可以打开dump功能，dump输入与输出。根据dump出来的图像分析输入和输出的虚宽是否正确。
-   - 在3.2小节对`rkpq_imgbuf_info`结构体的介绍中，有提到虚宽计算容易出错的地方，可参考内容进行分析。
+    - 一般是虚宽配置不对造成。可以打开dump功能，dump输入与输出。根据dump出来的图像分析输入和输出的虚宽是否正确。
+    - 在3.2小节对`rkpq_imgbuf_info`结构体的介绍中，有提到虚宽计算容易出错的地方，可参考内容进行分析。
 
 5. 输出图像绿屏
-  - LOG没有错误：可能是该版本SDK未支持的某些模块被开启，可查询`RKPQ_QUERY_MODULES_SUPPORT`条目获取当前版本支持的模块。
-  - LOG里有错误`CL_MISALIGNED_SUB_BUFFER_OFFSET`: 可能是输入输出图像buffer没有对齐量，造成OpenCL映射buffer错误，建议修改图像buffer的对齐量。
-  - LOG里有错误`No enough src(or dst) buffer size (xxxx) < frame size (xxxx)`, buffer的大小参数传入错误，应该不小于图像的大小。
+    - LOG没有错误：可能是该版本SDK未支持的某些模块被开启，可查询`RKPQ_QUERY_MODULES_SUPPORT`条目获取当前版本支持的模块。
+    - LOG里有错误`CL_MISALIGNED_SUB_BUFFER_OFFSET`: 可能是输入输出图像buffer没有对齐量，造成OpenCL映射buffer错误，建议修改图像buffer的对齐量。
+    - LOG里有错误`No enough src(or dst) buffer size (xxxx) < frame size (xxxx)`, buffer的大小参数传入错误，应该不小于图像的大小。
 
 6. 输出图像Y通道正常，UV通道有重复性条纹
     - 可能是Y和UV的像素对齐量不一致导致，可以dump输入输出确认Y通道和UV通道的虚宽是否正确。
@@ -1897,8 +1836,50 @@ PQ程序错误码如下：
     - 水印和图像均显示错位，大概率是输出图像虚宽配置不正确。
     - 水印显示错位，输出图像显示正常，有可能混淆了图像的宽和高两个参数。
 
-9. 显示画面每隔一段时间会发生闪烁，闪烁内容是之前的画面
-   - 执行命令`adb shell setprop vendor.rkpq.io.cache.clear 1`，查看是否解决问题，如果解决问题，则原因如下：
+9. 显示画面每隔几帧会发生闪烁，闪烁内容是之前的画面
+    - 执行命令`adb shell setprop vendor.rkpq.io.cache.clear 1`，查看是否解决问题，如果解决问题，则原因如下：
       - fd-buffer存在释放和重新申请的操作，新申请的buffer的fd数值与之前释放的一致，导致算法内部缓存的buffer数据无法和实际buffer对应上，往往在输入信号源变化时发生；
       - `setprop vendor.rkpq.io.cache.clear`命令清除了算法内的缓存，强制fd-buffer重新映射，故能解决该问题；
       - 最佳方式是获取fd-buffer的**唯一标识符**，并将其填至`rkpq_imgbuf_info::nFdIndex`属性上。
+
+### 模块输入输出及平台性能总表
+
+| 模块名称 | 输入格式 | 输出格式 | 支持ROI | 平台    | GPU占用率 (%) | 带宽占用 (Gbps) | 耗时 (ms) | 备注 |
+|----------|----------|----------|---------|---------|---------------|-----------------|-----------|------|
+| **CSC**  | YUV4xxSP_8/10bit, VU24, RGB系列 | YUV4xxSP_8/10bit, VU24, RGB系列 | 否 | RK3588 | 5%@(1080P→RGB) | GPU-0.560 | 2.0 | **Color Space Conversion** 模块，支持Full/LimitedRange色彩空间转换[YUV2RGB,RGB2YUV] |
+|          |          |          |         | RK3568 | 30%@(1080P→RGB) | GPU-0.5370 | 7.0 |  |
+|          |          |          |         | RK3399 | 27%@(1080P→RGB) | GPU-0.5280 | 6.5 |  |
+| **DCI**  | YUV4xxSP_8bit, VU24, Y8 | 同输入格式 | 是 | RK3588 | 7%@(1080P NV12) | GPU-0.5370 | 2.5 (统计+处理) | **Dynamic Contrast lmprovement**模块,根据图像直方图信息智能动态调整画面的对比度和层次感仅处理Y通道 |
+|          |          |          |         | RK3568 | 55%@(1080P NV12) | GPU-0.5250 | 8.0+5.0 |  |
+|          |          |          |         | RK3399 | 32%@(1080P NV12) | GPU-0.5190 | 4.5+4.5 |  |
+| **ACM**  | YUV4xxSP_8bit, VU24 | 同输入格式 | 否 | RK3588 | 4%@(1080P NV12) | GPU-0.5380 | 1.5 | **Auto Color Management**模块，基于HSV色彩空间调节用户感兴趣的色相，比如天空蓝色人像肤色、植物绿色等 |
+|          |          |          |         | RK3568 | 31%@(1080P NV12) | GPU-0.5250 | 7.0 |  |
+| **SHP**  | YUV4xxSP_8bit, VU24, Y8 | 同输入格式 | 否 | RK3588 | 7%@(1080P NV12) | GPU-0.5280 | 2.0 | **Sharpnees**模块，根据图像的高频信息，选择性增强不同频段能量，提高清晰度.仅处理Y通 |
+|          |          |          |         | RK3568 | 50%@(1080P NV12) | GPU-0.5170 | 10.0 |  |
+| **ZME**  | YUV4xxSP, VU24, RGB系列, Y8/UV88 | 同输入格式（支持缩放） | 否 | RK3588 | 10%@(540P→1080P) | GPU-0.5570 | 3.5 | **Zoom Management Engine**模块，支持任意倍率缩放 |
+|          |          |          |         | RK3568 | 53%@(540P→1080P) | GPU-0.5190 | 24.0 |  |
+| **AISR** | YUV4xxSP_8bit, VU24, Y8 | 2x放大（如1080P→4K） | 是 | RK3588 | 18%@(1080P→4K) | NPU-10 | 16.0 | **Al super-resolution**模块，支持任意倍率放大 |
+|          |          |          |         | RK3568 | 22%@(540P→1080P) | NPU-0.780 | 25.0 |  |
+| **AISD** | YUV/RGB系列 | 场景得分 | 否 | RK3588 | 2%@(1080P NV12) | NPU-0.720 | 4.0 | **Al  scene detection**场景分类(建筑，人像，植物，天空，食物)识别不同场景智能动态调整参数，使得蓝天场景更蓝，绿色植物更绿，肤色更加自然等 |
+| **AIDM** | YUV420SP_NV12, Y8 | 同输入格式 | 是 | RK3568 | 35%@(1080P NV12) | NPU-0.640 | 15.5 | **Al De mosquito noise** 去压缩蚊虫噪声，仅RK356X平台 |
+| **AIDFC** | YUV420SP_NV12 | YUV444SP_NV24/RGBA | 是 | RK3576 | 30%@(1080P NV12) | N/A | 28 | **Al De false color** 对比RGB或者YUV444信号针对YUV420丢失的高频色彩伪色还原，特别是excel表格中的彩色文字等 |
+| **MixMSSR** | 多种分辨率组合（如540P NV24） | 目标分辨率（如1080P NV12） | 否 | RK3576 | 5%~45%(720p->4k & 24/25/30fps->60fps) | 复杂多模型(maxup to 11) | 可变 | 支持**插帧(MEMC)**，**超分(SR)** 混合处理,由于3576平台集成了硬件PQ处理模块，因此只在RK3576平台支持MixMSSR模块 |
+
+### 关键说明：
+1. **输入输出格式**
+   - **YUV4xxSP**: 包含NV12/YUV420SP、NV16/YUV422SP、NV24/YUV444SP等格式
+   - **RGB系列**: 包含RGBA8888、RGB888、RGB565等格式（含BGR排列）
+   - **Y8/UV88**: 单通道或双通道灰度格式
+
+2. **性能数据**
+   - 表中数据基于文档实测值，实际性能可能因系统负载、频率配置等略有波动
+   - **NPU带宽**: AI模块涉及NPU计算时需额外考虑模型推理带宽（如AISR在RK3588上NPU带宽约10GB/s）
+
+3. **平台限制**
+   - **RK3399**: 仅支持部分基础模块（CSC/DCI/ZME）
+   - **RK3576**: 新增支持AIDFC/AIDD/AIDHW等AI模块
+   - **AI模块依赖RKNN版本**（如AISR需≥1.4，AIDFC需≥1.5）
+
+4. **特殊场景**
+   - **零拷贝模式**: 需正确配置`rkpq_imgbuf_info`中的`nFdValue`和`nFdIndex`
+   - **异步处理**: MixMSSR等模块支持异步模式，会增加1-2帧延迟

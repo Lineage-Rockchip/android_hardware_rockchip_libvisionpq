@@ -261,20 +261,58 @@ int main(int argc, const char *argv[])
         //
         pConfig->nProcFlag = RKPQ_MSSR_PROC_FLAGS_SD_DC_SR_MEMC; // 参考 rkpq_mssr_procflag
 
-        int inputFPS = 20;
-        int outputFPS = 30;
+        int inputFPS  = 25;
+        int outputFPS = 60;
         int kk = frameIdx;
-        if (inputFPS == 15 && outputFPS == 30) // 15->30
+
+    #if 1 /* 步骤4.2.5: 实际帧率检测 */
+        pConfig->nProcFlag |= RKPQ_MSSR_PROC_FLAG_FRD; // 参考 rkpq_mssr_procflag
+        ret = rkpq_proc(context, &procParams);
+        if (ret)
         {
-            // 0 - 0.5
-            pConfig->nModelIdx = 0;
-            pConfig->nMemcScale = 4;
-            pConfig->aDstIdx[0] = 0;
-            pConfig->aDstIdx[1] = 2;
-            pConfig->nDstNum = 2;
+            printf("Fail to rkpq_proc() %d\n", ret);
+            break;
         }
-        else if (inputFPS == 20 && outputFPS == 30) // 20->30
+        else
         {
+            printf("FRD result : isAbandoned=%d, actualFPS=%d\n", pConfig->aFrameRateInfo[0], pConfig->aFrameRateInfo[1]);
+            inputFPS = pConfig->aFrameRateInfo[1]; // 更新实际帧率
+            if (pConfig->aFrameRateInfo[0]) // 丢重复帧
+            {
+                continue; // 不再继续执行算法，注意这里没有再执行后面的 frameIdx++
+            }
+        }
+        pConfig->nProcFlag &= (~RKPQ_MSSR_PROC_FLAG_FRD); // 参考 rkpq_mssr_procflag
+    #endif
+
+        // x{1.0, 1.2, 1.5, 2.0, 2.4, 2.5, 3.0, 4.0}
+        if (outputFPS * 1.0 / inputFPS == 1.0) // 10->10, ..., 50->50, 60->60
+        {
+            // x1.0
+            pConfig->bEnableMEMC = 0;
+            pConfig->aDstIdx[0]  = 0;
+            pConfig->nDstNum     = 1;
+        }
+        else if (outputFPS * 1.0 / inputFPS == 1.2) // 20->24, 25->30, 50->60
+        {
+            // x1.2
+            if (kk % 5 == 4)
+            {
+                pConfig->bEnableMEMC = 0;
+                pConfig->aDstIdx[0]  = 0;
+                pConfig->aDstIdx[1]  = 1;
+                pConfig->nDstNum     = 2;
+            }
+            else
+            {
+                pConfig->bEnableMEMC = 0;
+                pConfig->aDstIdx[0]  = 0;
+                pConfig->nDstNum     = 1;
+            }
+        }
+        else if (outputFPS * 1.0 / inputFPS == 1.5) // 10->15, 20->30
+        {
+            // x1.5
             if (kk%2==0)
             {
                 // 0 - 0.6
@@ -293,93 +331,18 @@ int main(int argc, const char *argv[])
                 pConfig->nDstNum = 1;
             }
         }
-        else if (inputFPS == 25 && outputFPS == 30) // 25->30
+        else if (outputFPS * 1.0 / inputFPS == 2.0) // 10->20, 15->30, 25->50, 30->60
         {
-            if (kk%5==0)
-            {
-                // 0 - 0.8
-                pConfig->nModelIdx = 1;
-                pConfig->nMemcScale = 5;
-                pConfig->aDstIdx[0] = 0;
-                pConfig->aDstIdx[1] = 4;
-                pConfig->nDstNum = 2;
-            }
-            else if (kk%5==1)
-            {
-                // 1.6
-                pConfig->nModelIdx = 1;
-                pConfig->nMemcScale = 5;
-                pConfig->aDstIdx[0] = 3;
-                pConfig->nDstNum = 1;
-            }
-            else if (kk%5==2)
-            {
-                // 2.5
-                pConfig->nModelIdx = 0;
-                pConfig->nMemcScale = 4;
-                pConfig->aDstIdx[0] = 2;
-                pConfig->nDstNum = 1;
-            }
-            else if (kk%5==3)
-            {
-                // 3.4
-                pConfig->nModelIdx = 1;
-                pConfig->nMemcScale = 5;
-                pConfig->aDstIdx[0] = 2;
-                pConfig->nDstNum = 1;
-            }
-            else if (kk%5==4)
-            {
-                // 3.4
-                pConfig->nModelIdx = 1;
-                pConfig->nMemcScale = 5;
-                pConfig->aDstIdx[0] = 1;
-                pConfig->nDstNum = 1;
-            }
-        }
-        else if (inputFPS == 15 && outputFPS == 60) // 15->60
-        {
+            // x2
             pConfig->nModelIdx = 0;
             pConfig->nMemcScale = 4;
-            pConfig->aDstIdx[0] = 1;
-            pConfig->aDstIdx[1] = 2;
-            pConfig->aDstIdx[2] = 3;
-            pConfig->aDstIdx[3] = 4;
-            pConfig->nDstNum = 4;
-        }
-        else if (inputFPS == 20 && outputFPS == 60) // 20->60
-        {
-            pConfig->nModelIdx = 0;
-            pConfig->nMemcScale = 5;
             pConfig->aDstIdx[0] = 0;
             pConfig->aDstIdx[1] = 2;
-            pConfig->aDstIdx[2] = 3;
-            pConfig->nDstNum = 3;
+            pConfig->nDstNum = 2;
         }
-        else if (inputFPS == 24 && outputFPS == 60) // 24->60
+        else if (outputFPS * 1.0 / inputFPS == 2.4) // 10->24, 25->60
         {
-            if (kk%2==0)
-            {
-                // 0 - 0.4 - 0.8
-                pConfig->nModelIdx = 1;
-                pConfig->nMemcScale = 5;
-                pConfig->aDstIdx[0] = 0;
-                pConfig->aDstIdx[1] = 2;
-                pConfig->aDstIdx[2] = 4;
-                pConfig->nDstNum = 3;
-            }
-            else if (kk%2==1)
-            {
-                // 1.2 - 1.6
-                pConfig->nModelIdx = 1;
-                pConfig->nMemcScale = 5;
-                pConfig->aDstIdx[0] = 1;
-                pConfig->aDstIdx[1] = 3;
-                pConfig->nDstNum = 2;
-            }
-        }
-        else if (inputFPS == 25 && outputFPS == 60) // 25->60
-        {
+            // x2.4
             if (kk%5==0)
             {
                 // 0 - 0.4 - 0.8
@@ -428,41 +391,70 @@ int main(int argc, const char *argv[])
                 pConfig->nDstNum = 2;
             }
         }
-        else if (inputFPS == 30 && outputFPS == 60) // 30->60
+        else if (outputFPS * 1.0 / inputFPS == 2.5) // 10->25, 20->50, 24->60
         {
+            // x2.5
+            if (kk%2==0)
+            {
+                // 0 - 0.4 - 0.8
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 0;
+                pConfig->aDstIdx[1] = 2;
+                pConfig->aDstIdx[2] = 4;
+                pConfig->nDstNum = 3;
+            }
+            else if (kk%2==1)
+            {
+                // 1.2 - 1.6
+                pConfig->nModelIdx = 1;
+                pConfig->nMemcScale = 5;
+                pConfig->aDstIdx[0] = 1;
+                pConfig->aDstIdx[1] = 3;
+                pConfig->nDstNum = 2;
+            }
+        }
+        else if (outputFPS * 1.0 / inputFPS == 3.0) // 10->30, 20->60
+        {
+            // x3.0
+            pConfig->nModelIdx = 0;
+            pConfig->nMemcScale = 5;
+            pConfig->aDstIdx[0] = 0;
+            pConfig->aDstIdx[1] = 2;
+            pConfig->aDstIdx[2] = 3;
+            pConfig->nDstNum = 3;
+        }
+        else if (outputFPS * 1.0 / inputFPS == 4.0) // 15->60
+        {
+            // x4.0
             pConfig->nModelIdx = 0;
             pConfig->nMemcScale = 4;
             pConfig->aDstIdx[0] = 0;
-            pConfig->aDstIdx[1] = 2;
-            pConfig->nDstNum = 2;
+            pConfig->aDstIdx[1] = 1;
+            pConfig->aDstIdx[2] = 2;
+            pConfig->aDstIdx[3] = 3;
+            pConfig->nDstNum = 4;
         }
-        else if (inputFPS == 50 && outputFPS == 60) // 50->60
+        else if (outputFPS * 1.0 / inputFPS == 5.0) // 10->50
         {
-            if (kk % 5 == 4)
-            {
-                pConfig->bEnableMEMC = 0;
-                pConfig->aDstIdx[0]  = 0;
-                pConfig->aDstIdx[1]  = 1;
-                pConfig->nDstNum     = 2;
-            }
-            else
-            {
-                pConfig->bEnableMEMC = 0;
-                pConfig->aDstIdx[0]  = 0;
-                pConfig->nDstNum     = 1;
-            }
-        }
-        else if (inputFPS == 60 && outputFPS == 60) // 60->60
-        {
-            pConfig->bEnableMEMC = 0;
-            pConfig->aDstIdx[0]  = 0;
-            pConfig->nDstNum     = 1;
+            // x5.0
+            pConfig->nModelIdx = 1;
+            pConfig->nMemcScale = 5;
+            pConfig->aDstIdx[0] = 0;
+            pConfig->aDstIdx[1] = 1;
+            pConfig->aDstIdx[2] = 2;
+            pConfig->aDstIdx[3] = 3;
+            pConfig->aDstIdx[4] = 4;
+            pConfig->nDstNum = 5;
         }
 
         /* 步骤4.3: 设置输入和输出 */
         // 设置输入输出图像和缓冲区信息；一般每帧的缓冲区不同，每帧都要设置一次
         rkpq_set_inputs(context, stSrcImgInfos, 5);
         rkpq_set_outputs(context, stDstImgInfos, 2);
+
+
+    
 
         /* 步骤4.4: 执行算法 */
         ret = rkpq_proc(context, &procParams); // 算法阻塞执行

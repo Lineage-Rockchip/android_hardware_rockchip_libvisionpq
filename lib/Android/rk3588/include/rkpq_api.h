@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Last update on 2024-12-09 for v0.14.0
+// Last update on 2025-01-21 for v0.16.0
 
 #pragma once
 #ifndef __RKPQ_API_H_
@@ -51,6 +51,10 @@ extern "C"
 #define RKPQ_FLAG_CIRCULAR_BUF_OUT      (1 << 6)    /* circular output buffer with same size & format, better performance */
 #define RKPQ_FLAG_CALC_MEAN_LUMA        (1 << 7)    /* calculate mean luminance for output image */
 #define RKPQ_FLAG_CVT_RANGE_ONLY        (1 << 4)    /* deprecated */
+
+/* callback flags definition for rkpq_set_callback() */
+#define RKPQ_CBFLAG_OCL_CACHE_READ      (0x01)
+#define RKPQ_CBFLAG_OCL_CACHE_WRITE     (0x02)
 
 /* const numbers definition */
 #define RKPQ_MIN_IMAGE_WIDTH            128
@@ -269,6 +273,7 @@ typedef enum _rkpq_mssr_procflag
     RKPQ_MSSR_PROC_FLAG_SR                  = (1<<2),//  4: SR
     RKPQ_MSSR_PROC_FLAG_MEMC                = (1<<3),//  8: MEMC
     RKPQ_MSSR_PROC_FLAG_FE                  = (1<<4),// 16: FE
+    RKPQ_MSSR_PROC_FLAG_FRD                 = (1<<5),// 32: FRD
     // typical customized ProcFlags
     RKPQ_MSSR_PROC_FLAGS_SD_SR              = (RKPQ_MSSR_PROC_FLAG_SD | RKPQ_MSSR_PROC_FLAG_SR)         ,// SD | SR             = 1 | 4 = 5
     RKPQ_MSSR_PROC_FLAGS_SD_DC              = (RKPQ_MSSR_PROC_FLAG_SD | RKPQ_MSSR_PROC_FLAG_DC)         ,// SD | DC             = 1 | 2 = 3
@@ -277,7 +282,7 @@ typedef enum _rkpq_mssr_procflag
     RKPQ_MSSR_PROC_FLAGS_SD_DC_SR_MEMC      = (RKPQ_MSSR_PROC_FLAGS_SD_DC_SR | RKPQ_MSSR_PROC_FLAG_MEMC),// SD | DC | SR | MEMC = 7 | 8 = 15
     RKPQ_MSSR_PROC_FLAGS_FE_SR              = (RKPQ_MSSR_PROC_FLAG_FE | RKPQ_MSSR_PROC_FLAG_SR)         ,// FE | SR             =16 | 4 = 20
     // MAX
-    RKPQ_MSSR_PROC_FLAGS_MAX                = ((1<<5)-1) // 31
+    RKPQ_MSSR_PROC_FLAGS_MAX                = ((1<<6)-1) // 63
 }rkpq_mssr_procflag;
 
 /* the information for RKPQ_QUERY_SDK_VERSION */
@@ -382,7 +387,7 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_init_params
     /**
      * to reduce the memory consumption & time cost of initialization, use setup flags to control the allocation of OpenCL & RKNN resouce.
      * if you want to use the default setting, just set this flags to 0.
-     * supported module & setup flags:
+     * supported modules & setup flags:
      *  - RKPQ_MODULE_CSC,   range: [0, 15], bitfield (0-ALL, 1-R2Y, 2-Y2R, 4-R2R, 8-Y2Y)
      *  - RKPQ_MIXTURE_MSSR, range: [0, 127], bitfield
      */
@@ -829,6 +834,8 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_mssr_cfg
 
     uint32_t        bEnableHDMI;        /* [i] {0, 1}: 0-codec, 1-hdmi*/
 
+    uint32_t        aFrameRateInfo[2];  /* [o] #0=isAbandoned, #1=actualFPS*/
+
     uint32_t        aReservedData[1];   /* reserved for future use */
 } rkpq_mssr_cfg;
 
@@ -845,44 +852,44 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_dci_acm_cfg
 
 
 /**
- * @Function: rkpq_init()
- * @Descrptn: rkpq_context initialization, create a rkpq_context instance.
- * @Params:
+ * @function: rkpq_init()
+ * @descrptn: rkpq_context initialization, create a rkpq_context instance.
+ * @params:
  *      rkpq_context *pCtxPtr - a pointer of the pq handle of context
  *      rkpq_init_params *pInitParam - a pointer of the API initialization parameters
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_init(rkpq_context *pCtxPtr, rkpq_init_params *pInitParam);
 
 /**
- * @Function: rkpq_proc()
- * @Descrptn: call a rkpq_context instance to execute RKPQ
- * @Params:
+ * @function: rkpq_proc()
+ * @descrptn: call a rkpq_context instance to execute RKPQ
+ * @params:
  *      rkpq_context ctx - the pq handle of context
  *      rkpq_proc_params *pProcParam - a pointer of the API execution parameters
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_proc(rkpq_context ctx, rkpq_proc_params *pProcParam);
 
 /**
- * @Function: rkpq_deinit()
- * @Descrptn: release rkpq_context resource (whether it's valid or not) created by rkpq_init().
- * @Params:
+ * @function: rkpq_deinit()
+ * @descrptn: release rkpq_context resource (whether it's valid or not) created by rkpq_init().
+ * @params:
  *      rkpq_context ctx - the pq handle of context
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_deinit(rkpq_context ctx);
 
 /**
- * @Function: rkpq_query()
- * @Descrptn: query the information about image, buffer or others.
- * @Params:
+ * @function: rkpq_query()
+ * @descrptn: query the information about image, buffer or others.
+ * @params:
  *      rkpq_context ctx - the pq handle of context
  *      rkpq_query_cmd cmd - the query command, see rkpq_query_cmd
  *      size_t size - the buffer size of retuned information
  *      void *info - the buffer pointer of retuned information value
- * @Return: error code, 0 indicates everything is ok.
- * @Detail: the detail explanation of the arguments lists below:
+ * @return: error code, 0 indicates everything is ok.
+ * @detail: the detail explanation of the arguments lists below:
  *  |       Query Command               |   Need A Context  |   Return Type     |
  *  | --------------------------------- | ----------------- | ----------------- |
  *  | RKPQ_QUERY_SDK_VERSION            |       no          | rkpq_version_info |
@@ -904,80 +911,140 @@ int rkpq_deinit(rkpq_context ctx);
 int rkpq_query(rkpq_context ctx, rkpq_query_cmd cmd, size_t size, void *info);
 
 /**
- * @Function: rkpq_set_loglevel()
- * @Descrptn: set the log level for a pq context
- * @Params:
+ * @function: rkpq_set_loglevel()
+ * @descrptn: set the log level for a pq context
+ * @params:
  *      rkpq_context ctx - the pq handle of context, could be 0 for all rkpq_context
  *      int logLevel - the log level, valid range: {0-OFF, 1-FATAL, 2-ERROR, 3-WARNING, 4-INFO}
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_set_loglevel(rkpq_context ctx, int logLevel);
 
 /**
- * @Function: rkpq_set_cache_path()
- * @Descrptn: set the cache data path, for fast initilization, RKNN model etc.
+ * @function: rkpq_set_cache_path()
+ * @descrptn: set the cache data path, for fast initilization, RKNN model etc.
  *      Call this function before rkpq_init().
- * @Params:
+ * @params:
  *      rkpq_context ctx - set to NULL before calling rkpq_init()
  *      const char *pPath - the folder path, ends with '/'
  *      int target - bitfield, 1 for Ocl caches, 2 for RKNN models, 4 for license path, 8 for librga path, 16 for license json config file, 0 for all
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_set_cache_path(rkpq_context ctx, const char *pPath, int target);
 
 /**
- * @Function: rkpq_clear_caches()
- * @Descrptn: clear the old IO buffer caches, used when the input/output buffers are changed.
- * @Params:
+ * @function: rkpq_clear_caches()
+ * @descrptn: clear the old IO buffer caches, used when the input/output buffers are changed.
+ * @params:
  *      rkpq_context ctx - the pq handle of context
  *      int flag - bitfield, set to 1 for now
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_clear_caches(rkpq_context ctx, int flag);
 
 /**
- * @Function: rkpq_set_default_cfg()
- * @Descrptn: set a specified module configuration to default values.
- * @Params:
+ * @function: rkpq_set_default_cfg()
+ * @descrptn: set a specified module configuration to default values.
+ * @params:
  *      void *pModuleConfig - the target configuration of the specified module
  *      rkpq_module module - the specified module
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_set_default_cfg(void *pModuleConfig, rkpq_module module);
 
 /**
- * @Function: rkpq_get_default_cfg()
- * @Descrptn: get the specified module configuration pointer.
- * @Params:
+ * @function: rkpq_get_default_cfg()
+ * @descrptn: get the specified module configuration pointer.
+ * @params:
  *      rkpq_context ctx - the pq handle of context
  *      int pipeOrder - the module order in the pipeline
  *      int module - see rkpq_module
- * @Return: void * - the specified module configuration pointer, NULL indicates error happened.
+ * @return: void * - the specified module configuration pointer, NULL indicates error happened.
  */
 void *rkpq_get_default_cfg(rkpq_context ctx, int pipeOrder, int module);
 
 /**
- * @Function: rkpq_set_inputs() / rkpq_set_outputs()
- * @Descrptn: for multi-input/output modules like AI_MEMC
- * @Params:
+ * @function: rkpq_set_inputs() / rkpq_set_outputs()
+ * @descrptn: for multi-input/output modules like AI_MEMC
+ * @params:
  *      rkpq_context ctx - the pq handle of context
  *      rkpq_imgbuf_info *pInputBufs - the input/output buffers' info
  *      int num - number of input/output buffers
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_set_inputs(rkpq_context ctx, rkpq_imgbuf_info *pInputBufs, int num);
 int rkpq_set_outputs(rkpq_context ctx, rkpq_imgbuf_info *pOutputBufs, int num);
 
 /**
- * @Function: rkpq_set_target_platform()
- * @Descrptn: set the target platform, such as "rk3568", "RK3576", "rk3588[s]", "RK3399[pro]" etc.
+ * @function: rkpq_prefetch_bufs()
+ * @descrptn: prefetch the input/output buffers to improve the performance.
+ * @params:
+ *      rkpq_context ctx - the pq handle of context
+ *      rkpq_imgbuf_info *pTargetBufs - the input/output buffers' info
+ *      int num - number of target buffers
+ * @return: error code, 0 indicates everything is ok.
+ */
+int rkpq_prefetch_bufs(rkpq_context ctx, rkpq_imgbuf_info *pTargetBufs, int num);
+
+/**
+ * @function: rkpq_set_auth_info()
+ * @descrptn: for AIPQ authorization
+ * @params:
+ *      [I] rkpq_context ctx - set to NULL before calling rkpq_init()
+ *      [I/O] char *pLicenseInfo - license info content (1st order checking). If set to NULL, 2nd or 3rd order checking will be used.
+ *      [I] int nLicenseStrSize - buffer length of 'pLicenseInfo', ONLY work if the condition is true:
+*           condition = (pDeviceInfo[I] != NULL) && (pLicenseInfo[I] != NULL) && (pActivateCode[O] != NULL) && (nLicenseStrSize > 0);
+ *          when the condition is true, the license content data (length <= nLicenseStrSize) will be written to 'pLicenseInfo' if successed.
+ *      [I] const char *pActivateCode - activate code content (2nd order checking). If set to NULL, 1st or 3rd order checking will be used.
+ *      [I] int nVSID - vendor storage item id (3rd order checking). if set to -1, 1st or 2nd order checking will be used.
+ *          Data in the vendor storage item should be license info content!
+ *      [I] const char *pDeviceInfo - device info content (The last char should not be '\n'!). If set to NULL, this info will get by librkauth.
+ * @usage: supported argument cases:
+ *      1. set pLicenseInfo (with license info content)
+ *      2. set pLicenseInfo (with license info content) + pDeviceInfo
+ *      3. set pLicenseInfo (array pointer) + nLicenseStrSize (> 0) + pActivateCode + pDeviceInfo
+ *      4. set pActivateCode
+ *      5. set nVSID (with license info content in the vendor storage item)
+ * @return: error code, 0 indicates everything is ok.
+ */
+int rkpq_set_auth_info(rkpq_context ctx, char *pLicenseInfo, int nLicenseStrSize,
+    const char* pActivateCode, int nVSID, const char *pDeviceInfo);
+
+/**
+ * @function: rkpq_set_target_platform()
+ * @descrptn: set the target platform, such as "rk3568", "RK3576", "rk3588[s]", "RK3399[pro]" etc.
  *      Call this function before rkpq_init() to set the target platform.
- * @Params:
+ * @params:
  *      const char *pPlatformName - the target platform name, case insensitive
- * @Return: error code, 0 indicates everything is ok.
+ * @return: error code, 0 indicates everything is ok.
 */
 int rkpq_set_target_platform(const char *pPlatformName); /* Deprecated */
 
+/**
+ * @function: rkpq_set_callback()
+ * @descrptn: set the callback function
+ * @params:
+ *      [I] rkpq_context ctx - the pq handle of context
+ *          - set `rkpq_init_params::bLazyInit` to 1 if call this function after rkpq_init()
+ *          - set to NULL if call this function before rkpq_init()
+ *      [I] int flag - callback function type flag, see RKPQ_CBFLAG_XXX
+ *      [I] int (*cbf)(void *, size_t, void *, void *pUserData) - the callback function, usage:
+ *          1. like `int xxx_cbf_read(void *pFilename, size_t nMaxSize, void *pFileData, void *pUserData)`:
+ *              - @params: pFilename: the file name of the input file
+ *              - @params: nMaxSize: the max data length of 'pFileData', NOTE: the file size shoule be smaller or equal than 'nMaxSize'!
+ *              - @params: pFileData: the target buffer about to store the data read from the input file
+ *              - @params: pUserData: user defined data pointer, could be NULL
+ *              - @return: NOTE: return the actual file size, a value greater than 0 indicates the data is read successfully.
+ *          2. like `int xxx_cbf_write(void *pFilename, size_t nSize, void *pFileData, void *pUserData)`:
+ *              - @params: pFilename: the file name of the output file
+ *              - @params: nSize: the data length of 'pFileData'
+ *              - @params: pFileData: the source buffer about to write to the output file
+ *              - @params: pUserData: user defined data pointer, could be NULL
+ *              - @return: NOTE: return the actual write size, return value should be equal to 'nSize' if succeed.
+ *      [I] void *pUserData - the user defined data pointer, could be NULL
+ * @return: error code, 0 indicates everything is ok.
+ */
+int rkpq_set_callback(rkpq_context ctx, int flag, int (*cbf)(void *, size_t, void *, void *pUserData), void *pUserData);
 
 #ifdef __cplusplus
 }

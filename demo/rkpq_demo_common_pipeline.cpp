@@ -16,14 +16,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Last update 2024-09-02 for librkswpq.so v0.7.0
+// Last update 2025-01-21 for librkswpq.so v0.16.0
 
 #include "rkpq_api.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <string>
 
-#define USE_HARDWARE_BUFFER 0   /* use DRM like hardware buffers with fd values valid */
+#define USE_HARDWARE_BUFFER     0   /* use DRM like hardware buffers with fd values valid */
+#define OCL_CACHE_PATH_PREFIX   "/data/rkalgo/"
 
 void optionalQueryContextInfo(rkpq_context ctx)
 {
@@ -50,6 +53,67 @@ void optionalQueryContextInfo(rkpq_context ctx)
     printf("OpenCL image alignment: %u\n", imgAlignment);
     printf("OpenCL buffer alignment: %u\n", bufAlignment);
     printf("Is support RKNN: %u\n", isRknnSupport);
+}
+
+
+int test_cbf_ocl_cache_read(void *_filename, size_t _size, void *_data, void *_userdata)
+{
+    if (!_filename || !_data)
+    {
+        printf("%s: NULL argument input!\n", __func__);
+        return -1;
+    }
+
+    std::string filename((const char *)_filename);
+    auto pos = filename.find_last_of('/');
+    filename = pos == std::string::npos ? OCL_CACHE_PATH_PREFIX + filename : filename;
+
+    FILE *fp = fopen(filename.c_str(), "rb");
+    if (fp == NULL)
+    {
+        printf("Failed to open file '%s'! (%s)\n", filename.c_str(), strerror(errno));
+        return -1;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    if (size <= _size)
+    {
+        fread(_data, sizeof(char), size, fp);
+        printf("Read %zu bytes from file '%s'.\n", size, filename.c_str());
+    } else {
+        printf("File '%s' size %zu is larger than buffer size %zu!\n", filename.c_str(), size, _size);
+    }
+
+    fclose(fp);
+    return (int)size;
+}
+
+int test_cbf_ocl_cache_write(void *_filename, size_t _size, void *_data, void *_userdata)
+{
+    if (!_filename || !_data)
+    {
+        printf("%s: NULL argument input!\n", __func__);
+        return -1;
+    }
+
+    std::string filename((const char *)_filename);
+    auto pos = filename.find_last_of('/');
+    filename = pos == std::string::npos ? OCL_CACHE_PATH_PREFIX + filename : filename;
+
+    FILE *fp = fopen(filename.c_str(), "wb");
+    if (fp == NULL)
+    {
+        printf("Failed to open file '%s'! (%s)\n", filename.c_str(), strerror(errno));
+        return -1;
+    }
+
+    size_t size = fwrite(_data, sizeof(char), _size, fp);
+    fclose(fp);
+    printf("Write %zu bytes to file '%s'.\n", size, filename.c_str());
+    return (int)size;
 }
 
 
@@ -84,6 +148,10 @@ int main(int argc, const char *argv[])
         printf("Failed to set loglevel or cache_path or target_platform! %d\n", ret);
         // return ret;
     }
+
+    /* 设置OpenCL缓存文件的自定义读写回调函数，用于在Android系统中规避缓存文件读写权限相关的问题 */
+    rkpq_set_callback(nullptr, RKPQ_CBFLAG_OCL_CACHE_READ, test_cbf_ocl_cache_read, NULL);
+    rkpq_set_callback(nullptr, RKPQ_CBFLAG_OCL_CACHE_WRITE, test_cbf_ocl_cache_write, NULL);
 
     /* 创建相关结构体对象，有条件可以做一层封装 */
     rkpq_context ctx = NULL;
