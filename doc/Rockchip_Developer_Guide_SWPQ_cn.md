@@ -1,8 +1,8 @@
 # RK SW(SoftWare) PQ SDK 使用指南
 
-发布版本：v1.2.5
+发布版本：v1.2.7
 
-发布日期：2025-03-07
+发布日期：2025-05-06
 
 文件密级：□绝密   □秘密   ■内部资料   □公开
 
@@ -61,6 +61,9 @@ Rockchip Electronics Co., Ltd.
 | 2024/09/24 | 1.2.4    | librkswpq v0.11.0| 吴方熠 |   \  | API flag调整，信息更新 |
 | 2025/02/24 | 1.2.5    | librkswpq v0.11.0| 周祥云 |   \  | 信息更新 |
 | 2025/03/07 | 1.2.6    | librkswpq v0.17.0| 周祥云 |   \  | `CSC`模块数据更新 |
+| 2025/05/06 | 1.2.7    | librkswpq v0.18.5| 吴方熠 |   \  | `SHP`模块性能数据更新 |
+| 2025/05/06 | 1.2.8    | librkswpq v0.18.5| 游生福 |   \  | 更新性能总表 |
+| 2025/05/22 | 1.2.8    | librkswpq v0.20.0| 游生福 |   \  | `LDC`模块性能数据更新 |
 
 ## 目 录
 
@@ -237,7 +240,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | AIDHW| 否 | 输入: YUV4xxSP_8bit, RGB[A8]888, Y8 <br> 输出: YUV4xxSP_8bit, RGB[A8]888, Y8 | 输出格式和输入相同 |
 | MixSHPACM | 否 | 输入: YUV420SP_NV12, RGBA8888 <br> 输出: YUV420SP_NV12 | \ |
 | MixFE | 否 | 输入: 540p YUV420SP_NV12 <br> 输出: 4k YUV420SP_NV12 | 只支持指定的分辨率和指定的输入输出格式 |
-| MixMSSR | 否 | 输入 $\xrightarrow{主要算法处理}$ 输出： <br> 540pNV24 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 720pY8+UV88 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 1080pNV12 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 1080pNV24 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV24 <br> 1080pRGB $\xrightarrow{SD+MEMC}$ 1080pRGB <br> 1080pNV12 $\xrightarrow{SD+DC+SR}$ 4kNV12 <br> 540pNV24 $\xrightarrow{SR+MEMC+FE}$ 1080pNV12 <br> 4kNV12 $\xrightarrow{SD+MEMC}$ 4kNV12 <br> 4kNV24 $\xrightarrow{SD+MEMC}$ 4kNV24 <br> 4kRGB $\xrightarrow{SD+MEMC}$  4kRGB| 只支持指定的分辨率和指定的输入输出格式 |
+| MixMSSR | 否 | 输入 $\xrightarrow{主要算法处理}$ 输出： <br> 540pNV24 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 720pY8+UV88 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 1080pNV12 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV12 <br> 1080pNV24 $\xrightarrow{SD+DC+SR+MEMC}$ 1080pNV24 <br> 1080pRGB $\xrightarrow{SD+MEMC}$ 1080pRGB <br> 1080pNV12 $\xrightarrow{SD+DC+SR}$ 4kNV12 <br> 540pNV24 $\xrightarrow{SR+MEMC+FE}$ 1080pNV12 <br> 4kNV12 $\xrightarrow{SD+MEMC}$ 4kNV12 <br> 4kNV24 $\xrightarrow{SD+MEMC}$ 4kNV24 <br> 4kRGB $\xrightarrow{SD+MEMC}$  4kRGB <br> 256x256RGB $\xrightarrow{SD}$ SD-Info <br> 1080pNV12 $\xrightarrow{DFC}$ 1080pRGB/1080pNV24 <br> 1080pNV12 $\xrightarrow{SR+DFC}$  4kNV12 | 只支持指定的分辨率和指定的输入输出格式 |
 
 注：
 1. `YUV4xxSP_8bit`表示`YUV420SP_NV12, YUV422SP_NV16, YUV444SP_NV24`均支持。
@@ -305,7 +308,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
 | ^    | ^                     | 3840x2160 RGB => NV12 | 60 | 15 | gpu-2250 | 3.5 |
 | ^    | ^                     | 3840x2160 Legacy420 => NV12 | 60 | 16 | TBD | 3.0 |
 | ^    | ^                     | 3840x2160 Legacy420 => NV24 | 60 | 25 | TBD | 4.5 |
-|RK3576|Mali-G52 MC4EE2 @800MHz| 最大4K, IP support<br>(online display) | IP support | IP support | IP support | IP support |
+|RK3576|Mali-G52 MC4EE2 @900MHz| 最大4K, IP support<br>(online display) | IP support | IP support | IP support | IP support |
 | ^    | ^                     | 3840x2160 Legacy420 => NV12 | 60 | 33 | TBD | 6.5 |
 | ^    | ^                     | 3840x2160 Legacy420 => NV24 | 60 | 45 | TBD | 8.5 |
 
@@ -372,7 +375,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>最大4K, IP support <br> (online display) </td>
     <td>IP support</td>
     <td>IP support</td>
@@ -448,7 +451,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>最大4K, IP support <br> (online display) </td>
     <td>IP support</td>
     <td>IP support</td>
@@ -520,7 +523,7 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>最大1080P,IP support <br> (Y/UV separated, online display)</td>
     <td>IP support</td>
     <td>IP support</td>
@@ -592,12 +595,19 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
   <!-- RK3576 -->
   <tr align="center">
     <td rowspan="2">RK3576</td>
-    <td rowspan="2">Mali-G52 MC4EE2 @800MHz</td>
-    <td>最大4K, IP support <br> (online display) </td>
-    <td>IP support</td>
-    <td>IP support</td>
-    <td>IP support</td>
-    <td>IP support</td>
+    <td rowspan="2">Mali-G52 MC4EE2 @900MHz</td>
+    <td>1920x1080, NV12 (Lite版本) </td>
+    <td>60</td>
+    <td>14</td>
+    <td>cpu-250,gpu-245</td>
+    <td>3.2</td>
+    <tr align="center">
+      <td>最大4K, IP support <br> (online display) </td>
+      <td>IP support</td>
+      <td>IP support</td>
+      <td>IP support</td>
+      <td>IP support</td>
+    </tr>
   </tr>
 </table>
 
@@ -632,13 +642,12 @@ SWPQ (SoftWare Picture Quality) 主要功能是利用软件对输出画质进行
       <td>24</td>
       <td>gpu-3000</td>
       <td>2</td>
-
     </tr>
   </tr>
   <!-- RK3576 -->
   <tr align="center">
     <td rowspan="2">RK3576</td>
-    <td rowspan="2">Mali-G52 MC4EE2 @800MHz</td>
+    <td rowspan="2">Mali-G52 MC4EE2 @900MHz</td>
     <td>TBD</td>
     <td>TBD</td>
     <td>TBD</td>
@@ -704,7 +713,7 @@ TODO
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>TBD</td>
     <td>TBD</td>
     <td>TBD</td>
@@ -752,7 +761,7 @@ TODO
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>TBD</td>
     <td>TBD</td>
     <td>TBD</td>
@@ -800,7 +809,7 @@ TODO
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>N/A</td>
     <td>N/A</td>
     <td>N/A</td>
@@ -848,7 +857,7 @@ TODO
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>1920x1080 NV12</td>
     <td>30</td>
     <td>30</td>
@@ -896,7 +905,7 @@ TODO
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>TBD</td>
     <td>TBD</td>
     <td>TBD</td>
@@ -944,7 +953,7 @@ TODO
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>TBD</td>
     <td>TBD</td>
     <td>TBD</td>
@@ -996,7 +1005,7 @@ TODO
   <!-- RK3576 -->
   <tr align="center">
     <td>RK3576</td>
-    <td>Mali-G52 MC4EE2 @800MHz</td>
+    <td>Mali-G52 MC4EE2 @900MHz</td>
     <td>960x540,NV24</td>
     <td>30</td>
     <td>N/A</td>
@@ -1792,16 +1801,18 @@ PQ程序错误码如下：
 
 ### 6.3. 常见异常现象分析解答
 1. 输出图像明显被放大且只显示了约原图左上角1/4左右的区域，或仅左上角1/4区域有内容
-    - 存在分辨率放大的模块(如ZME/AISR等)没有正确地开启或关闭，或者输出图像的分辨率大小设置不正确。
-
+    
+- 存在分辨率放大的模块(如ZME/AISR等)没有正确地开启或关闭，或者输出图像的分辨率大小设置不正确。
+    
 2. 输出图像亮度/对比度/色调/饱和度怪异
     - 检查每个开启模块的配置参数是否有初始化，以及取值是否在合理的范围。
     - 可调用`rkpq_set_default_cfg`接口将配置的配置参数设为默认值，再对对应的参数进行修改。
     - 可能造成这些影响的模块有：CSC, DCI, ACM 等。
 
 3. 输出图像全黑，开启水印后有水印显示
-    - 若CSC模块开启，请检查`rkpq_csc_cfg`参数是否正确，`nBrightness/nR[/G/B]Gain = 0`时图像会变黑。
-
+    
+- 若CSC模块开启，请检查`rkpq_csc_cfg`参数是否正确，`nBrightness/nR[/G/B]Gain = 0`时图像会变黑。
+    
 4. 输出图像有重影或者花屏，水印显示不正确
     - 一般是虚宽配置不对造成。可以打开dump功能，dump输入与输出。根据dump出来的图像分析输入和输出的虚宽是否正确。
     - 在3.2小节对`rkpq_imgbuf_info`结构体的介绍中，有提到虚宽计算容易出错的地方，可参考内容进行分析。
@@ -1843,43 +1854,1497 @@ PQ程序错误码如下：
       - 最佳方式是获取fd-buffer的**唯一标识符**，并将其填至`rkpq_imgbuf_info::nFdIndex`属性上。
 
 ### 模块输入输出及平台性能总表
-
-| 模块名称 | 输入格式 | 输出格式 | 支持ROI | 平台    | GPU占用率 (%) | 带宽占用 (Gbps) | 耗时 (ms) | 备注 |
-|----------|----------|----------|---------|---------|---------------|-----------------|-----------|------|
-| **CSC**  | YUV4xxSP_8/10bit, VU24, RGB系列 | YUV4xxSP_8/10bit, VU24, RGB系列 | 否 | RK3588 | 5%@(1080P→RGB) | GPU-0.560 | 2.0 | **Color Space Conversion** 模块，支持Full/LimitedRange色彩空间转换[YUV2RGB,RGB2YUV] |
-|          |          |          |         | RK3568 | 30%@(1080P→RGB) | GPU-0.5370 | 7.0 |  |
-|          |          |          |         | RK3399 | 27%@(1080P→RGB) | GPU-0.5280 | 6.5 |  |
-| **DCI**  | YUV4xxSP_8bit, VU24, Y8 | 同输入格式 | 是 | RK3588 | 7%@(1080P NV12) | GPU-0.5370 | 2.5 (统计+处理) | **Dynamic Contrast lmprovement**模块,根据图像直方图信息智能动态调整画面的对比度和层次感仅处理Y通道 |
-|          |          |          |         | RK3568 | 55%@(1080P NV12) | GPU-0.5250 | 8.0+5.0 |  |
-|          |          |          |         | RK3399 | 32%@(1080P NV12) | GPU-0.5190 | 4.5+4.5 |  |
-| **ACM**  | YUV4xxSP_8bit, VU24 | 同输入格式 | 否 | RK3588 | 4%@(1080P NV12) | GPU-0.5380 | 1.5 | **Auto Color Management**模块，基于HSV色彩空间调节用户感兴趣的色相，比如天空蓝色人像肤色、植物绿色等 |
-|          |          |          |         | RK3568 | 31%@(1080P NV12) | GPU-0.5250 | 7.0 |  |
-| **SHP**  | YUV4xxSP_8bit, VU24, Y8 | 同输入格式 | 否 | RK3588 | 7%@(1080P NV12) | GPU-0.5280 | 2.0 | **Sharpnees**模块，根据图像的高频信息，选择性增强不同频段能量，提高清晰度.仅处理Y通 |
-|          |          |          |         | RK3568 | 50%@(1080P NV12) | GPU-0.5170 | 10.0 |  |
-| **ZME**  | YUV4xxSP, VU24, RGB系列, Y8/UV88 | 同输入格式（支持缩放） | 否 | RK3588 | 10%@(540P→1080P) | GPU-0.5570 | 3.5 | **Zoom Management Engine**模块，支持任意倍率缩放 |
-|          |          |          |         | RK3568 | 53%@(540P→1080P) | GPU-0.5190 | 24.0 |  |
-| **AISR** | YUV4xxSP_8bit, VU24, Y8 | 2x放大（如1080P→4K） | 是 | RK3588 | 18%@(1080P→4K) | NPU-10 | 16.0 | **Al super-resolution**模块，支持任意倍率放大 |
-|          |          |          |         | RK3568 | 22%@(540P→1080P) | NPU-0.780 | 25.0 |  |
-| **AISD** | YUV/RGB系列 | 场景得分 | 否 | RK3588 | 2%@(1080P NV12) | NPU-0.720 | 4.0 | **Al  scene detection**场景分类(建筑，人像，植物，天空，食物)识别不同场景智能动态调整参数，使得蓝天场景更蓝，绿色植物更绿，肤色更加自然等 |
-| **AIDM** | YUV420SP_NV12, Y8 | 同输入格式 | 是 | RK3568 | 35%@(1080P NV12) | NPU-0.640 | 15.5 | **Al De mosquito noise** 去压缩蚊虫噪声，仅RK356X平台 |
-| **AIDFC** | YUV420SP_NV12 | YUV444SP_NV24/RGBA | 是 | RK3576 | 30%@(1080P NV12) | N/A | 28 | **Al De false color** 对比RGB或者YUV444信号针对YUV420丢失的高频色彩伪色还原，特别是excel表格中的彩色文字等 |
-| **MixMSSR** | 多种分辨率组合（如540P NV24） | 目标分辨率（如1080P NV12） | 否 | RK3576 | 5%~45%(720p->4k & 24/25/30fps->60fps) | 复杂多模型(maxup to 11) | 可变 | 支持**插帧(MEMC)**，**超分(SR)** 混合处理,由于3576平台集成了硬件PQ处理模块，因此只在RK3576平台支持MixMSSR模块 |
+(`html`表格。如显示异常，请更换支持`html`的`Markdown`渲染器)
+<table>
+  <!-- 标题栏 -->
+  <thead>
+    <tr align="center">
+      <th>模块名称</th>
+      <th>平台<br><sup>[见说明2]</sup></th>
+      <th>输入<sup>[见说明3]</sup><br>(分辨率/格式/帧率)</th>
+      <th>主要算法处理</th>
+      <th>输出<sup>[见说明3]</sup><br>(分辨率/格式/帧率)</th>
+      <th>CPU<sup>[见说明4]</sup><br>占用率(%)</th>
+      <th>GPU<sup>[见说明4]</sup><br>占用率(%)<br>带宽(Gbps)</th>
+      <th>NPU<sup>[见说明4]</sup><br>占用率(%)<br>带宽(Gbps)</th>
+      <th>总带宽(Gbps)<br><sup>[见说明4]</sup></th>
+      <th>平均耗时(ms)<br><sup>[见说明5]</sup></th>
+      <th>NPU算力占用<br>(=平台算力<sup>[见说明6]</sup>x每帧耗时x处理帧率， 单位T/s)</th>
+      <th>备注</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- CSC RK3588 1080pNV12@30fps -> 1080pRGB@30fps -->
+    <tr align="center">
+      <td rowspan="16"><b>CSC</b></td>
+      <td rowspan="4">RK3588</td>
+      <td>1080pNV12@30fps</td>
+      <td>YUV2RGB</td>
+      <td>1080pRGB@30fps</td>
+      <td>28%/800%</td>
+      <td>4%@900MHz<br>0.3659Gbps</td>
+      <td>/</td>
+      <td>0.6047Gbps</td>
+      <td>1.6ms</td>
+      <td>/</td>
+      <td rowspan="16" align="left"><b>Color Space Conversion</b> 模块，支持Full/LimitedRange色彩空间转换[YUV2RGB,RGB2YUV]</td>
+    </tr>
+    <!-- CSC RK3588 1080pRGB@30fps -> 1080pNV12@30fps -->
+    <tr align="center">
+      <td>1080pRGB@30fps</td>
+      <td>RGB2YUV</td>
+      <td>1080pNV12@30fps</td>
+      <td>28%/800%</td>
+      <td>4%@900MHz<br>0.2768Gbps</td>
+      <td>/</td>
+      <td>0.5040Gbps</td>
+      <td>1.6ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3588 1080pNV24@30fps -> 1080pRGB@30fps -->
+    <tr align="center">
+      <td>1080pNV24@30fps</td>
+      <td>YUV2RGB</td>
+      <td>1080pRGB@30fps</td>
+      <td>27%/800%</td>
+      <td>4%@900MHz<br>0.4622Gbps</td>
+      <td>/</td>
+      <td>0.7130Gbps</td>
+      <td>1.5ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3588 1080pRGB@30fps -> 1080pNV24@30fps -->
+    <tr align="center">
+      <td>1080pRGB@30fps</td>
+      <td>RGB2YUV</td>
+      <td>1080pNV24@30fps</td>
+      <td>27%/800%</td>
+      <td>4%@900MHz<br>0.3717Gbps</td>
+      <td>/</td>
+      <td>0.6202Gbps</td>
+      <td>2.0ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3576 1080pNV12@30fps -> 1080pRGB@30fps -->
+    <tr align="center">
+      <td rowspan="4">RK3576</td>
+      <td>1080pNV12@30fps</td>
+      <td>YUV2RGB</td>
+      <td>1080pRGB@30fps</td>
+      <td>25%/800%</td>
+      <td>5%@900MHz<br>0.2717Gbps</td>
+      <td>/</td>
+      <td>0.8705Gbps</td>
+      <td>2.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3576 1080pRGB@30fps -> 1080pNV12@30fps -->
+    <tr align="center">
+      <td>1080pRGB@30fps</td>
+      <td>RGB2YUV</td>
+      <td>1080pNV12@30fps</td>
+      <td>23%/800%</td>
+      <td>4%@900MHz<br>0.2659Gbps</td>
+      <td>/</td>
+      <td>0.8675Gbps</td>
+      <td>2.7ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3576 1080pNV24@30fps -> 1080pRGB@30fps -->
+    <tr align="center">
+      <td>1080pNV24@30fps</td>
+      <td>YUV2RGB</td>
+      <td>1080pRGB@30fps</td>
+      <td>23%/800%</td>
+      <td>5%@900MHz<br>0.3565Gbps</td>
+      <td>/</td>
+      <td>0.9736Gbps</td>
+      <td>2.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3576 1080pRGB@30fps -> 1080pNV24@30fps -->
+    <tr align="center">
+      <td>1080pRGB@30fps</td>
+      <td>RGB2YUV</td>
+      <td>1080pNV24@30fps</td>
+      <td>26%/800%</td>
+      <td>5%@900MHz<br>0.3589Gbps</td>
+      <td>/</td>
+      <td>0.9593Gbps</td>
+      <td>2.9ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK356X 1080pNV12@30fps -> 1080pRGB@30fps -->
+    <tr align="center">
+      <td rowspan="4">RK356X</td>
+      <td>1080pNV12@30fps</td>
+      <td>YUV2RGB</td>
+      <td>1080pRGB@30fps</td>
+      <td>35%/400%</td>
+      <td>18%@800MHz<br>0.2748Gbps</td>
+      <td>/</td>
+      <td>0.5561Gbps</td>
+      <td>7.2ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK356X 1080pRGB@30fps -> 1080pNV12@30fps -->
+    <tr align="center">
+      <td>1080pRGB@30fps</td>
+      <td>RGB2YUV</td>
+      <td>1080pNV12@30fps</td>
+      <td>34%/400%</td>
+      <td>16%@800MHz<br>0.2744Gbps</td>
+      <td>/</td>
+      <td>0.5702Gbps</td>
+      <td>7.3ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK356X 1080pNV24@30fps -> 1080pRGB@30fps -->
+    <tr align="center">
+      <td>1080pNV24@30fps</td>
+      <td>YUV2RGB</td>
+      <td>1080pRGB@30fps</td>
+      <td>34%/400%</td>
+      <td>18%@800MHz<br>0.3639Gbps</td>
+      <td>/</td>
+      <td>0.6546Gbps</td>
+      <td>7.3ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK356X 1080pRGB@30fps -> 1080pNV24@30fps -->
+    <tr align="center">
+      <td>1080pRGB@30fps</td>
+      <td>RGB2YUV</td>
+      <td>1080pNV24@30fps</td>
+      <td>34%/400%</td>
+      <td>20%@800MHz<br>0.3675Gbps</td>
+      <td>/</td>
+      <td>0.6616Gbps</td>
+      <td>8.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3562 1080pNV12@30fps -> 1080pRGB@30fps -->
+    <tr align="center">
+      <td rowspan="4">RK3562</td>
+      <td>1080pNV12@30fps</td>
+      <td>YUV2RGB</td>
+      <td>1080pRGB@30fps</td>
+      <td>28%/400%</td>
+      <td>14%@900MHz<br>0.2748Gbps</td>
+      <td>/</td>
+      <td>0.6969Gbps</td>
+      <td>6.0ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3562 1080pRGB@30fps -> 1080pNV12@30fps -->
+    <tr align="center">
+      <td>1080pRGB@30fps</td>
+      <td>RGB2YUV</td>
+      <td>1080pNV12@30fps</td>
+      <td>28%/400%</td>
+      <td>14%@900MHz<br>0.2755Gbps</td>
+      <td>/</td>
+      <td>0.7084Gbps</td>
+      <td>5.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3562 1080pNV24@30fps -> 1080pRGB@30fps -->
+    <tr align="center">
+      <td>1080pNV24@30fps</td>
+      <td>YUV2RGB</td>
+      <td>1080pRGB@30fps</td>
+      <td>27%/400%</td>
+      <td>15%@900MHz<br>0.3643Gbps</td>
+      <td>/</td>
+      <td>0.8140Gbps</td>
+      <td>6.1ms</td>
+      <td>/</td>
+    </tr>
+    <!-- CSC RK3562 1080pRGB@30fps -> 1080pNV24@30fps -->
+    <tr align="center">
+      <td>1080pRGB@30fps</td>
+      <td>RGB2YUV</td>
+      <td>1080pNV24@30fps</td>
+      <td>28%/400%</td>
+      <td>17%@900MHz<br>0.3665Gbps</td>
+      <td>/</td>
+      <td>0.8182Gbps</td>
+      <td>7.2ms</td>
+      <td>/</td>
+    </tr>
+    <!-- DCI RK3588 1080p DCI -->
+    <tr align="center">
+      <td rowspan="8"><b>DCI</b></td>
+      <td rowspan="2">RK3588</td>
+      <td>1080pNV12@30fps</td>
+      <td>DCI</td>
+      <td>1080pNV12@30fps</td>
+      <td>27%/800%</td>
+      <td>4%@900MHz<br>0.2475Gbps</td>
+      <td>/</td>
+      <td>0.4849Gbps</td>
+      <td>2.2ms</td>
+      <td>/</td>
+      <td rowspan="8" align="left"><b>Dynamic Contrast lmprovement</b>模块,根据图像直方图信息智能动态调整画面的对比度和层次感仅处理Y通道</td>
+    </tr>
+    <!-- DCI RK3588 4k DCI -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>DCI</td>
+      <td>4kNV12@30fps</td>
+      <td>27%/800%</td>
+      <td>14%@900MHz<br>0.9417Gbps</td>
+      <td>/</td>
+      <td>1.2630Gbps</td>
+      <td>5.5ms</td>
+      <td>/</td>
+    </tr>
+    <!-- DCI RK3576 1080p DCI -->
+    <tr align="center">
+      <td rowspan="2">RK3576</td>
+      <td>1080pNV12@30fps</td>
+      <td>DCI</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>9%@900MHz<br>0.2430Gbps</td>
+      <td>/</td>
+      <td>0.8826Gbps</td>
+      <td>5.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- DCI RK3576 4k DCI -->
+    <tr align="center">
+      <td>4kNV12@27fps</td>
+      <td>DCI</td>
+      <td>4kNV12@27fps</td>
+      <td>27%/800%</td>
+      <td>34%@900MHz<br>0.9420Gbps</td>
+      <td>/</td>
+      <td>1.6310Gbps</td>
+      <td>14.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- DCI RK356X 1080p DCI -->
+    <tr align="center">
+      <td rowspan="2">RK356X</td>
+      <td>1080pNV12@30fps</td>
+      <td>DCI</td>
+      <td>1080pNV12@30fps</td>
+      <td>33%/400%</td>
+      <td>30%@800MHz<br>0.2469Gbps</td>
+      <td>/</td>
+      <td>0.5591Gbps</td>
+      <td>13.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- DCI RK356X 4k DCI -->
+    <tr align="center">
+      <td>4kNV12@22fps</td>
+      <td>DCI</td>
+      <td>4kNV12@22fps</td>
+      <td>36%/400%</td>
+      <td>88%@800MHz<br>0.7091Gbps</td>
+      <td>/</td>
+      <td>0.9825Gbps</td>
+      <td>43.9ms</td>
+      <td>/</td>
+    </tr>
+    <!-- DCI RK3562 1080p DCI -->
+    <tr align="center">
+      <td rowspan="2">RK3562</td>
+      <td>1080pNV12@30fps</td>
+      <td>DCI</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/400%</td>
+      <td>25%@900MHz<br>0.2456Gbps</td>
+      <td>/</td>
+      <td>0.7175Gbps</td>
+      <td>11.0ms</td>
+      <td>/</td>
+    </tr>
+    <!-- DCI RK3562 4k DCI -->
+    <tr align="center">
+      <td>4kNV12@27fps</td>
+      <td>DCI</td>
+      <td>4kNV12@27fps</td>
+      <td>29%/400%</td>
+      <td>90%@900MHz<br>0.8645Gbps</td>
+      <td>/</td>
+      <td>1.3220Gbps</td>
+      <td>36.9ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ACM RK3588 1080p ACM -->
+    <tr align="center">
+      <td rowspan="8"><b>ACM</b></td>
+      <td rowspan="2">RK3588</td>
+      <td>1080pNV12@30fps</td>
+      <td>ACM</td>
+      <td>1080pNV12@30fps</td>
+      <td>27%/800%</td>
+      <td>3%@900MHz<br>0.2145Gbps</td>
+      <td>/</td>
+      <td>0.4488Gbps</td>
+      <td>1.4ms</td>
+      <td>/</td>
+      <td rowspan="8" align="left"><b>Auto Color Management</b>模块，基于HSV色彩空间调节用户感兴趣的色相，比如天空蓝色人像肤色、植物绿色等</td>
+    </tr>
+    <!-- ACM RK3588 4k ACM -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>ACM</td>
+      <td>4kNV12@30fps</td>
+      <td>28%/800%</td>
+      <td>9%@900MHz<br>0.8561Gbps</td>
+      <td>/</td>
+      <td>1.1375Gbps</td>
+      <td>3.2ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ACM RK3576 1080p ACM -->
+    <tr align="center">
+      <td rowspan="2">RK3576</td>
+      <td>1080pNV12@30fps</td>
+      <td>ACM</td>
+      <td>1080pNV12@30fps</td>
+      <td>23%/800%</td>
+      <td>4%@900MHz<br>0.1823Gbps</td>
+      <td>/</td>
+      <td>0.7820Gbps</td>
+      <td>2.3ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ACM RK3576 4k ACM -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>ACM</td>
+      <td>4kNV12@30fps</td>
+      <td>25%/800%</td>
+      <td>18%@900MHz<br>0.7234Gbps</td>
+      <td>/</td>
+      <td>1.3368Gbps</td>
+      <td>6.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ACM RK356X 1080p ACM -->
+    <tr align="center">
+      <td rowspan="2">RK356X</td>
+      <td>1080pNV12@30fps</td>
+      <td>ACM</td>
+      <td>1080pNV12@30fps</td>
+      <td>33%/400%</td>
+      <td>16%@800MHz<br>0.1876Gbps</td>
+      <td>/</td>
+      <td>0.4772Gbps</td>
+      <td>6.7ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ACM RK356X 4k ACM -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>ACM</td>
+      <td>4kNV12@30fps</td>
+      <td>36%/400%</td>
+      <td>66%@800MHz<br>0.7400Gbps</td>
+      <td>/</td>
+      <td>1.0383Gbps</td>
+      <td>23.6ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ACM RK3562 1080p ACM -->
+    <tr align="center">
+      <td rowspan="2">RK3562</td>
+      <td>1080pNV12@30fps</td>
+      <td>ACM</td>
+      <td>1080pNV12@30fps</td>
+      <td>25%/400%</td>
+      <td>14%@900MHz<br>0.1861Gbps</td>
+      <td>/</td>
+      <td>0.6285Gbps</td>
+      <td>5.9ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ACM RK3562 4k ACM -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>ACM</td>
+      <td>4kNV12@30fps</td>
+      <td>28%/400%</td>
+      <td>55%@900MHz<br>0.7283Gbps</td>
+      <td>/</td>
+      <td>1.1968Gbps</td>
+      <td>20.1ms</td>
+      <td>/</td>
+    </tr>
+    <!-- SHP RK3588 1080p SHP -->
+    <tr align="center">
+      <td rowspan="8"><b>SHP</b></td>
+      <td rowspan="2">RK3588</td>
+      <td>1080pNV12@30fps</td>
+      <td>SHP</td>
+      <td>1080pNV12@30fps</td>
+      <td>27%/800%</td>
+      <td>4%@900MHz<br>0.2246Gbps</td>
+      <td>/</td>
+      <td>0.4595Gbps</td>
+      <td>1.7ms</td>
+      <td>/</td>
+      <td rowspan="8" align="left"><b>Sharpnees</b>模块，根据图像的高频信息，选择性增强不同频段能量，提高清晰度.仅处理Y通</td>
+    </tr>
+    <!-- SHP RK3588 4k SHP -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>SHP</td>
+      <td>4kNV12@30fps</td>
+      <td>27%/800%</td>
+      <td>15%@900MHz<br>0.8603Gbps</td>
+      <td>/</td>
+      <td>1.1365Gbps</td>
+      <td>4.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- SHP RK3576 1080p SHP -->
+    <tr align="center">
+      <td rowspan="2">RK3576</td>
+      <td>1080pNV12@30fps</td>
+      <td>SHP(Lite)</td>
+      <td>1080pNV12@30fps</td>
+      <td>24%/800%</td>
+      <td>8%@900MHz<br>0.1819Gbps</td>
+      <td>/</td>
+      <td>0.7045Gbps</td>
+      <td>3.2ms</td>
+      <td>/</td>
+    </tr>
+    <!-- SHP RK3576 4k SHP -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>SHP(Lite)</td>
+      <td>4kNV12@30fps</td>
+      <td>29%/800%</td>
+      <td>29%@900MHz<br>0.7072Gbps</td>
+      <td>/</td>
+      <td>1.3278Gbps</td>
+      <td>10.5ms</td>
+      <td>/</td>
+    </tr>
+    <!-- SHP RK356X 1080p SHP -->
+    <tr align="center">
+      <td rowspan="2">RK356X</td>
+      <td>1080pNV12@30fps</td>
+      <td>SHP(Lite)</td>
+      <td>1080pNV12@30fps</td>
+      <td>34%/400%</td>
+      <td>26%@800MHz<br>0.1846Gbps</td>
+      <td>/</td>
+      <td>0.4942Gbps</td>
+      <td>10.5ms</td>
+      <td>/</td>
+    </tr>
+    <!-- SHP RK356X 4k SHP -->
+    <tr align="center">
+      <td>4kNV12@28fps</td>
+      <td>SHP(Lite)</td>
+      <td>4kNV12@28fps</td>
+      <td>36%/400%</td>
+      <td>89%@800MHz<br>0.6193Gbps</td>
+      <td>/</td>
+      <td>0.8918Gbps</td>
+      <td>35.0ms</td>
+      <td>/</td>
+    </tr>
+    <!-- SHP RK3562 1080p SHP -->
+    <tr align="center">
+      <td rowspan="2">RK3562</td>
+      <td>1080pNV12@30fps</td>
+      <td>SHP(Lite)</td>
+      <td>1080pNV12@30fps</td>
+      <td>29%/400%</td>
+      <td>24%@900MHz<br>0.1833Gbps</td>
+      <td>/</td>
+      <td>0.6671Gbps</td>
+      <td>8.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- SHP RK3562 4k SHP -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>SHP(Lite)</td>
+      <td>4kNV12@30fps</td>
+      <td>26%/400%</td>
+      <td>90%@900MHz<br>0.7167Gbps</td>
+      <td>/</td>
+      <td>1.1900Gbps</td>
+      <td>30.6ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3588 540pNV12->1080pNV12 -->
+    <tr align="center">
+      <td rowspan="16"><b>ZME</b></td>
+      <td rowspan="4">RK3588</td>
+      <td>540pNV12@30fps</td>
+      <td>Y x2.0, UV x2.0</td>
+      <td>1080pNV12@30fps</td>
+      <td>28%/800%</td>
+      <td>9%@900MHz<br>0.2143Gbps</td>
+      <td>/</td>
+      <td>0.4484Gbps</td>
+      <td>4.2ms</td>
+      <td>/</td>
+      <td rowspan="16" align="left"><b>Zoom Management Engine</b>模块，支持任意倍率缩放</td>
+    </tr>
+    <!-- ZME RK3588 540pNV12->1080pNV24 -->
+    <tr align="center">
+      <td>540pNV12@30fps</td>
+      <td>Y x2.0, UV x4.0</td>
+      <td>1080pNV24@30fps</td>
+      <td>28%/800%</td>
+      <td>13%@900MHz<br>0.3389Gbps</td>
+      <td>/</td>
+      <td>0.5848Gbps</td>
+      <td>5.7ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3588 1080pNV12->1080pNV24 -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>Y x1.0, UV x2.0</td>
+      <td>1080pNV24@30fps</td>
+      <td>28%/800%</td>
+      <td>5%@900MHz<br>0.4013Gbps</td>
+      <td>/</td>
+      <td>0.6350Gbps</td>
+      <td>2.7ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3588 1080pNV24->1080pNV12 -->
+    <tr align="center">
+      <td>1080pNV24@30fps</td>
+      <td>Y x1.0, UV x0.5</td>
+      <td>1080pNV12@30fps</td>
+      <td>27%/800%</td>
+      <td>4%@900MHz<br>0.3952Gbps</td>
+      <td>/</td>
+      <td>0.6376Gbps</td>
+      <td>2.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3576 540pNV12->1080pNV12 -->
+    <tr align="center">
+      <td rowspan="4">RK3576</td>
+      <td>540pNV12@30fps</td>
+      <td>Y x2.0, UV x2.0</td>
+      <td>1080pNV12@30fps</td>
+      <td>25%/800%</td>
+      <td>34%@900MHz<br>0.2053Gbps</td>
+      <td>/</td>
+      <td>0.8362Gbps</td>
+      <td>13.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3576 540pNV12->1080pNV24 -->
+    <tr align="center">
+      <td>540pNV12@30fps</td>
+      <td>Y x2.0, UV x4.0</td>
+      <td>1080pNV24@30fps</td>
+      <td>25%/800%</td>
+      <td>56%@900MHz<br>0.3351Gbps</td>
+      <td>/</td>
+      <td>0.9800Gbps</td>
+      <td>21.3ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3576 1080pNV12->1080pNV24 -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>Y x1.0, UV x2.0</td>
+      <td>1080pNV24@30fps</td>
+      <td>25%/800%</td>
+      <td>15%@900MHz<br>0.3896Gbps</td>
+      <td>/</td>
+      <td>1.0342Gbps</td>
+      <td>6.9ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3576 1080pNV24->1080pNV12 -->
+    <tr align="center">
+      <td>1080pNV24@30fps</td>
+      <td>Y x1.0, UV x0.5</td>
+      <td>1080pNV12@30fps</td>
+      <td>24%/800%</td>
+      <td>13%@900MHz<br>0.3875Gbps</td>
+      <td>/</td>
+      <td>1.0206Gbps</td>
+      <td>6.7ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK356X 540pNV12->1080pNV12 -->
+    <tr align="center">
+      <td rowspan="4">RK356X</td>
+      <td>540pNV12@21fps</td>
+      <td>Y x2.0, UV x2.0</td>
+      <td>1080pNV12@21fps</td>
+      <td>38%/400%</td>
+      <td>89%@800MHz<br>0.1557Gbps</td>
+      <td>/</td>
+      <td>0.4195Gbps</td>
+      <td>45.7ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK356X 540pNV12->1080pNV24 -->
+    <tr align="center">
+      <td>540pNV12@13fps</td>
+      <td>Y x2.0, UV x4.0</td>
+      <td>1080pNV24@13fps</td>
+      <td>34%/400%</td>
+      <td>92%@800MHz<br>0.1568Gbps</td>
+      <td>/</td>
+      <td>0.3953Gbps</td>
+      <td>72.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK356X 1080pNV12->1080pNV24 -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>Y x1.0, UV x2.0</td>
+      <td>1080pNV24@30fps</td>
+      <td>40%/400%</td>
+      <td>55%@800MHz<br>0.3990Gbps</td>
+      <td>/</td>
+      <td>0.7244Gbps</td>
+      <td>21.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK356X 1080pNV24->1080pNV12 -->
+    <tr align="center">
+      <td>1080pNV24@30fps</td>
+      <td>Y x1.0, UV x0.5</td>
+      <td>1080pNV12@30fps</td>
+      <td>39%/400%</td>
+      <td>45%@800MHz<br>0.4001Gbps</td>
+      <td>/</td>
+      <td>0.7264Gbps</td>
+      <td>18.7ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3562 540pNV12->1080pNV12 -->
+    <tr align="center">
+      <td rowspan="4">RK3562</td>
+      <td>540pNV12@26fps</td>
+      <td>Y x2.0, UV x2.0</td>
+      <td>1080pNV12@26fps</td>
+      <td>28%/400%</td>
+      <td>91%@900MHz<br>0.1900Gbps</td>
+      <td>/</td>
+      <td>0.6203Gbps</td>
+      <td>37.7ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3562 540pNV12->1080pNV24 -->
+    <tr align="center">
+      <td>540pNV12@16fps</td>
+      <td>Y x2.0, UV x4.0</td>
+      <td>1080pNV24@16fps</td>
+      <td>26%/400%</td>
+      <td>94%@900MHz<br>0.1877Gbps</td>
+      <td>/</td>
+      <td>0.5876Gbps</td>
+      <td>60.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3562 1080pNV12->1080pNV24 -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>Y x1.0, UV x2.0</td>
+      <td>1080pNV24@30fps</td>
+      <td>29%/400%</td>
+      <td>45%@900MHz<br>0.3957Gbps</td>
+      <td>/</td>
+      <td>0.8727Gbps</td>
+      <td>17.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- ZME RK3562 1080pNV24->1080pNV12 -->
+    <tr align="center">
+      <td>1080pNV24@30fps</td>
+      <td>Y x1.0, UV x0.5</td>
+      <td>1080pNV12@30fps</td>
+      <td>30%/400%</td>
+      <td>40%@900MHz<br>0.3958Gbps</td>
+      <td>/</td>
+      <td>0.8736Gbps</td>
+      <td>15.9ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3588 1080pNV12 TDC-4pts -->
+    <tr align="center">
+      <td rowspan="16"><b>LDC</b></td>
+      <td rowspan="4">RK3588</td>
+      <td>1080pNV12@30fps</td>
+      <td>TDC(4-pts)</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>4%@900MHz<br>0.6700Gbps</td>
+      <td>/</td>
+      <td>0.9066Gbps</td>
+      <td>1.9ms</td>
+      <td>/</td>
+      <td rowspan="16" align="left"><b>Lens Distortion Correction</b> 镜头畸变矫正模块，根据相应畸变参数进行反畸变矫正处理。<br>支持<b>梯形畸变矫正TDC</b>(Trapezoidal Distortion Correction)、<b>枕形畸变矫正PDC</b>(Pincushion Distortion Correction)、<b>桶形畸变矫正BDC</b>(Barrel Distortion Correction)，支持NV12、NV24、RGBX、BGRX输入格式，输入输出格式必须相同</td>
+    </tr>
+    <!-- LDC RK3588 1080pNV12 TDC-H -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>TDC(H)</td>
+      <td>1080pNV12@30fps</td>
+      <td>27%/800%</td>
+      <td>4%@900MHz<br>0.6635Gbps</td>
+      <td>/</td>
+      <td>0.8992Gbps</td>
+      <td>1.9ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3588 1080pNV12 PDC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>PDC(k>0)</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>4%@900MHz<br>0.6715Gbps</td>
+      <td>/</td>
+      <td>0.9021Gbps</td>
+      <td>1.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3588 1080pNV12 BDC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>BDC(k<0)</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>4%@900MHz<br>0.6695Gbps</td>
+      <td>/</td>
+      <td>0.9094Gbps</td>
+      <td>1.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3576 1080pNV12 TDC-4pts -->
+    <tr align="center">
+      <td rowspan="4">RK3576</td>
+      <td>1080pNV12@30fps</td>
+      <td>TDC(4-pts)</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>7%@900MHz<br>0.6596Gbps</td>
+      <td>/</td>
+      <td>1.2643Gbps</td>
+      <td>3.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3576 1080pNV12 TDC-H -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>TDC(H)</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>7%@900MHz<br>0.6633Gbps</td>
+      <td>/</td>
+      <td>1.2690Gbps</td>
+      <td>3.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3576 1080pNV12 PDC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>PDC(k>0)</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>7%@900MHz<br>0.6648Gbps</td>
+      <td>/</td>
+      <td>1.2629Gbps</td>
+      <td>3.5ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3576 1080pNV12 BDC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>BDC(k<0)</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>7%@900MHz<br>0.6627Gbps</td>
+      <td>/</td>
+      <td>1.2658Gbps</td>
+      <td>3.5ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK356X 1080pNV12 TDC-4pts -->
+    <tr align="center">
+      <td rowspan="4">RK356X</td>
+      <td>1080pNV12@30fps</td>
+      <td>TDC(4-pts)</td>
+      <td>1080pNV12@30fps</td>
+      <td>36%/400%</td>
+      <td>27%@800MHz<br>0.6801Gbps</td>
+      <td>/</td>
+      <td>0.9866Gbps</td>
+      <td>10.8ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK356X 1080pNV12 TDC-H -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>TDC(H)</td>
+      <td>1080pNV12@30fps</td>
+      <td>33%/400%</td>
+      <td>27%@800MHz<br>0.7163Gbps</td>
+      <td>/</td>
+      <td>1.0104Gbps</td>
+      <td>10.9ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK356X 1080pNV12 PDC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>PDC(k>0)</td>
+      <td>1080pNV12@30fps</td>
+      <td>32%/400%</td>
+      <td>27%@800MHz<br>0.6840Gbps</td>
+      <td>/</td>
+      <td>0.9601Gbps</td>
+      <td>10.3ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK356X 1080pNV12 BDC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>BDC(k<0)</td>
+      <td>1080pNV12@30fps</td>
+      <td>37%/400%</td>
+      <td>27%@800MHz<br>0.6821Gbps</td>
+      <td>/</td>
+      <td>0.9625Gbps</td>
+      <td>10.6ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3562 1080pNV12 TDC-4pts -->
+    <tr align="center">
+      <td rowspan="4">RK3562</td>
+      <td>1080pNV12@30fps</td>
+      <td>TDC(4-pts)</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/400%</td>
+      <td>23%@900MHz<br>0.6771Gbps</td>
+      <td>/</td>
+      <td>1.1200Gbps</td>
+      <td>9.0ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3562 1080pNV12 TDC-H -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>TDC(H)</td>
+      <td>1080pNV12@30fps</td>
+      <td>27%/400%</td>
+      <td>23%@900MHz<br>0.7067Gbps</td>
+      <td>/</td>
+      <td>1.1498Gbps</td>
+      <td>9.0ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3562 1080pNV12 PDC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>PDC(k>0)</td>
+      <td>1080pNV12@30fps</td>
+      <td>29%/400%</td>
+      <td>24%@900MHz<br>0.6844Gbps</td>
+      <td>/</td>
+      <td>1.1272Gbps</td>
+      <td>9.0ms</td>
+      <td>/</td>
+    </tr>
+    <!-- LDC RK3562 1080pNV12 BDC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>BDC(k<0)</td>
+      <td>1080pNV12@30fps</td>
+      <td>25%/400%</td>
+      <td>23%@900MHz<br>0.6802Gbps</td>
+      <td>/</td>
+      <td>1.1216Gbps</td>
+      <td>9.0ms</td>
+      <td>/</td>
+    </tr>
+    <!-- AIDM RK356X 540p DM -->
+    <tr align="center">
+      <td rowspan="2"><b>AIDM</b></td>
+      <td rowspan="2">RK356X</td>
+      <td>540pNV12@30fps</td>
+      <td>DM</td>
+      <td>540pNV12@30fps</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td rowspan="2" align="left"><b>Al De mosquito noise</b> 去压缩蚊虫噪声，仅RK356X平台</td>
+    </tr>
+    <!-- AIDM RK356X 1080p DM -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>DM</td>
+      <td>10800pNV12@30fps</td>
+      <td>35%/400%</td>
+      <td>61%@800MHz<br>0.3150Gbps</td>
+      <td>17%/100%<br>0.4721Gbps</td>
+      <td>1.1210Gbps</td>
+      <td>29.0ms</td>
+      <td>1*0.029*30=0.87T/s</td>
+    </tr>
+    <!-- AISR RK3588 1080p SR -->
+    <tr align="center">
+      <td rowspan="2"><b>AISR</b></td>
+      <td>RK3588</td>
+      <td>1080pNV12@30fps</td>
+      <td>SR x2.0</td>
+      <td>4kNV12@30fps</td>
+      <td>28%/800%</td>
+      <td>93%@900MHz<br>1.2850Gbps</td>
+      <td>65%/300%<br>4.8641Gbps</td>
+      <td>6.5280Gbps</td>
+      <td>22.0ms</td>
+      <td>6*0.022*30=3.96T/s</td>
+      <td rowspan="2" align="left"><b>Al super-resolution</b>模块，支持x2放大</td>
+    </tr>
+    <!-- AISR RK3576 -->
+    <tr align="center">
+      <td>RK3576</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+    </tr>
+    <!-- AIDFC RK3588 -->
+    <tr align="center">
+      <td rowspan="4"><b>AIDFC</b></td>
+      <td rowspan="2">RK3588</td>
+      <td>1080pNV12@30fps</td>
+      <td>DFC</td>
+      <td>1080pBGRA@30fps</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td rowspan="4" align="left"><b>Al De False Color</b> 对比RGB或者YUV444信号针对YUV420丢失的高频色彩伪色还原，特别是excel表格中的彩色文字等</td>
+    </tr>
+    <!-- AIDFC RK3588 -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>SD+SR/DFC</td>
+      <td>4kNV12@30fps</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+      <td>/</td>
+    </tr>
+    <!-- AIDFC RK3576 1080p DFC -->
+    <tr align="center">
+      <td rowspan="2">RK3576</td>
+      <td>1080pNV12@30fps</td>
+      <td>DFC</td>
+      <td>1080pBGRA@30fps</td>
+      <td>76%/800%</td>
+      <td>13%@900MHz<br>0.6677Gbps</td>
+      <td>65%/200%<br>2.9761Gbps</td>
+      <td>6.4020Gbps</td>
+      <td>12.0ms</td>
+      <td>4*0.012*30=1.44T/s</td>
+    </tr>
+    <!-- AIDFC RK3576 1080p DFCSR -->
+    <tr align="center">
+      <td>1080pNV12@27fps</td>
+      <td>SD+SR/DFC</td>
+      <td>4kNV12@27fps</td>
+      <td>142%/800%</td>
+      <td>70%@900MHz<br>2.4132Gbps</td>
+      <td>128%/200%<br>5.3635Gbps</td>
+      <td>11.1845Gbps</td>
+      <td>37.0ms</td>
+      <td>4*0.037*27=4.00T/s</td>
+    </tr>
+    <!-- MixMSSR RK3588 256x256 SD-->
+    <tr align="center">
+      <td rowspan="34"><b>MixMSSR</b><br><br>[包含<br><b>AISD<br>AIDC<br>AISR<br>AIMEMC</b><br>各种组合]</td>
+      <td rowspan="6">RK3588</td>
+      <td>256x256RGB@30fps</td>
+      <td>SD</td>
+      <td>SD-Score</td>
+      <td>28%/800%</td>
+      <td>1%@900MHz<br>0.0135Gbps</td>
+      <td>6%/300%<br>0.3453Gbps</td>
+      <td>0.5604Gbps</td>
+      <td>3.0ms</td>
+      <td>6*0.003*30=0.54T/s</td>
+      <td rowspan="34" align="left"><b>MixMSSR</b>支持基于运动矢量的运动补偿(<b>AIMEMC</b>: Al Motion Compensation with Motion Estimation，支持24/25/30fps等帧率输入)、场景检测(<b>AISD</b>: Al Scene Detection，建筑、人像、植物、天空、食物等场景识别后智能动态调整参数，使得蓝天场景更蓝，绿色植物更绿，肤色更加自然等)、超分(<b>AISR</b> )、去等高线(<b>AIDC</b>: Al De Contour Noise，去等高线轮廓噪声)等混合处理，由于3576平台集成了硬件PQ处理模块，因此只在RK3576平台支持MixMSSR模块全部功能组合SD+DC+SR+MEMC，其他平台只支持部分功能。如RK3588平台没有HWPQ不需要开启SD，可以配合DCI/ACM等模块处理得到相似效果；RK3562平台因性能限制只能开启部分功能</td>
+    </tr>
+    <!-- MixMSSR RK3588 1080p DC-->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>DC</td>
+      <td>1080pNV12@30fps</td>
+      <td>29%/800%</td>
+      <td>5%@900MHz<br>0.7083Gbps</td>
+      <td>21%/300%<br>1.0567Gbps</td>
+      <td>2.0714Gbps</td>
+      <td>7.0ms</td>
+      <td>6*0.007*30=1.26T/s</td>
+    </tr>
+    <!-- MixMSSR RK3588 1080p MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>MEMC</td>
+      <td>1080pNV12@60fps</td>
+      <td>35%/800%</td>
+      <td>10%@900MHz<br>1.1056Gbps</td>
+      <td>75%/300%<br>2.6186Gbps</td>
+      <td>3.9863Gbps</td>
+      <td>12.0ms</td>
+      <td>6*0.012*30=2.16T/s</td>
+    </tr>
+    <!-- MixMSSR RK3588 4k MEMC -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>MEMC</td>
+      <td>4kNV12@60fps</td>
+      <td>36%/800%</td>
+      <td>21%@900MHz<br>2.5834Gbps</td>
+      <td>77%/300%<br>2.5575Gbps</td>
+      <td>5.7343Gbps</td>
+      <td>14.0ms</td>
+      <td>6*0.014*30=2.52T/s</td>
+    </tr>
+    <!-- MixMSSR RK3588 1080p DC+MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>DC+MEMC</td>
+      <td>1080pNV12@60fps</td>
+      <td>34%/800%</td>
+      <td>14%@900MHz<br>1.6850Gbps</td>
+      <td>98%/300%<br>3.8356Gbps</td>
+      <td>6.2551Gbps</td>
+      <td>17.0ms</td>
+      <td>6*0.017*30=3.06T/s</td>
+    </tr>
+    <!-- MixMSSR RK3588 1080p SD+DC+MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>SD+DC+MEMC</td>
+      <td>1080pNV12@60fps</td>
+      <td>30%/800%</td>
+      <td>14%@900MHz<br>1.7003Gbps</td>
+      <td>102%/300%<br>3.9597Gbps</td>
+      <td>6.4307Gbps</td>
+      <td>18.0ms</td>
+      <td>6*0.018*30=3.24T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 256x256 SD-->
+    <tr align="center">
+      <td rowspan="10">RK3576</td>
+      <td>256x256RGB@30fps</td>
+      <td>SD</td>
+      <td>SD-Score</td>
+      <td>27%/800%</td>
+      <td>1%@900MHz<br>0.0116Gbps</td>
+      <td>6%/200%<br>0.3440Gbps</td>
+      <td>0.9635Gbps</td>
+      <td>3.0ms</td>
+      <td>4*0.003*30=0.36T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 1080p DC-->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>DC</td>
+      <td>1080pNV12@30fps</td>
+      <td>26%/800%</td>
+      <td>8%@900MHz<br>0.7006Gbps</td>
+      <td>24%/200%<br>1.0370Gbps</td>
+      <td>2.4518Gbps</td>
+      <td>10.0ms</td>
+      <td>4*0.010*30=1.20T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 540p SR-->
+    <tr align="center">
+      <td>540pNV24@30fps</td>
+      <td>SR</td>
+      <td>1080pNV12@30fps</td>
+      <td>31%/800%</td>
+      <td>3%@900MHz<br>0.2792Gbps</td>
+      <td>26%/200%<br>1.1410Gbps</td>
+      <td>2.0487Gbps</td>
+      <td>4.0ms</td>
+      <td>4*0.004*30=0.48T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 1080p SR-->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>SR</td>
+      <td>1080pNV12@30fps</td>
+      <td>25%/800%</td>
+      <td>3%@900MHz<br>0.3793Gbps</td>
+      <td>26%/200%<br>1.1399Gbps</td>
+      <td>2.1729Gbps</td>
+      <td>4.0ms</td>
+      <td>4*0.004*30=0.48T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 1080p MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>MEMC</td>
+      <td>1080pNV12@60fps</td>
+      <td>30%/800%</td>
+      <td>20%@900MHz<br>1.1789Gbps</td>
+      <td>82%/200%<br>2.6542Gbps</td>
+      <td>5.0408Gbps</td>
+      <td>20.0ms</td>
+      <td>4*0.020*30=2.40T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 4k MEMC -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>MEMC</td>
+      <td>4kNV12@60fps</td>
+      <td>32%/800%</td>
+      <td>36%@900MHz<br>1.9415Gbps</td>
+      <td>82%/200%<br>2.5809Gbps</td>
+      <td>6.4082Gbps</td>
+      <td>27.0ms</td>
+      <td>4*0.027*30=3.24T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 1080p DC+MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>DC+MEMC</td>
+      <td>1080pNV12@60fps</td>
+      <td>31%/800%</td>
+      <td>27%@900MHz<br>1.6512Gbps</td>
+      <td>104%/200%<br>3.6464Gbps</td>
+      <td>6.5816Gbps</td>
+      <td>24.0ms</td>
+      <td>4*0.024*30=2.88T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 1080p SD+DC+MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>SD+DC+MEMC</td>
+      <td>1080pNV12@60fps</td>
+      <td>31%/800%</td>
+      <td>27%@900MHz<br>1.6857Gbps</td>
+      <td>109%/200%<br>3.8125Gbps</td>
+      <td>6.8161Gbps</td>
+      <td>22.0ms</td>
+      <td>4*0.022*30=2.88T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 1080p SD+DC+SR+MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>SD+DC+SR+MEMC</td>
+      <td>1080pNV12@60fps</td>
+      <td>35%/800%</td>
+      <td>37%@900MHz<br>1.9774Gbps</td>
+      <td>137%/200%<br>4.9499Gbps</td>
+      <td>8.2782Gbps</td>
+      <td>27.0ms</td>
+      <td>4*0.027*30=3.24T/s</td>
+    </tr>
+    <!-- MixMSSR RK3576 4k SD+MEMC -->
+    <tr align="center">
+      <td>4kNV12@30fps</td>
+      <td>SD+DC+SR+MEMC</td>
+      <td>4kNV12@60fps</td>
+      <td>40%/800%</td>
+      <td>37%@900MHz<br>1.9567Gbps</td>
+      <td>85%/200%<br>2.7444Gbps</td>
+      <td>6.6003Gbps</td>
+      <td>27.0ms</td>
+      <td>4*0.027*30=3.24T/s</td>
+    </tr>
+    <!-- MixMSSR RK356X 256x256 SD -->
+    <tr align="center">
+      <td rowspan="4">RK356X</td>
+      <td>256x256RGB@30fps</td>
+      <td>SD</td>
+      <td>SD-Score</td>
+      <td>38%/400%</td>
+      <td>1%@800MHz<br>0.0117Gbps</td>
+      <td>16%/100%<br>0.3530Gbps</td>
+      <td>0.6513Gbps</td>
+      <td>8.0ms</td>
+      <td>1*0.008*30=0.24T/s</td>
+    </tr>
+    <!-- MixMSSR RK356X 540p SR -->
+    <tr align="center">
+      <td>540pNV24@30fps</td>
+      <td>SR</td>
+      <td>1080pNV12@30fps</td>
+      <td>42%/400%</td>
+      <td>31%@800MHz<br>0.4992Gbps</td>
+      <td>51%/100%<br>1.1442Gbps</td>
+      <td>1.9435Gbps</td>
+      <td>8.0ms</td>
+      <td>1*0.008*30=0.24T/s</td>
+    </tr>
+    <!-- MixMSSR RK356X 1080p SR -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>SR</td>
+      <td>1080pNV12@30fps</td>
+      <td>39%/400%</td>
+      <td>12%@800MHz<br>0.3733Gbps</td>
+      <td>46%/100%<br>1.1863Gbps</td>
+      <td>1.8362Gbps</td>
+      <td>8.0ms</td>
+      <td>1*0.008*30=0.24T/s</td>
+    </tr>
+    <!-- MixMSSR RK356X 1080p MEMC -->
+    <tr align="center">
+      <td>1080pNV12@17fps</td>
+      <td>MEMC</td>
+      <td>1080pNV12@34fps</td>
+      <td>42%/400%</td>
+      <td>16%@800MHz<br>0.4284Gbps</td>
+      <td>88%/100%<br>1.5583Gbps</td>
+      <td>2.3067Gbps</td>
+      <td>57.0ms</td>
+      <td>1*0.057*17=0.97T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 256x256 SD -->
+    <tr align="center">
+      <td rowspan="14">RK3562</td>
+      <td>256x256RGB@30fps</td>
+      <td>SD</td>
+      <td>SD-Score</td>
+      <td>27%/400%</td>
+      <td>1%@900MHz<br>0.0117Gbps</td>
+      <td>12%/100%<br>0.3482Gbps</td>
+      <td>0.7440Gbps</td>
+      <td>6.0ms</td>
+      <td>1*0.006*30=0.18T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 540p SR -->
+    <tr align="center">
+      <td>540pNV24@30fps</td>
+      <td>SR</td>
+      <td>1080pNV12@30fps</td>
+      <td>31%/400%</td>
+      <td>30%@900MHz<br>0.1963Gbps</td>
+      <td>56%/100%<br>0.7677Gbps</td>
+      <td>1.3887Gbps</td>
+      <td>14.0ms</td>
+      <td>1*0.014*30=0.42T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 1080p SR -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>SR</td>
+      <td>1080pNV12@30fps</td>
+      <td>35%/400%</td>
+      <td>31%@900MHz<br>0.3713Gbps</td>
+      <td>56%/100%<br>1.0956Gbps</td>
+      <td>1.9095Gbps</td>
+      <td>14.0ms</td>
+      <td>1*0.014*30=0.42T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 540p SR+MEMC -->
+    <tr align="center">
+      <td>540pNV24@15fps</td>
+      <td>SR+MEMC(scm=2)</td>
+      <td>1080pNV12@30fps</td>
+      <td>35%/400%</td>
+      <td>30%@900MHz<br>0.4686Gbps</td>
+      <td>86%/100%<br>1.3363Gbps</td>
+      <td>2.4054Gbps</td>
+      <td>66.0ms</td>
+      <td>1*0.066*15=0.99T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 1080p MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>MEMC(scm=2)</td>
+      <td>1080pNV12@60fps</td>
+      <td>32%/400%</td>
+      <td>30%@900MHz<br>0.6973Gbps</td>
+      <td>77%/100%<br>1.4834Gbps</td>
+      <td>3.0355Gbps</td>
+      <td>30.0ms</td>
+      <td>1*0.030*30=0.90T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 4k MEMC -->
+    <tr align="center">
+      <td>4kNV12@21fps</td>
+      <td>MEMC(scm=2)</td>
+      <td>4kNV12@42fps</td>
+      <td>32%/400%</td>
+      <td>73%@900MHz<br>1.5752Gbps</td>
+      <td>53%/100%<br>1.0011Gbps</td>
+      <td>3.1393Gbps</td>
+      <td>48.0ms</td>
+      <td>1*0.048*21=1.00T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 720p MEMC -->
+    <tr align="center">
+      <td>720pNV12@30fps</td>
+      <td>MEMC(scm=0)</td>
+      <td>720pNV12@60fps</td>
+      <td>30%/400%</td>
+      <td>18%@900MHz<br>0.3992Gbps</td>
+      <td>51%/100%<br>0.9908Gbps</td>
+      <td>2.0863Gbps</td>
+      <td>20.0ms</td>
+      <td>1*0.020*30=0.60T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 720p SHP+MEMC -->
+    <tr align="center">
+      <td>720pNV12@30fps</td>
+      <td>SHP+MEMC(scm=0)</td>
+      <td>720pNV12@60fps</td>
+      <td>33%/400%</td>
+      <td>51%@900MHz<br>0.5094Gbps</td>
+      <td>53%/100%<br>0.9904Gbps</td>
+      <td>2.2367Gbps</td>
+      <td>21.0ms</td>
+      <td>1*0.021*30=0.63T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 1080p MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>MEMC(scm=0)</td>
+      <td>1080pNV12@60fps</td>
+      <td>31%/400%</td>
+      <td>26%@900MHz<br>0.5578Gbps</td>
+      <td>52%/100%<br>0.9820Gbps</td>
+      <td>2.3953Gbps</td>
+      <td>21.0ms</td>
+      <td>1*0.021*30=0.63T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 1080p SHP+MEMC -->
+    <tr align="center">
+      <td>1080pNV12@30fps</td>
+      <td>SHP+MEMC(scm=0)</td>
+      <td>1080pNV12@60fps</td>
+      <td>35%/400%</td>
+      <td>58%@900MHz<br>0.8026Gbps</td>
+      <td>52%/100%<br>0.9860Gbps</td>
+      <td>2.5811Gbps</td>
+      <td>25.0ms</td>
+      <td>1*0.025*30=0.75T/s</td>
+    </tr>
+    <!-- MixMSSR RK3562 768x480 SHP -->
+    <tr align="center">
+      <td>768x480NV12@60fps</td>
+      <td>SHP</td>
+      <td>768x480NV12@60fps</td>
+      <td>29%/400%</td>
+      <td>9%@900MHz<br>0.0786Gbps</td>
+      <td>/</td>
+      <td>0.5744Gbps</td>
+      <td>3.3ms</td>
+      <td>/</td>
+    </tr>
+    <!-- MixMSSR RK3562 768x576 SHP -->
+    <tr align="center">
+      <td>768x576NV12@60fps</td>
+      <td>SHP</td>
+      <td>768x576NV12@60fps</td>
+      <td>29%/400%</td>
+      <td>10%@900MHz<br>0.0917Gbps</td>
+      <td>/</td>
+      <td>0.5895Gbps</td>
+      <td>3.4ms</td>
+      <td>/</td>
+    </tr>
+    <!-- MixMSSR RK3562 720p SHP -->
+    <tr align="center">
+      <td>720pNV12@60fps</td>
+      <td>SHP</td>
+      <td>720pNV12@60fps</td>
+      <td>30%/400%</td>
+      <td>22%@900MHz<br>0.1772Gbps</td>
+      <td>/</td>
+      <td>0.6878Gbps</td>
+      <td>5.6ms</td>
+      <td>/</td>
+    </tr>
+    <!-- MixMSSR RK3562 1080p SHP -->
+    <tr align="center">
+      <td>1080pNV12@60fps</td>
+      <td>SHP</td>
+      <td>1080pNV12@60fps</td>
+      <td>39%/400%</td>
+      <td>48%@900MHz<br>0.3772Gbps</td>
+      <td>/</td>
+      <td>0.9061Gbps</td>
+      <td>10.3ms</td>
+      <td>/</td>
+    </tr>
+  </tbody>
+  <!-- 标题栏 -->
+  <thead>
+    <tr align="center">
+      <th>模块名称</th>
+      <th>平台<br><sup>[见说明2]</sup></th>
+      <th>输入<sup>[见说明3]</sup><br>(分辨率/格式/帧率)</th>
+      <th>主要算法处理</th>
+      <th>输出<sup>[见说明3]</sup><br>(分辨率/格式/帧率)</th>
+      <th>CPU<sup>[见说明4]</sup><br>占用率(%)</th>
+      <th>GPU<sup>[见说明4]</sup><br>占用率(%)<br>带宽(Gbps)</th>
+      <th>NPU<sup>[见说明4]</sup><br>占用率(%)<br>带宽(Gbps)</th>
+      <th>总带宽(Gbps)<br><sup>[见说明4]</sup></th>
+      <th>平均耗时(ms)<br><sup>[见说明5]</sup></th>
+      <th>NPU算力占用<br>(=平台算力<sup>[见说明6]</sup>x每帧耗时x处理帧率， 单位T/s)</th>
+      <th>备注</th>
+    </tr>
+  </thead>
+</table>
 
 ### 关键说明：
-1. **输入输出格式**
+1. **性能数据说明**
+   - 表中的CPU、GPU、NPU等占用率、带宽，算法耗时等所有数据均采用算法仿真所得，与实际应用环境可能会有出入，主要是算法外的占用资源不同，从而影响算法的实际性能
+   - 仿真时统一以30fps调用各算法模块，如果算法某特定平台的某个算法模块算法耗时达不到30fps，则以实际能达到的处理帧率调用，如`RK3562 540pNV24 SR+MEMC`处理时只能处理输入15fps
+   - 表中数据基于仿真实测平均值，实际性能可能因系统负载、频率配置等会有波动
+
+2. **平台限制**
+   - **RK3399**: 仅支持部分基础模块（CSC/DCI/ZME）
+   - **RK3576**: 新增支持AIDFC/AIDD/AIDHW等AI模块
+   - **AI模块依赖RKNN版本**（如AISR需≥1.4，AIDFC需≥2.0，MixMSSR需≥2.0），可以使用命令`adb shell "strings /vendor/lib64/librknnrt.so | grep 'librknnrt version'"`直接查找RKNN版本信息
+
+3. **输入输出格式**
    - **YUV4xxSP**: 包含NV12/YUV420SP、NV16/YUV422SP、NV24/YUV444SP等格式
    - **RGB系列**: 包含RGBA8888、RGB888、RGB565等格式（含BGR排列）
    - **Y8/UV88**: 单通道或双通道灰度格式
+   - **各模块有相应的输入输出限制**，如MixMSSR没有支持540pNV12，可以支持540pNV24
 
-2. **性能数据**
-   - 表中数据基于文档实测值，实际性能可能因系统负载、频率配置等略有波动
-   - **NPU带宽**: AI模块涉及NPU计算时需额外考虑模型推理带宽（如AISR在RK3588上NPU带宽约10GB/s）
+4. **占用率和带宽**
+   - **CPU占用率**: 各平台的CPU核数不一样，如RK3588有8个CPU核，表中的CPU占用率使用`adb shell "top | grep user"`获取并求均值
+   - **GPU占用率**: 各平台获取命令不一样，如RK3588平台使用 `adb shell cat /sys/class/devfreq/fb000000.gpu/load`获取并求均值
+   - **NPU占用率**: 使用 `adb shell cat /sys/kernel/debug/rknpu/load`获取并求均值
+   - **带宽**: 使用带宽工具`rk-msch-probe`，各平台获取命令不一样，如RK3588平台使用`adb shell "./data/rk-msch-probe_V1.45_20240322 -c rk3588 -f 2112 -l 7 -m 'gpu npu'"`获取，表中有把GPU和NPU的带宽单独列出来，`总带宽`包含了GPU、NPU、CPU、RGA、VOP等仿真时的所有消耗的带宽
 
-3. **平台限制**
-   - **RK3399**: 仅支持部分基础模块（CSC/DCI/ZME）
-   - **RK3576**: 新增支持AIDFC/AIDD/AIDHW等AI模块
-   - **AI模块依赖RKNN版本**（如AISR需≥1.4，AIDFC需≥1.5）
+5. **平均耗时**
+   - **零拷贝模式**: 需要需正确配置接口`rkpq_imgbuf_info`中的`nFdValue`和`nFdIndex`，否则算法内会增加数据传输耗时
+   - **异步处理**: MixMSSR等模块支持异步模式，会增加1-2帧的延迟，此时表中的耗时是指“**从调用算法接口到返回消耗的时间**”，这个耗时可能会小于算法处理需要的时间，因为算法返回后还有后台算法任务在执行，所以不能单纯以**平均耗时**去换算不同输入帧率下的**预期耗时**
 
-4. **特殊场景**
-   - **零拷贝模式**: 需正确配置`rkpq_imgbuf_info`中的`nFdValue`和`nFdIndex`
-   - **异步处理**: MixMSSR等模块支持异步模式，会增加1-2帧延迟
+6. **平台算力**
+   - RK3588：6T
+   - RK3576：4T
+   - RK3568：1T
+   - RK3399：1T
+   - RK3562：1T

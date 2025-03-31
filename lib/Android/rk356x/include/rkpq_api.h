@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Last update on 2025-01-02 for v0.15.0
+// Last update on 2025-06-26 for v0.21.0
 
 #pragma once
 #ifndef __RKPQ_API_H_
@@ -52,6 +52,10 @@ extern "C"
 #define RKPQ_FLAG_CALC_MEAN_LUMA        (1 << 7)    /* calculate mean luminance for output image */
 #define RKPQ_FLAG_CVT_RANGE_ONLY        (1 << 4)    /* deprecated */
 
+/* callback flags definition for rkpq_set_callback() */
+#define RKPQ_CBFLAG_OCL_CACHE_READ      (0x01)
+#define RKPQ_CBFLAG_OCL_CACHE_WRITE     (0x02)
+
 /* const numbers definition */
 #define RKPQ_MIN_IMAGE_WIDTH            128
 #define RKPQ_MIN_IMAGE_HEIGHT           128
@@ -72,6 +76,8 @@ extern "C"
 #define RKPQ_ACM_LUT_LENGTH_S           13  // valid ACM_S LUT range [0:12]
 #define RKPQ_SHP_PEAKING_BAND_NUM       4   // number of valid bands for Sharp module
 #define RKPQ_ZME_COEF_LENGTH            8   // valid ZME coefs range [0:7]
+
+#define RKPQ_LDC_MESH_POINTS_MAX_SIZE   8192// support up to 64x64x2
 
 
 /* forward declaration */
@@ -97,7 +103,11 @@ struct _rkpq_shp_acm_cfg;
 struct _rkpq_dci_acm_cfg;
 struct _rkpq_fe_cfg;
 struct _rkpq_mssr_cfg;
+struct _rkpq_vsr_cfg;
 struct _rkpq_ld_cfg;
+struct _rkpq_dci_acm_ld_cfg;
+struct _rkpq_deblur_cfg;
+struct _rkpq_ldc_cfg;
 
 /* the RKPQ modules, use rkpq_query() to check if supported */
 typedef enum _rkpq_module
@@ -115,6 +125,7 @@ typedef enum _rkpq_module
     RKPQ_MODULE_CGC     = 8,        /* Color Gamut Conversion */
     RKPQ_MODULE_BLR     = 9,        /* Region Gauss Blur */
     RKPQ_MODULE_LD      = 10,       /* Local Dimming */
+    RKPQ_MODULE_LDC     = 11,       /* Lens Distortion Correction */
     RKPQ_MODULE_MAX,                /* please DO NOT use this item! */
 
     /* AI Modules, need RKNN support */
@@ -127,6 +138,7 @@ typedef enum _rkpq_module
     RKPQ_MODULE_AI_DD   = 105,      /* AI Doc Detection */
     RKPQ_MODULE_AI_DHW  = 106,      /* AI Doc DeHandWriting */
     RKPQ_MODULE_AI_DMR  = 107,      /* AI Demoire */
+    RKPQ_MODULE_AI_DBL  = 108,      /* AI Deblur */
     RKPQ_MODULE_AI_MAX,             /* please DO NOT use this item! */
 
     /* Mixture Modules, better performance for a specific scene */
@@ -138,6 +150,8 @@ typedef enum _rkpq_module
     RKPQ_MIXTURE_FE4     = 1004,    /* Mixture modules: AI Face Enhance v4*/
     RKPQ_MIXTURE_MSSR    = 1005,    /* Mixture modules: MEMC + SD + SR + RD */
     RKPQ_MIXTURE_DCI_ACM = 1006,    /* Mixture modules: DCI + ACM */
+    RKPQ_MIXTURE_VSR     = 1007,    /* Mixture modules: Video Super Resolution */
+    RKPQ_MIXTURE_DCIACM_LD = 1008,  /* Mixture modules: CSC + DCI + ACM + LD */
     RKPQ_MIXTURE_MAX                /* please DO NOT use this item! */
 } rkpq_module;
 
@@ -183,10 +197,11 @@ typedef enum _rkpq_image_format
     RKPQ_IMG_FMT_YU12    = 8,   /* DRM_FORMAT_YUV420, YUV420P,  12bpp(8|8/4|8/4) */ /* reserved */
     RKPQ_IMG_FMT_YUYV    = 9,   /* DRM_FORMAT_YUYV,   YUV422I,  16bpp(8*4/2) */     /* reserved */
     RKPQ_IMG_FMT_VU24    = 10,  /* DRM_FORMAT_VUY888, YUV444I,  24bpp([23:0]=[V8:U8:Y8]) */
-    RKPQ_IMG_FMT_VU30    = 11,  /* DRM_FORMAT_VUY101010,YUV444I,32bpp([31:0]=[X2:V10:U10:Y10]), MSB order */ /* reserved */
+    RKPQ_IMG_FMT_VU30    = 11,  /* DRM_FORMAT_VUY101010,YUV444I,32bpp([31:0]=[X2:V10:U10:Y10]), LSB order */ /* reserved */
     RKPQ_IMG_FMT_Y8      = 12,  /* DRM_FORMAT_R8,   8bit YUV400, 8bpp */
     RKPQ_IMG_FMT_UV88    = 13,  /* DRM_FORMAT_GR88, 8bit UV, 16bpp([15:0]=[V8:U8]) */
     RKPQ_IMG_FMT_VU88    = 14,  /* DRM_FORMAT_RG88, 8bit VU, 16bpp([15:0]=[U8:V8]) */
+    RKPQ_IMG_FMT_LEGACY420 = 15, /* no DMR format, for MIPI Legacy YUV420 8bit (type: 0x1A) image format */
     RKPQ_IMG_FMT_YUV_MAX,       /* the max YUV format value, please DO NOT use this item! */
 
     // RGB
@@ -252,13 +267,15 @@ typedef enum _rkpq_mssr_initflag
     RKPQ_MSSR_INIT_FLAG_FESRMEMC            = (1<<5),// 32: FaceEnhanceSRMEMC
     RKPQ_MSSR_INIT_FLAG_EBPPKSR             = (1<<6),// 64: EbookSR
     RKPQ_MSSR_INIT_FLAG_MSSR4K              = (1<<7),//128: MSSR4K
+    RKPQ_MSSR_INIT_FLAG_DFCSR               = (1<<8),//256: DFCSR
+    RKPQ_MSSR_INIT_FLAG_SD                  = (1<<9),//512: SD
     // typical customized InitFlags
     RKPQ_MSSR_INIT_FLAGS_OUT1080P           = ( 3),// MSSR | SR = 1 | 2 = 3
     RKPQ_MSSR_INIT_FLAGS_OUT4K              = ( 4),// SR2 = 4
     RKPQ_MSSR_INIT_FLAGS_FESR               = (16),// FaceEnhanceSR = 16
     RKPQ_MSSR_INIT_FLAGS_OUT1080P_FESR      = (19),// MSSR | SR | FaceEnhanceSR = 1 | 2 | 16 = 19
     // MAX
-    RKPQ_MSSR_INIT_FLAGS_MAX                = ((1<<8)-1) // 255
+    RKPQ_MSSR_INIT_FLAGS_MAX                = ((1<<9)-1) // 511
 }rkpq_mssr_initflag;
 
 typedef enum _rkpq_mssr_procflag
@@ -270,6 +287,8 @@ typedef enum _rkpq_mssr_procflag
     RKPQ_MSSR_PROC_FLAG_MEMC                = (1<<3),//  8: MEMC
     RKPQ_MSSR_PROC_FLAG_FE                  = (1<<4),// 16: FE
     RKPQ_MSSR_PROC_FLAG_FRD                 = (1<<5),// 32: FRD
+    RKPQ_MSSR_PROC_FLAG_DFC                 = (1<<6),// 64: DFC
+    RKPQ_MSSR_PROC_FLAG_SHP                 = (1<<7),//128: SHP
     // typical customized ProcFlags
     RKPQ_MSSR_PROC_FLAGS_SD_SR              = (RKPQ_MSSR_PROC_FLAG_SD | RKPQ_MSSR_PROC_FLAG_SR)         ,// SD | SR             = 1 | 4 = 5
     RKPQ_MSSR_PROC_FLAGS_SD_DC              = (RKPQ_MSSR_PROC_FLAG_SD | RKPQ_MSSR_PROC_FLAG_DC)         ,// SD | DC             = 1 | 2 = 3
@@ -278,8 +297,59 @@ typedef enum _rkpq_mssr_procflag
     RKPQ_MSSR_PROC_FLAGS_SD_DC_SR_MEMC      = (RKPQ_MSSR_PROC_FLAGS_SD_DC_SR | RKPQ_MSSR_PROC_FLAG_MEMC),// SD | DC | SR | MEMC = 7 | 8 = 15
     RKPQ_MSSR_PROC_FLAGS_FE_SR              = (RKPQ_MSSR_PROC_FLAG_FE | RKPQ_MSSR_PROC_FLAG_SR)         ,// FE | SR             =16 | 4 = 20
     // MAX
-    RKPQ_MSSR_PROC_FLAGS_MAX                = ((1<<6)-1) // 63
+    RKPQ_MSSR_PROC_FLAGS_MAX                = ((1<<8)-1) // 255
 }rkpq_mssr_procflag;
+
+typedef enum _rkpq_vsr_initflag
+{
+    RKPQ_VSR_INIT_FLAG_ALL                  = ( 0x0),//  0: All
+    RKPQ_VSR_INIT_FLAG_540P                 = (1<<0),//  1: 540P 
+    RKPQ_VSR_INIT_FLAG_720P                 = (1<<1),//  2: 720P 
+    RKPQ_VSR_INIT_FLAG_1080P                = (1<<2),//  4: 1080P
+    RKPQ_VSR_INIT_FLAG_4K                   = (1<<3),//  8: 4K  
+    RKPQ_VSR_INIT_FLAGS_MAX                 = ((1<<4)-1) // 15
+}rkpq_vsr_initflag;
+
+typedef enum _rkpq_vsr_procflag
+{
+    RKPQ_VSR_PROC_FLAG_DEFAULT              = ( 0x0),//  0: Default = RKPQ_VSR_PROC_FLAGS_MAX
+    RKPQ_VSR_PROC_FLAG_ME                   = (1<<0),//  1: ME
+    RKPQ_VSR_PROC_FLAG_SR                   = (1<<1),//  2: SR
+    RKPQ_VSR_PROC_FLAG_SD                   = (1<<2),//  4: SD
+    RKPQ_VSR_PROC_FLAGS_MAX                 = ((1<<3)-1) // 7
+}rkpq_vsr_procflag;
+
+typedef enum _rkpq_dbl_initflag
+{
+    RKPQ_DBL_INIT_FLAG_ALL                  = ( 0x0),//  0: All
+    RKPQ_DBL_INIT_FLAG_DEF                  = (1<<0),//  1: 
+    RKPQ_DBL_INIT_FLAGS_MAX                 = ((1<<2)-1) // 3
+}rkpq_dbl_initflag;
+
+typedef enum _rkpq_dbl_procflag
+{
+    RKPQ_DBL_PROC_FLAG_DEFAULT              = ( 0x0),//  0: Default = RKPQ_VSR_PROC_FLAGS_MAX
+    RKPQ_DBL_PROC_FLAG_DT                   = (1<<0),//  1: DT
+    RKPQ_DBL_PROC_FLAG_DB                   = (1<<1),//  2: DB
+    RKPQ_DBL_PROC_FLAG_SR                   = (1<<2),//  4: SR
+    RKPQ_DBL_PROC_FLAGS_MAX                 = ((1<<3)-1) // 7
+}rkpq_dbl_procflag;
+
+typedef enum _rkpq_ldc_method
+{
+    RKPQ_LDC_METHOD_4POINTS                 = (0),// method 0: use 4 points for mapping
+    RKPQ_LDC_METHOD_HOMOGRAPHY              = (1),// method 1: use homography for mapping 
+    RKPQ_LDC_METHOD_DISTCOEFF               = (2),// method 2: use distortion coefficient
+    RKPQ_LDC_METHOD_MESHPOINTS              = (3),// method 3: use NxN mesh points for mapping
+    RKPQ_LDC_METHOD_MAX
+}rkpq_ldc_method;
+
+typedef enum _rkpq_ldc_correct_dir
+{
+    RKPQ_LDC_CORRECT_DIR_NORMAL_TO_DISTORTED = (0),// 0: normal -> distorted
+    RKPQ_LDC_CORRECT_DIR_DISTORTED_TO_NORMAL = (1),// 1: distorted -> normal
+    RKPQ_LDC_CORRECT_DIR_MAX
+}rkpq_ldc_correct_dir;
 
 /* the information for RKPQ_QUERY_SDK_VERSION */
 typedef struct _rkpq_version_info
@@ -383,7 +453,7 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_init_params
     /**
      * to reduce the memory consumption & time cost of initialization, use setup flags to control the allocation of OpenCL & RKNN resouce.
      * if you want to use the default setting, just set this flags to 0.
-     * supported module & setup flags:
+     * supported modules & setup flags:
      *  - RKPQ_MODULE_CSC,   range: [0, 15], bitfield (0-ALL, 1-R2Y, 2-Y2R, 4-R2R, 8-Y2Y)
      *  - RKPQ_MIXTURE_MSSR, range: [0, 127], bitfield
      */
@@ -614,6 +684,7 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_blr_cfg
 
     uint32_t    aReservedData[1];   // reserved for future use
 } rkpq_blr_cfg;
+
 /* LD configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_ld_cfg
 {
@@ -622,23 +693,44 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_ld_cfg
 
     uint32_t    bEnableLD;         /* [i] {0, (1)} */
 
+    uint32_t    magicNumber;       /* [i] magic number for modification */
+    uint32_t    version;           /* [i] version  */
+
     uint32_t    nLdHorNum;              /* [i] local dimming backlight data horizontal block number */
     uint32_t    nLdVerNum;              /* [i] local dimming backlight data vertical block number */
     uint32_t    nLdTotalNum;             /* [i] local dimming backlight data total block number */
     uint32_t    nLdBlMax;               /* [i] local dimming backlight max value */
     uint32_t    nLdBlMin;               /* [i] local dimming backlight min value */
+    uint32_t    nLdBlMsgBitsPerPix;     /* [i] backlight message bits per pixel */
+    uint32_t    nLdBlMsgTotalBytes;       /* [i] backlight message total bytes */
 
     uint32_t    bHDRFmt;                /* [i] is hdr format or not. For SDR, set to 0*/
 
     uint32_t    nLdFiltMode;        /* [i] refer to "rkpq_ld_filt_mode" */
     int32_t     nLdFiltCoef[9];     /* [i] filter coefficients for LD filtering, fixed point in 10bit(1024) */
+    int32_t     nLdTuningPara[3];   /* [i] tuning parameters for LD, such as global gain, contrast, etc. */
 
-    uint32_t    nSpiProtLength;     /* [o] local dimming spi data protocol length */
+    uint32_t    nSpiProtLength;     /* [o] local dimming spi data protocol bytes length */
     uint8_t     *pSpiProtData;      /* [o] local dimming spi data protocol */
 
     uint32_t    aReservedData[1];   /* reserved for future use */
 } rkpq_ld_cfg;
 
+/* Lens Distortion Correction */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_ldc_cfg
+{
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+
+    uint32_t                bEnableLDC;         // [i] {0, (1)}
+    rkpq_ldc_method         eLdcMethod;         // [i] LdcMethod, see rkpq_ldc_method
+    rkpq_ldc_correct_dir    eCorrectDir;        // [i] CorrectDir, see rkpq_ldc_correct_dir
+    float                   fPoints[4][2];      // [i] params for method eLdcMethod=0: 4-points (x,y) correspond to left-top, right-top, left-bottom, right-bottom
+    float                   fHomography[9];     // [i] params for method eLdcMethod=1: 3x3 homography matrix
+    float                   fDistCoeffK;        // [i] params for method eLdcMethod=2: distortion coefficient
+    float*                  pfMeshPoints;       // [i] params for method eLdcMethod=3: point to mesh-points-info-buf, example:[64,64,x00,y00,x01,y01,...] for 64x64x2xfloat MeshPoints
+    
+    uint32_t                aReservedData[1];   // reserved for future use
+} rkpq_ldc_cfg;
 
 /* AI SR configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_sr_cfg
@@ -753,6 +845,20 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_dmr_cfg
     uint32_t    aReservedData[1];       // reserved for future use
 } rkpq_dmr_cfg;
 
+/* AI Deblur configuration */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_deblur_cfg
+{
+    rkpq_pipe_res_info  stPipeResInfo;  /* resolution change info, must set manually */
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+
+    uint32_t        bEnableDBL;         /* [i] {0, (1)} */
+    uint32_t        nProcFlag;          /* [i] range: [0, 7], bitfield, see rkpq_dbl_procflag*/
+    uint32_t        nDBStrength;        /* [i] Deblur strength  [0, (100)] */
+    uint32_t        nSRStrength;        /* [i] SR strength  [0, (100)] */
+    
+    uint32_t        aReservedData[1];   /* reserved for future use */
+} rkpq_dbl_cfg;
+
 /* Mixture SHP + ACM configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_shp_acm_cfg
 {
@@ -831,7 +937,10 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_mssr_cfg
     uint32_t        bEnableHDMI;        /* [i] {0, 1}: 0-codec, 1-hdmi*/
 
     uint32_t        aFrameRateInfo[2];  /* [o] #0=isAbandoned, #1=actualFPS*/
-    
+
+    uint32_t        nSrcFps;            /* [i] src fps*/
+    uint32_t        nDstFps;            /* [i] dst fps*/
+
     uint32_t        aReservedData[1];   /* reserved for future use */
 } rkpq_mssr_cfg;
 
@@ -846,6 +955,31 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_dci_acm_cfg
     uint32_t        aReservedData[1];   /* reserved for future use */
 } rkpq_dci_acm_cfg;
 
+/* Mixture VSR configuration */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_vsr_cfg
+{
+    rkpq_pipe_res_info  stPipeResInfo;  /* resolution change info, must set manually */
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+
+    uint32_t        bEnableVSR;         /* [i] {0, (1)} */
+    uint32_t        nProcFlag;          /* [i] range: [0, 127], bitfield, see rkpq_vsr_procflag*/
+    uint32_t        nFlowNetSchemeIdx;  /* [i] FlowNet scheme idx  {(0), 1, 2} */
+    uint32_t        nCodecNetModelIdx;  /* [i] CodecNet model idx  {(0), 1, 2} */
+    
+    uint32_t        aReservedData[1];   /* reserved for future use */
+} rkpq_vsr_cfg;
+
+/* Mixture DCI + ACM + LD configuration */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_dci_acm_ld_cfg
+{
+    uint32_t        bEnableDCIACMLD;      /* [i] {0, (1)} */
+    rkpq_csc_cfg   *pCSCConfig;        /* [o] no need to asign this pointer */
+    rkpq_dci_cfg   *pDCIConfig;        /* [o] no need to asign this pointer */
+    rkpq_acm_cfg   *pACMConfig;        /* [o] no need to asign this pointer */
+    rkpq_ld_cfg    *pLDConfig;         /* [o] no need to asign this pointer */
+
+    uint32_t        aReservedData[1];   /* reserved for future use */
+} rkpq_dci_acm_ld_cfg;
 
 /**
  * @function: rkpq_init()
@@ -972,6 +1106,17 @@ int rkpq_set_inputs(rkpq_context ctx, rkpq_imgbuf_info *pInputBufs, int num);
 int rkpq_set_outputs(rkpq_context ctx, rkpq_imgbuf_info *pOutputBufs, int num);
 
 /**
+ * @function: rkpq_prefetch_bufs()
+ * @descrptn: prefetch the input/output buffers to improve the performance.
+ * @params:
+ *      rkpq_context ctx - the pq handle of context
+ *      rkpq_imgbuf_info *pTargetBufs - the input/output buffers' info
+ *      int num - number of target buffers
+ * @return: error code, 0 indicates everything is ok.
+ */
+int rkpq_prefetch_bufs(rkpq_context ctx, rkpq_imgbuf_info *pTargetBufs, int num);
+
+/**
  * @function: rkpq_set_auth_info()
  * @descrptn: for AIPQ authorization
  * @params:
@@ -1005,6 +1150,31 @@ int rkpq_set_auth_info(rkpq_context ctx, char *pLicenseInfo, int nLicenseStrSize
 */
 int rkpq_set_target_platform(const char *pPlatformName); /* Deprecated */
 
+/**
+ * @function: rkpq_set_callback()
+ * @descrptn: set the callback function
+ * @params:
+ *      [I] rkpq_context ctx - the pq handle of context
+ *          - set `rkpq_init_params::bLazyInit` to 1 if call this function after rkpq_init()
+ *          - set to NULL if call this function before rkpq_init()
+ *      [I] int flag - callback function type flag, see RKPQ_CBFLAG_XXX
+ *      [I] int (*cbf)(void *, size_t, void *, void *pUserData) - the callback function, usage:
+ *          1. like `int xxx_cbf_read(void *pFilename, size_t nMaxSize, void *pFileData, void *pUserData)`:
+ *              - @params: pFilename: the file name of the input file
+ *              - @params: nMaxSize: the max data length of 'pFileData', NOTE: the file size shoule be smaller or equal than 'nMaxSize'!
+ *              - @params: pFileData: the target buffer about to store the data read from the input file
+ *              - @params: pUserData: user defined data pointer, could be NULL
+ *              - @return: NOTE: return the actual file size, a value greater than 0 indicates the data is read successfully.
+ *          2. like `int xxx_cbf_write(void *pFilename, size_t nSize, void *pFileData, void *pUserData)`:
+ *              - @params: pFilename: the file name of the output file
+ *              - @params: nSize: the data length of 'pFileData'
+ *              - @params: pFileData: the source buffer about to write to the output file
+ *              - @params: pUserData: user defined data pointer, could be NULL
+ *              - @return: NOTE: return the actual write size, return value should be equal to 'nSize' if succeed.
+ *      [I] void *pUserData - the user defined data pointer, could be NULL
+ * @return: error code, 0 indicates everything is ok.
+ */
+int rkpq_set_callback(rkpq_context ctx, int flag, int (*cbf)(void *, size_t, void *, void *pUserData), void *pUserData);
 
 #ifdef __cplusplus
 }

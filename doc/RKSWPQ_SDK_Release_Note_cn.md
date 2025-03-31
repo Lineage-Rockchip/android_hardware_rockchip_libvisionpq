@@ -1,9 +1,93 @@
 # RKSWPQ SDK Release Note
 
-## coming next version
+## v0.21.1.4734 Release Note | 2025.07.04
+  - [MSSR] RK3576平台调整DFCSR通路CSC系数range解决运动区域拖影残留问题
+
+## v0.21.0.4711 Release Note | 2025.06.26
+  - [MSSR] 更新Api的`rkpq_mssr_procflag`：增加`RKPQ_MSSR_PROC_FLAG_SHP`功能选项
+  - [MSSR] 更新Api的`rkpq_mssr_cfg`：增加`nSrcFps`和`nDstFps`配置输入和输出帧率
+  - [MSSR] RK3562平台MSSR2通路部分处理分支增加可选Sharp功能
+  - [MSSR] RK3562平台MSSR2通路`schemeIdx=0`分支修正数据冲突问题
+
+## v0.20.7.4685 Release Note | 2025.06.19
+  - [MSSR] RK3576平台更新DFCSR通路，目前已支持`1080pNV12->1080pBGRA/1080pNV24`、`1080pNV12->4kNV12/4kNV24/4kRGB/4kBGRA`、`1080pRGB->4kNV12/4kNV24/4kRGB`等9个处理分支
+
+## v0.20.6.4677 Release Note | 2025.06.18
+  - [MSSR] RK3576平台更新DFCSR通路兼容解码输入和HDMI输入，修正bug
+  - [MSSR] RK3576平台更新DFCSR通路，目前已支持`1080pNV12->4kNV12/4kNV24`、`1080pRGB->4kNV12/4kNV24/4kRGB`等5个处理分支
+
+## v0.20.5.4672 Release Note | 2025.06.17
+  - [MSSR] RK3576平台优化DFCSR通路算法效果（针对解码通路优化效果）
+
+## v0.20.4.4668 Release Note | 2025.06.12
+  - [MSSR] RK3576平台调整DFCSR通路时序优化性能和效果
+
+## v0.20.3.4660 Release Note | 2025.06.11
+  - [MSSR] RK3562平台支持`rkpq_mssr_cfg::nProcFlag`配置`0`，执行直接拷贝输出
+  - [MSSR] RK3562平台增加内部直方图统计优化场景切换过渡
+  - [MSSR] RK3576平台DFCSR处理通路新加支持`1080pRGB->4kRGB/4kNV24`处理分支（支持SD+BSR/TSR）
+  - [MSSR] 修正`静态横幅文字插帧后闪烁`问题
+
+## v0.20.2.4641 Release Note | 2025.06.05
+  - [MSSR] RK3576平台DFCSR处理通路新加支持`1080pRGB->4kRGB`处理分支（只支持SD+BSR）
+  - [MSSR] RK3562平台MSSR2通路新加支持`schemeIdx=0`的特殊分支（新加模型）
+
+## v0.20.1.4625 Release Note | 2025.05.29
+  - [MSSR] 支持`720pNV12`输入输出的MEMC处理通路
+  - [MSSR] RK3562平台新加支持schemeIdx=3的ME模型
+  - [MSSR] 修正ME前处理通路分支条件
+  - [IO] 修正非对齐输出buffer在计算平均亮度时可能会崩溃的错误以及可能存在的`cache line`未同步错误。
+
+## v0.20.0.4577 Release Note | 2025.05.20
+  - [LDC] 新加LDC(Lens Distortion Correction)模块，支持梯形畸变校正、枕形畸变矫正，支持`NV12`/`NV24`/`RGBX`/`BGRX`等格式
+  - [MSSR] DFC通路增加支持`1920x1200NV12->1920x1200BGRA`处理分支
+  - [MSSR] 修正水印SR开关状态与属性值不匹配的问题
+
+## v0.19.2.4552 Release Note | 2025.05.14
+  - [MSSR] 修正Linux平台下内部直方图未初始化导致外部传入直方图数据错误解析的问题
+
+## v0.19.1.4549 Release Note | 2025.05.14
+  - [DBL] 更新RK3588平台AIDeblurSR模块，支持单进单出参数配置
+  - [MSSR] 更新RK356X平台MSSR模块支持SD和SR功能
+
+## v0.19.0.4538 Release Note | 2025.05.12
+  - [ALL] 针对大部分图像分辨率不满足OpenCL NDRange条件的直方图统计行为进行了效率优化。
+  - [LD] 模块接口调整 （by LinQiqi）
+  - [DBL] RK3588平台新加支持AIDeblurSR模块，支持`1080pBGR->4kNV24`处理通路
+
+## v0.18.5.4506 Release Note | 2025.05.06
+  - [MSSR] RK3562平台的SR和SD模型改用bin加密文件
+  - [SHP] RK3576和RK3562的SHP模块改为Lite模式
+  - [ALL] 更新各模块在各平台的参考性能总表
+
+## v0.18.4.4498 Release Note | 2025.04.29
+  - [MSSR] 更新RK3588平台MSSR2通路的SD、DC、ME模型
+  - [MSSR] 新加RK3562、RK356X平台支持部分分辨率的MEMC、SR功能
+
+## v0.18.3.4433 Release Note | 2025.04.11
+  - [MSSR] 更新`1080pNV12->1080pBGRA`的DFC处理通路部分默认参数，优化闪烁问题
+
+## v0.18.2.4431 Release Note | 2025.04.11
+  - [MSSR] 新加支持`1080pNV12->1080pNV24`的DFC处理通路，修正黑色区域出现绿色花图问题
+  - [MSSR] 更新`1080pNV12->4kNV12`的DFC+SR处理通路，增加切换过渡处理
+
+## v0.18.1.4417 Release Note | 2025.04.08
+  - [ALL] OpenCL库增加`/system/lib64/libOpenCL-system.so`搜索选项
+
+## v0.18.0.4415 Release Note | 2025.04.07
+  - [MSSR] 新加支持`SD`通路：输入256x256RGB数据，输出场景检测结果数据
+
+## v0.17.6.4403 Release Note | 2025.04.03
+  - [MSSR] 更新`1080pNV12->1080pBGRA`的DFC处理通路优化效果
+
+## v0.17.5.4391 Release Note | 2025.04.01
+  - [MSSR] 水印支持显示system属性配置的帧率
+
+## v0.17.4.4389 Release Note | 2025.03.31
+  - [MSSR] 新加支持`1080pNV12->1080pBGRA`的DFC处理通路
 
 ## v0.17.3.4348 Release Note | 2025.03.18
-  - [MSSR] 新加BlockDFCSR通路
+  - [MSSR] 新加支持`1080pNV12->4kNV12`的DFC处理通路
   - [MSSR] 修正RGA拷贝高度非偶数对齐数据失败的问题
 
 ## v0.17.2.4330 Release Note | 2025.03.12
