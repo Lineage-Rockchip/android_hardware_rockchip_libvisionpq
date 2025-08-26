@@ -50,7 +50,19 @@ ifneq ($(filter rk3576, $(strip $(TARGET_BOARD_PLATFORM))), )
     USE_LIBHWPQ := true
 endif
 
-## TODO: RK356X
+## RK356X
+ifneq ($(filter rk356x, $(strip $(TARGET_BOARD_PLATFORM))), )
+    TARGET_SOC_PLATFORM := rk356x
+    USE_LIBSWPQ := true
+    USE_LIBHWPQ := false
+endif
+
+## RK3562
+ifneq ($(filter rk3562, $(strip $(TARGET_BOARD_PLATFORM))), )
+    TARGET_SOC_PLATFORM := rk3562
+    USE_LIBSWPQ := true
+    USE_LIBHWPQ := false
+endif
 
 
 ## define target lib path according to TARGET_SOC_PLATFORM

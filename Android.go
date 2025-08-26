@@ -9,6 +9,7 @@ import (
 
 var SWPQ_SUPPORT_TARGET_PLATFORM = [...]string{
     "rk356x",
+    "rk3562",
     "rk3588",
     "rk3576",
 }
