@@ -1,48 +1,13 @@
-bootstrap_go_package {
-    name: "soong-libvisionpq",
-    pkgPath: "android/soong/libvisionpq",
-    deps: [
-        "blueprint",
-        "blueprint-pathtools",
-        "soong",
-        "soong-android",
-        "soong-cc",
-        "soong-genrule",
-    ],
-    srcs: [
-          "Android.go",
-    ],
-    pluginFor: ["soong_build"],
-}
+//
+// Copyright (C) 2026 The LineageOS Project
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 
-cc_librkswpq_prebuilt_library_shared {
-    name: "librkswpq",
-    compile_multilib: "both",
+soong_namespace {}
 
-    // some prop generate by Android.go
-
-    strip: {
-        none: true,
-    },
-
-    shared_libs: [
-        "librknnrt"
-    ],
-
-    check_elf_files: false,
+cc_library_headers {
+    name: "libvisionpq_rk3576_headers",
     vendor_available: true,
-}
-
-cc_librkhwpq_prebuilt_library_shared {
-    name: "librkhwpq",
-    compile_multilib: "both",
-
-    // some prop generate by Android.go
-
-    strip: {
-        none: true,
-    },
-
-    check_elf_files: false,
-    vendor_available: true,
+    export_include_dirs: ["lib/Android/rk3576/include"],
 }
