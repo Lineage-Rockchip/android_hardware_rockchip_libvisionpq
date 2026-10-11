@@ -49,7 +49,8 @@ prebuilt_etc {
     filename: "vop_base_config.json",
 }
 
-// Rockchip's BOARD_ENABLE_AIPQ_PROJECTOR_PRODUCT selection.
+// Rockchip's BOARD_ENABLE_AIPQ_PROJECTOR_PRODUCT selection, plus the
+// Rife models the MSSR3 and ME3D paths load.
 prebuilt_etc {
     name: "rkaipq_models.rk3576",
     vendor: true,
@@ -61,6 +62,7 @@ prebuilt_etc {
         "models/rk3576/rkaipq_mssr_model*_f*.bin",
         "models/rk3576/rkaipq_mssr_model*_DC*.bin",
         "models/rk3576/rkaipq_mssr_model*_DFC*.bin",
+        "models/rk3576/rkaipq_mssr_model*_Rife*.bin",
     ],
 }
 

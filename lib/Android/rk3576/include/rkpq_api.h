@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Last update on 2025-06-26 for v0.21.0
+// Last update on 2026-01-07 for v0.24.0
 
 #pragma once
 #ifndef __RKPQ_API_H_
@@ -82,7 +82,7 @@ extern "C"
 
 /* forward declaration */
 typedef void * rkpq_context;
-struct _rkpq_cvt_cfg; /* reserved */
+struct _rkpq_cvt_cfg;
 struct _rkpq_csc_cfg;
 struct _rkpq_dci_cfg;
 struct _rkpq_acm_cfg;
@@ -108,6 +108,7 @@ struct _rkpq_ld_cfg;
 struct _rkpq_dci_acm_ld_cfg;
 struct _rkpq_deblur_cfg;
 struct _rkpq_ldc_cfg;
+struct _rkpq_hwe_cfg;
 
 /* the RKPQ modules, use rkpq_query() to check if supported */
 typedef enum _rkpq_module
@@ -115,13 +116,13 @@ typedef enum _rkpq_module
     RKPQ_MODULE_NOTUSE  = 0,        /* please DO NOT use this item! */
 
     /* Common Modules */
-    RKPQ_MODULE_CVT     = 1,        /* reserved */ /* format Convert, Y2Y or R2R */
+    RKPQ_MODULE_CVT     = 1,        /* format Convert, Y2Y or R2R */
     RKPQ_MODULE_CSC     = 2,        /* Color Space Convert, supported case: Y2Y, Y2R, R2Y, R2R */
     RKPQ_MODULE_DCI     = 3,        /* Dynamic Contrast Improvement */
     RKPQ_MODULE_ACM     = 4,        /* Auto Color Management */
     RKPQ_MODULE_ZME     = 5,        /* Zoom Manage Engine */
     RKPQ_MODULE_SHP     = 6,        /* Sharpen */
-    RKPQ_MODULE_MLC     = 7,        /* reserved */ /* Mean Luminance Calculation */
+    RKPQ_MODULE_MLC     = 7,        /* reserved */
     RKPQ_MODULE_CGC     = 8,        /* Color Gamut Conversion */
     RKPQ_MODULE_BLR     = 9,        /* Region Gauss Blur */
     RKPQ_MODULE_LD      = 10,       /* Local Dimming */
@@ -139,6 +140,7 @@ typedef enum _rkpq_module
     RKPQ_MODULE_AI_DHW  = 106,      /* AI Doc DeHandWriting */
     RKPQ_MODULE_AI_DMR  = 107,      /* AI Demoire */
     RKPQ_MODULE_AI_DBL  = 108,      /* AI Deblur */
+    RKPQ_MODULE_AI_HWE  = 109,      /* AI Hand Writing Erasing */
     RKPQ_MODULE_AI_MAX,             /* please DO NOT use this item! */
 
     /* Mixture Modules, better performance for a specific scene */
@@ -172,13 +174,14 @@ typedef enum _rkpq_query_cmd
     RKPQ_QUERY_BUF_ALIGNMENT_OCL,       /* get the OpenCL sub-buffer alignment size, unit: byte */
     RKPQ_QUERY_RKNN_SUPPORT,            /* get the RKNN supported flag for AIPQ */
     RKPQ_QUERY_MEAN_LUMA_OUTPUT,        /* get the mean luma value of the output image (need RKPQ_FLAG_CALC_MEAN_LUMA) */
+    RKPQ_QUERY_CVT_CFG_SUPPORT,         /* check the current CVT config is supported or not */
     // RKPQ_QUERY_LAST_ERRORS,             /* get the last error messages */
     RKPQ_QUERY_MAX,                     /* the max query command value, please DO NOT use this item! */
 } rkpq_query_cmd;
 
 /**
  * the image formats supported
- * @Detail:
+ * @detail:
  *  - bpp means 'bits per pixel',
  *  - bpc means 'bits per component'.
  */
@@ -192,16 +195,23 @@ typedef enum _rkpq_image_format
     RKPQ_IMG_FMT_NV30    = 3,   /* DRM_FORMAT_NV30,   YUV444SP, 30bpp(10|10*2),   10bit packed */
     RKPQ_IMG_FMT_NV20    = 4,   /* DRM_FORMAT_NV20,   YUV422SP, 20bpp(10|10*2/2), 10bit packed */
     RKPQ_IMG_FMT_NV15    = 5,   /* DRM_FORMAT_NV15,   YUV420SP, 15bpp(10|10*2/4), 10bit packed */
-    RKPQ_IMG_FMT_YU24    = 6,   /* DRM_FORMAT_YUV444, YUV444P,  24bpp(8|8|8)     */ /* reserved */
-    RKPQ_IMG_FMT_YU16    = 7,   /* DRM_FORMAT_YUV422, YUV422P,  16bpp(8|8/2|8/2) */ /* reserved */
-    RKPQ_IMG_FMT_YU12    = 8,   /* DRM_FORMAT_YUV420, YUV420P,  12bpp(8|8/4|8/4) */ /* reserved */
-    RKPQ_IMG_FMT_YUYV    = 9,   /* DRM_FORMAT_YUYV,   YUV422I,  16bpp(8*4/2) */     /* reserved */
+    RKPQ_IMG_FMT_YU24    = 6,   /* DRM_FORMAT_YUV444, YUV444P,  24bpp(8|8|8)     */
+    RKPQ_IMG_FMT_YU16    = 7,   /* DRM_FORMAT_YUV422, YUV422P,  16bpp(8|8/2|8/2) */
+    RKPQ_IMG_FMT_YU12    = 8,   /* DRM_FORMAT_YUV420, YUV420P,  12bpp(8|8/4|8/4) */
+    RKPQ_IMG_FMT_YUYV    = 9,   /* DRM_FORMAT_YUYV,   YUV422I,  16bpp(8*4/2) */
     RKPQ_IMG_FMT_VU24    = 10,  /* DRM_FORMAT_VUY888, YUV444I,  24bpp([23:0]=[V8:U8:Y8]) */
-    RKPQ_IMG_FMT_VU30    = 11,  /* DRM_FORMAT_VUY101010,YUV444I,32bpp([31:0]=[X2:V10:U10:Y10]), LSB order */ /* reserved */
+    RKPQ_IMG_FMT_VU30    = 11,  /* DRM_FORMAT_VUY101010,YUV444I,32bpp([31:0]=[X2:V10:U10:Y10]). LSB aligned */
     RKPQ_IMG_FMT_Y8      = 12,  /* DRM_FORMAT_R8,   8bit YUV400, 8bpp */
     RKPQ_IMG_FMT_UV88    = 13,  /* DRM_FORMAT_GR88, 8bit UV, 16bpp([15:0]=[V8:U8]) */
     RKPQ_IMG_FMT_VU88    = 14,  /* DRM_FORMAT_RG88, 8bit VU, 16bpp([15:0]=[U8:V8]) */
-    RKPQ_IMG_FMT_LEGACY420 = 15, /* no DMR format, for MIPI Legacy YUV420 8bit (type: 0x1A) image format */
+    RKPQ_IMG_FMT_LEGACY420 = 15,/* no DMR format, for MIPI Legacy YUV420 8bit (type: 0x1A) image format */
+    RKPQ_IMG_FMT_YVYU    = 16,  /* DRM_FORMAT_YVYU, YUV422I, 16bpp */ /* reserved */
+    RKPQ_IMG_FMT_UYVY    = 17,  /* DRM_FORMAT_UYVY, YUV422I, 16bpp */ /* reserved */
+    RKPQ_IMG_FMT_VYUY    = 18,  /* DRM_FORMAT_VYUY, YUV422I, 16bpp */ /* reserved */
+    RKPQ_IMG_FMT_YUYV_10M = 19, /* DRM_FORMAT_Y210, YUV422I, 32bpp, 10bit unpacked. [63:0]=[V10_6:Y10_6:U10_6:Y10_6]. MSB aligned */
+    RKPQ_IMG_FMT_YVYU_10M = 20, /* no DMR format,   YUV422I, 32bpp, 10bit unpacked. [63:0]=[U10_6:Y10_6:V10_6:Y10_6]. MSB aligned */
+    RKPQ_IMG_FMT_UYVY_10M = 21, /* no DMR format,   YUV422I, 32bpp, 10bit unpacked. [63:0]=[Y10_6:V10_6:Y10_6:U10_6]. MSB aligned */
+    RKPQ_IMG_FMT_VYUY_10M = 22, /* no DMR format,   YUV422I, 32bpp, 10bit unpacked. [63:0]=[Y10_6:U10_6:Y10_6:V10_6]. MSB aligned */
     RKPQ_IMG_FMT_YUV_MAX,       /* the max YUV format value, please DO NOT use this item! */
 
     // RGB
@@ -269,13 +279,15 @@ typedef enum _rkpq_mssr_initflag
     RKPQ_MSSR_INIT_FLAG_MSSR4K              = (1<<7),//128: MSSR4K
     RKPQ_MSSR_INIT_FLAG_DFCSR               = (1<<8),//256: DFCSR
     RKPQ_MSSR_INIT_FLAG_SD                  = (1<<9),//512: SD
+    RKPQ_MSSR_INIT_FLAG_ME3D                = (1<<10),//1024: ME3D
+    RKPQ_MSSR_INIT_FLAG_MSSR3               = (1<<11),//2048: MSSR3
     // typical customized InitFlags
     RKPQ_MSSR_INIT_FLAGS_OUT1080P           = ( 3),// MSSR | SR = 1 | 2 = 3
     RKPQ_MSSR_INIT_FLAGS_OUT4K              = ( 4),// SR2 = 4
     RKPQ_MSSR_INIT_FLAGS_FESR               = (16),// FaceEnhanceSR = 16
     RKPQ_MSSR_INIT_FLAGS_OUT1080P_FESR      = (19),// MSSR | SR | FaceEnhanceSR = 1 | 2 | 16 = 19
     // MAX
-    RKPQ_MSSR_INIT_FLAGS_MAX                = ((1<<9)-1) // 511
+    RKPQ_MSSR_INIT_FLAGS_MAX                = ((1<<12)-1) // 4096-1
 }rkpq_mssr_initflag;
 
 typedef enum _rkpq_mssr_procflag
@@ -303,10 +315,10 @@ typedef enum _rkpq_mssr_procflag
 typedef enum _rkpq_vsr_initflag
 {
     RKPQ_VSR_INIT_FLAG_ALL                  = ( 0x0),//  0: All
-    RKPQ_VSR_INIT_FLAG_540P                 = (1<<0),//  1: 540P 
-    RKPQ_VSR_INIT_FLAG_720P                 = (1<<1),//  2: 720P 
+    RKPQ_VSR_INIT_FLAG_540P                 = (1<<0),//  1: 540P
+    RKPQ_VSR_INIT_FLAG_720P                 = (1<<1),//  2: 720P
     RKPQ_VSR_INIT_FLAG_1080P                = (1<<2),//  4: 1080P
-    RKPQ_VSR_INIT_FLAG_4K                   = (1<<3),//  8: 4K  
+    RKPQ_VSR_INIT_FLAG_4K                   = (1<<3),//  8: 4K
     RKPQ_VSR_INIT_FLAGS_MAX                 = ((1<<4)-1) // 15
 }rkpq_vsr_initflag;
 
@@ -322,7 +334,7 @@ typedef enum _rkpq_vsr_procflag
 typedef enum _rkpq_dbl_initflag
 {
     RKPQ_DBL_INIT_FLAG_ALL                  = ( 0x0),//  0: All
-    RKPQ_DBL_INIT_FLAG_DEF                  = (1<<0),//  1: 
+    RKPQ_DBL_INIT_FLAG_DEF                  = (1<<0),//  1:
     RKPQ_DBL_INIT_FLAGS_MAX                 = ((1<<2)-1) // 3
 }rkpq_dbl_initflag;
 
@@ -338,7 +350,7 @@ typedef enum _rkpq_dbl_procflag
 typedef enum _rkpq_ldc_method
 {
     RKPQ_LDC_METHOD_4POINTS                 = (0),// method 0: use 4 points for mapping
-    RKPQ_LDC_METHOD_HOMOGRAPHY              = (1),// method 1: use homography for mapping 
+    RKPQ_LDC_METHOD_HOMOGRAPHY              = (1),// method 1: use homography for mapping
     RKPQ_LDC_METHOD_DISTCOEFF               = (2),// method 2: use distortion coefficient
     RKPQ_LDC_METHOD_MESHPOINTS              = (3),// method 3: use NxN mesh points for mapping
     RKPQ_LDC_METHOD_MAX
@@ -485,10 +497,8 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_proc_params
     uint32_t            aReservedData[1];               /* reserved, for future use */
 } rkpq_proc_params;
 
-/**
- * the info structure for repeatable modules in the pipeline
- */
-/* format change info for repeatable modules in the pipeline */
+/** format change info in the pipeline.
+ * ONLY modules that can change the input format need it! */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_pipe_fmt_info
 {
     uint32_t    nSrcClrSpc;     /* [i] see rkpq_clr_spc */
@@ -501,7 +511,8 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_pipe_fmt_info
     uint32_t    nDstDrmFmt;     /* reserved */
 } rkpq_pipe_fmt_info;
 
-/* resolution change info for repeatable modules in the pipeline */
+/** resolution change info for repeatable modules in the pipeline.
+ * ONLY modules that can change the input resolution need it! */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_pipe_res_info
 {
     uint32_t    nSrcImgWid;     /* src image width,  unit: pixel */
@@ -516,10 +527,43 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_pipe_res_info
 /* CVT configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_cvt_cfg
 {
-    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* the format might be changed by CVT */
 
     uint32_t    bEnableCVT;             // [0, (1)]
-    uint32_t    nUVSampleMethod;        // YUV chroma data sampling method: {0-bilinear, 1-nearest}
+
+    /**
+     * YUV chroma data resampling method.
+     * Range: {0-default, 1-nearest, 2-bilinear, 3-mean}
+     * Default methods are:
+     *  - upsampling: copy (nearest interpolating)
+     *  - downsampling: 2x2 mean subsampling
+
+     */
+    uint32_t    nUVSampleMethod;
+
+    /**
+     * Bit-depth dithering method.
+     * Range: {0-default, 1-scale, 2-shift(TODO), 3-fillMsb(TODO), 4-OrderDither(TODO), 5-ErrorDiffusion(TODO)}
+     * Default methods are:
+     *  - dithering-up: scale
+     *  - dithering-down: scale
+     */
+    uint32_t    nDitherMethod;
+
+    /**
+     * Alpha value to be set for the output.
+     * This parameter is valid ONLY when the output format has an alpha channel!
+     * NOTE:
+     * set the max alpha value to `M = ((1 << n) - 1)` for n bit alpha data, then
+     * | nAlphaValue | input alpha | output alpha | behavior |
+     * |-------------|-------------|--------------|----------|
+     * |   A < 0     |  YES        |  YES         | scale input alpha values |
+     * |   A < 0     |  NO         |  YES         | set to M |
+     * |   A >= 0    |  -          |  YES         | set to (A & M) |
+     * |     -       |  -          |  NO          | - |
+     * Default value: -1
+     **/
+    int32_t     nAlphaValue;
 
     uint32_t    aReservedData[1];       // reserved for future use
 } rkpq_cvt_cfg;
@@ -527,19 +571,20 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_cvt_cfg
 /* CSC configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_csc_cfg
 {
-    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* the format might be changed by CSC */
 
     uint32_t    bEnableCSC;         // [0, (1)]
-    uint32_t    nBrightness;        // [0, (256), 511]
-    uint32_t    nHue;               // [0, (256), 511]
-    uint32_t    nContrast;          // [0, (256), 511]
-    uint32_t    nSaturation;        // [0, (256), 511]
-    uint32_t    nRGain;             // [0, (256), 511]
-    uint32_t    nGGain;             // [0, (256), 511]
-    uint32_t    nBGain;             // [0, (256), 511]
-    uint32_t    nROffset;           // [0, (256), 511]
-    uint32_t    nGOffset;           // [0, (256), 511]
-    uint32_t    nBOffset;           // [0, (256), 511]
+    uint32_t    nBrightness;        // [0, (256), 511] => [-1/4, 1/4]
+    uint32_t    nHue;               // [0, (256), 511] => [-30.0, 30.0]degree
+    uint32_t    nContrast;          // [0, (256), 511] => [0.0, 2.0]
+    uint32_t    nSaturation;        // [0, (256), 511] => [0.0, 2.0]
+    uint32_t    nRGain;             // [0, (256), 511] => [0.0, 2.0]
+    uint32_t    nGGain;             // [0, (256), 511] => [0.0, 2.0]
+    uint32_t    nBGain;             // [0, (256), 511] => [0.0, 2.0]
+    /** @note: RGB offsets are ONLY valid when the output is RGB format family */
+    uint32_t    nROffset;           // [0, (256), 511] => [-1/8, 1/8]
+    uint32_t    nGOffset;           // [0, (256), 511] => [-1/8, 1/8]
+    uint32_t    nBOffset;           // [0, (256), 511] => [-1/8, 1/8]
 
     uint32_t    nColorTemperature;  // [4000, (6500), 12000], unit: K
     uint32_t    aReservedData[1];   // reserved for future use
@@ -569,18 +614,18 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_acm_cfg
 {
     uint32_t    bEnableACM;         // [0, (1)]
 
-    int16_t     aTableDeltaYbyH[RKPQ_ACM_LUT_LENGTH_H];                         // [-255, 255]
-    int16_t     aTableDeltaSbyH[RKPQ_ACM_LUT_LENGTH_H];                         // [-255, 255]
-    int16_t     aTableDeltaHbyH[RKPQ_ACM_LUT_LENGTH_H];                         // [-64, 64]
-    int8_t      aTableGainYbyY[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_Y];   // [-127, 127]
-    int8_t      aTableGainSbyY[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_Y];   // [-127, 127]
-    int8_t      aTableGainHbyY[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_Y];   // [-127, 127]
-    int8_t      aTableGainYbyS[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_S];   // [-127, 127]
-    int8_t      aTableGainSbyS[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_S];   // [-127, 127]
-    int8_t      aTableGainHbyS[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_S];   // [-127, 127]
-    uint32_t    nLumGain;           // [0, (256), 1023]
-    uint32_t    nHueGain;           // [0, (256), 1023]
-    uint32_t    nSatGain;           // [0, (256), 1023]
+    int16_t     aTableDeltaYbyH[RKPQ_ACM_LUT_LENGTH_H];                         // [-255, 255] => [-1/4, 1/4]
+    int16_t     aTableDeltaSbyH[RKPQ_ACM_LUT_LENGTH_H];                         // [-255, 255] => [-1/4, 1/4]
+    int16_t     aTableDeltaHbyH[RKPQ_ACM_LUT_LENGTH_H];                         // [-64, 64]degree (Only [-16, 16] actually before v0.23.11)
+    int8_t      aTableGainYbyY[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_Y];   // [-127, 127] => [-1.0, 1.0]
+    int8_t      aTableGainSbyY[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_Y];   // [-127, 127] => [-1.0, 1.0]
+    int8_t      aTableGainHbyY[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_Y];   // [-127, 127] => [-1.0, 1.0]
+    int8_t      aTableGainYbyS[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_S];   // [-127, 127] => [-1.0, 1.0]
+    int8_t      aTableGainSbyS[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_S];   // [-127, 127] => [-1.0, 1.0]
+    int8_t      aTableGainHbyS[RKPQ_ACM_LUT_LENGTH_H][RKPQ_ACM_LUT_LENGTH_S];   // [-127, 127] => [-1.0, 1.0]
+    uint32_t    nLumGain;           // [0, (256), 1023] => [0.0, 4.0)
+    uint32_t    nHueGain;           // [0, (256), 1023] => [0.0, 4.0)
+    uint32_t    nSatGain;           // [0, (256), 1023] => [0.0, 4.0)
 
     /* only for env vars below: */
     uint32_t    nHueRed;            // [0, (256), 512], Deprecated
@@ -595,8 +640,8 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_acm_cfg
 /* ZME configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_zme_cfg
 {
-    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
-    rkpq_pipe_res_info  stPipeResInfo;  /* resolution change info, must set manually */
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* the format might be changed by ZME */
+    rkpq_pipe_res_info  stPipeResInfo;  /* the resolution might be changed by ZME */
 
     uint32_t    bEnableZME;                         // [0, (1)]
     uint32_t    bEnableDeringing;                   // [0, (1)]
@@ -728,15 +773,15 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_ldc_cfg
     float                   fHomography[9];     // [i] params for method eLdcMethod=1: 3x3 homography matrix
     float                   fDistCoeffK;        // [i] params for method eLdcMethod=2: distortion coefficient
     float*                  pfMeshPoints;       // [i] params for method eLdcMethod=3: point to mesh-points-info-buf, example:[64,64,x00,y00,x01,y01,...] for 64x64x2xfloat MeshPoints
-    
+
     uint32_t                aReservedData[1];   // reserved for future use
 } rkpq_ldc_cfg;
 
 /* AI SR configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_sr_cfg
 {
-    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
-    rkpq_pipe_res_info  stPipeResInfo;  /* resolution change info, must set manually */
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* the format might be changed by SR */
+    rkpq_pipe_res_info  stPipeResInfo;  /* the resolution might be changed by SR */
 
     uint32_t    bEnableSR;              // [0, (1)]
 
@@ -855,9 +900,20 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_deblur_cfg
     uint32_t        nProcFlag;          /* [i] range: [0, 7], bitfield, see rkpq_dbl_procflag*/
     uint32_t        nDBStrength;        /* [i] Deblur strength  [0, (100)] */
     uint32_t        nSRStrength;        /* [i] SR strength  [0, (100)] */
-    
+
     uint32_t        aReservedData[1];   /* reserved for future use */
 } rkpq_dbl_cfg;
+
+/* AI Hand Writing Erasing */
+typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_hwe_cfg
+{
+    rkpq_pipe_res_info  stPipeResInfo;  /* resolution change info, must set manually */
+    rkpq_pipe_fmt_info  stPipeFmtInfo;  /* format change info, must set manually */
+
+    uint32_t        bEnableHWE;         /* [i] {0, (1)} */
+
+    uint32_t        aReservedData[4];   /* reserved for future use */
+} rkpq_hwe_cfg;
 
 /* Mixture SHP + ACM configuration */
 typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_shp_acm_cfg
@@ -965,7 +1021,7 @@ typedef struct RKPQ_ATTR_ALIGN(16) _rkpq_vsr_cfg
     uint32_t        nProcFlag;          /* [i] range: [0, 127], bitfield, see rkpq_vsr_procflag*/
     uint32_t        nFlowNetSchemeIdx;  /* [i] FlowNet scheme idx  {(0), 1, 2} */
     uint32_t        nCodecNetModelIdx;  /* [i] CodecNet model idx  {(0), 1, 2} */
-    
+
     uint32_t        aReservedData[1];   /* reserved for future use */
 } rkpq_vsr_cfg;
 
@@ -1023,7 +1079,7 @@ int rkpq_deinit(rkpq_context ctx);
  *  |       Query Command               |   Need A Context  |   Return Type     |
  *  | --------------------------------- | ----------------- | ----------------- |
  *  | RKPQ_QUERY_SDK_VERSION            |       no          | rkpq_version_info |
- *  | RKPQ_QUERY_PERF_INFO              |       YES         | rkpq_perf_info    |
+ *  | RKPQ_QUERY_PERF_INFO              |       YES         | reserved          |
  *  | RKPQ_QUERY_MODULES_SUPPORT        |       YES         | rkpq_module_info  |
  *  | RKPQ_QUERY_MODULES_ROI_SUPPORT    |       YES         | rkpq_module_info  |
  *  | RKPQ_QUERY_IMG_RES_CHANGE_SUPPORT |       no          | uint32_t          |
@@ -1036,7 +1092,7 @@ int rkpq_deinit(rkpq_context ctx);
  *  | RKPQ_QUERY_BUF_ALIGNMENT_OCL      |       YES         | uint32_t          |
  *  | RKPQ_QUERY_RKNN_SUPPORT           |       YES         | uint32_t          |
  *  | RKPQ_QUERY_MEAN_LUMA_OUTPUT       |       YES         | int32_t           |
- *  | RKPQ_QUERY_LAST_ERRORS            |       YES         | reserved          |
+ *  | RKPQ_QUERY_CVT_CFG_SUPPORT        |       no          | rkpq_cvt_cfg (IO) |
  */
 int rkpq_query(rkpq_context ctx, rkpq_query_cmd cmd, size_t size, void *info);
 
@@ -1057,7 +1113,13 @@ int rkpq_set_loglevel(rkpq_context ctx, int logLevel);
  * @params:
  *      rkpq_context ctx - set to NULL before calling rkpq_init()
  *      const char *pPath - the folder path, ends with '/'
- *      int target - bitfield, 1 for Ocl caches, 2 for RKNN models, 4 for license path, 8 for librga path, 16 for license json config file, 0 for all
+ *      int target - bitfield, each bit represents a path type:
+ *          - bit0(1)  for OpenCL caches
+ *          - bit0(2)  for RKNN models
+ *          - bit0(4)  for license path
+ *          - bit0(8)  for librga path
+ *          - bit0(16) for license json config file
+ *          - (0/-1)   for all path supported
  * @return: error code, 0 indicates everything is ok.
  */
 int rkpq_set_cache_path(rkpq_context ctx, const char *pPath, int target);
@@ -1080,7 +1142,7 @@ int rkpq_clear_caches(rkpq_context ctx, int flag);
  *      rkpq_module module - the specified module
  * @return: error code, 0 indicates everything is ok.
  */
-int rkpq_set_default_cfg(void *pModuleConfig, rkpq_module module);
+int rkpq_set_default_cfg(void *pModuleConfig, int module);
 
 /**
  * @function: rkpq_get_default_cfg()
