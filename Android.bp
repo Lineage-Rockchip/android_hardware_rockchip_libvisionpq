@@ -11,3 +11,72 @@ cc_library_headers {
     vendor_available: true,
     export_include_dirs: ["lib/Android/rk3576/include"],
 }
+
+cc_prebuilt_library_shared {
+    name: "librkhwpq",
+    vendor: true,
+    compile_multilib: "both",
+    multilib: {
+        lib32: {
+            srcs: ["lib/Android/rk3576/armeabi-v7a/librkhwpq.so"],
+        },
+        lib64: {
+            srcs: ["lib/Android/rk3576/arm64-v8a/librkhwpq.so"],
+        },
+    },
+    shared_libs: [
+        "liblog",
+        "libz",
+    ],
+    strip: {
+        none: true,
+    },
+}
+
+prebuilt_etc {
+    name: "aipq_config.json",
+    vendor: true,
+    src: select(soong_config_variable("rockchip", "soc"), {
+        "rk3588": "config/rk3588/aipq_config.json",
+        default: "config/rk3576/aipq_config.json",
+    }),
+}
+
+prebuilt_etc {
+    name: "vop_base_config.json.rk3576",
+    vendor: true,
+    src: "config/rk3576/vop_base_config.json",
+    filename: "vop_base_config.json",
+}
+
+// Rockchip's BOARD_ENABLE_AIPQ_PROJECTOR_PRODUCT selection.
+prebuilt_etc {
+    name: "rkaipq_models.rk3576",
+    vendor: true,
+    srcs: [
+        "models/rk3576/rkaipq_mssr_model*_IFBlockX*.bin",
+        "models/rk3576/rkaipq_mssr_model*_NaturalSR*.bin",
+        "models/rk3576/rkaipq_mssr_model*_sd*.bin",
+        "models/rk3576/rkaipq_mssr_model*_std*.bin",
+        "models/rk3576/rkaipq_mssr_model*_f*.bin",
+        "models/rk3576/rkaipq_mssr_model*_DC*.bin",
+        "models/rk3576/rkaipq_mssr_model*_DFC*.bin",
+    ],
+}
+
+// Rockchip's BOARD_ENABLE_AIPQ_PROJECTOR_PRODUCT selection, plus the
+// Rife models the MSSR3 and ME3D paths load.
+prebuilt_etc {
+    name: "rkaipq_models.rk3588",
+    vendor: true,
+    srcs: [
+        "models/rk3588/rkaipq_mssr_model*_IFBlockX*.bin",
+        "models/rk3588/rkaipq_mssr_model*_NaturalSR*.bin",
+        "models/rk3588/rkaipq_mssr_model*_sd*.bin",
+        "models/rk3588/rkaipq_mssr_model*_std*.bin",
+        "models/rk3588/rkaipq_mssr_model*_f*.bin",
+        "models/rk3588/rkaipq_mssr_model*_DC*.bin",
+        "models/rk3588/rkaipq_mssr_model*_DFC*.bin",
+        "models/rk3588/rkaipq_mssr_model*_Rife*.bin",
+    ],
+}
